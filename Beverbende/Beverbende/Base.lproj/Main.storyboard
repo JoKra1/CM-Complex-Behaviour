@@ -45,21 +45,6 @@
                                     <action selector="drawCardFromDeck:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yKR-Nr-ml7"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WuP-oJ-hYZ">
-                                <rect key="frame" x="201" y="1098" width="150" height="248"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" name="AccentColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                <state key="normal" title="🦫"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="touchOwnCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Jag-r9-5yB"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Ju-DE-Kgh">
                                 <rect key="frame" x="359" y="1097" width="150" height="248"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -76,7 +61,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4W9-1z-xsI">
-                                <rect key="frame" x="515" y="1096" width="150" height="248"/>
+                                <rect key="frame" x="517" y="1097" width="150" height="248"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" name="AccentColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="75"/>
@@ -91,7 +76,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5I3-EU-FKC">
-                                <rect key="frame" x="673" y="1098" width="150" height="248"/>
+                                <rect key="frame" x="673" y="1096" width="150" height="248"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" name="AccentColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="75"/>
@@ -116,18 +101,56 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Ej-Vr-p8e">
+                                <rect key="frame" x="412" y="1172" width="200" height="100"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" systemColor="systemRedColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="50"/>
+                                <state key="normal" title="Inspect"/>
+                                <connections>
+                                    <action selector="touchInspectButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="guE-U1-II7"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ibr-Oq-Zau">
+                                <rect key="frame" x="321" y="85" width="383" height="80"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                <state key="normal" title="RESET VIEW"/>
+                                <connections>
+                                    <action selector="resetView:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cOI-Bs-JD6"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WuP-oJ-hYZ">
+                                <rect key="frame" x="201" y="1096" width="150" height="248"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" name="AccentColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
+                                <state key="normal" title="🦫"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="5"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="touchOwnCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Jag-r9-5yB"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <connections>
+                        <outlet property="InspectButton" destination="3Ej-Vr-p8e" id="5FC-fP-PFs"/>
                         <outlet property="deckButton" destination="xhG-Rf-aqw" id="LyS-Lb-g7g"/>
                         <outlet property="discardPileButton" destination="hqp-ee-n37" id="tg0-Ab-MKI"/>
                         <outlet property="drawnCardButton" destination="4iO-Km-ibL" id="DDG-ZH-tja"/>
+                        <outlet property="inspectButton" destination="3Ej-Vr-p8e" id="I13-a1-wb5"/>
                         <outletCollection property="playerCardButtons" destination="WuP-oJ-hYZ" collectionClass="NSMutableArray" id="QkX-dd-3E6"/>
                         <outletCollection property="playerCardButtons" destination="4W9-1z-xsI" collectionClass="NSMutableArray" id="wDc-O5-gyX"/>
                         <outletCollection property="playerCardButtons" destination="4Ju-DE-Kgh" collectionClass="NSMutableArray" id="9wK-q8-OrF"/>
                         <outletCollection property="playerCardButtons" destination="5I3-EU-FKC" collectionClass="NSMutableArray" id="9gt-YD-5PN"/>
+                        <outletCollection property="playerOutsideCardButtons" destination="5I3-EU-FKC" collectionClass="NSMutableArray" id="wTL-vJ-uqd"/>
+                        <outletCollection property="playerOutsideCardButtons" destination="WuP-oJ-hYZ" collectionClass="NSMutableArray" id="89C-le-xYJ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -144,6 +167,9 @@
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
