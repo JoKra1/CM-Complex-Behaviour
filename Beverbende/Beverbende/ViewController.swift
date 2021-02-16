@@ -35,6 +35,18 @@ class ViewController: UIViewController {
         cardButton.layer.borderColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
     }
     
+    @IBAction func drawCardFromDeck(_ sender: UIButton) {
+    }
+    
+    @IBAction func touchDiscardPile(_ sender: UIButton) {
+        // either discard or draw from this pile depending on game state
+    }
+    
+    @IBAction func touchOwnCard(_ sender: UIButton) {
+        // use game state to determine appropriate action
+    }
+    
+    // Functions for card visualization
     func showEmptyArea(for cardButton : UIButton) {
         cardButton.setTitle("", for: UIControl.State.normal)
         cardButton.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
