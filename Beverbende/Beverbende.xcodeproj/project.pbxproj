@@ -15,6 +15,10 @@
 		04EA846225DC238000B68C48 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04EA846025DC238000B68C48 /* LaunchScreen.storyboard */; };
 		04EA846D25DC238000B68C48 /* BeverbendeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA846C25DC238000B68C48 /* BeverbendeTests.swift */; };
 		04EA847825DC238000B68C48 /* BeverbendeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA847725DC238000B68C48 /* BeverbendeUITests.swift */; };
+		F9CDFBC125DD267800CCAF9F /* Beverbende.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC025DD267400CCAF9F /* Beverbende.swift */; };
+		F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC525DD279800CCAF9F /* Card.swift */; };
+		F9CDFBCB25DD2EB600CCAF9F /* ValueCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */; };
+		F9CDFBD025DD307100CCAF9F /* ActionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBCF25DD307100CCAF9F /* ActionCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +53,10 @@
 		04EA847325DC238000B68C48 /* BeverbendeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeverbendeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		04EA847725DC238000B68C48 /* BeverbendeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeverbendeUITests.swift; sourceTree = "<group>"; };
 		04EA847925DC238000B68C48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F9CDFBC025DD267400CCAF9F /* Beverbende.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beverbende.swift; sourceTree = "<group>"; };
+		F9CDFBC525DD279800CCAF9F /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueCard.swift; sourceTree = "<group>"; };
+		F9CDFBCF25DD307100CCAF9F /* ActionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +112,10 @@
 				04EA845B25DC237F00B68C48 /* Main.storyboard */,
 				04EA846025DC238000B68C48 /* LaunchScreen.storyboard */,
 				04EA846325DC238000B68C48 /* Info.plist */,
+				F9CDFBC025DD267400CCAF9F /* Beverbende.swift */,
+				F9CDFBC525DD279800CCAF9F /* Card.swift */,
+				F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */,
+				F9CDFBCF25DD307100CCAF9F /* ActionCard.swift */,
 			);
 			path = Beverbende;
 			sourceTree = "<group>";
@@ -267,6 +279,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				04EA845A25DC237F00B68C48 /* ViewController.swift in Sources */,
+				F9CDFBC125DD267800CCAF9F /* Beverbende.swift in Sources */,
+				F9CDFBD025DD307100CCAF9F /* ActionCard.swift in Sources */,
+				F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */,
+				F9CDFBCB25DD2EB600CCAF9F /* ValueCard.swift in Sources */,
 				04EA845625DC237F00B68C48 /* AppDelegate.swift in Sources */,
 				04EA845825DC237F00B68C48 /* SceneDelegate.swift in Sources */,
 			);
