@@ -8,9 +8,9 @@
 import Foundation
 
 class Beverbende {
-    var models: [Int]
-    var drawPile: [Card]
-    var discardPile: [Card]
+    var models: [Int] // Int is just a placeholder
+    var drawPile: Stack<Card>
+    var discardPile: Stack<Card>
     var playerCards: [Card]
     
     static func allCards() -> [Card] {
@@ -41,9 +41,40 @@ class Beverbende {
     }
     
     init() {
-        self.models = []
-        self.drawPile = []
-        self.discardPile = []
+        self.models = [] // Placeholder
+        self.discardPile = Stack<Card>()
+        
+        self.drawPile = Stack<Card>(initialArray: Beverbende.allCards().shuffled())
+        self.discardPile.push(self.drawPile.pop()!)
+        
         self.playerCards = []
+        for _ in 0..<4 {
+            self.playerCards.append(self.drawPile.pop()!)
+        }
+        
+        for _ in self.models {
+            print("I still need to be implemented")
+            // Assign cards to every model
+        }
+    }
+    
+    func drawCard() -> Card {
+        let card = self.drawPile.pop()
+        if card != nil {
+            return card!
+        }
+        
+        // Draw pile was empty,
+        // shuffle all but the top of the discard pile back into the draw pile
+        let topDiscardedCard = self.discardPile.pop()!
+        while self.discardPile.peek() != nil {
+            self.drawPile.push(self.discardPile.pop()!)
+        }
+        // Shuffle the draw pile
+        self.drawPile.shuffle()
+        // Place the card that was on the top of the discard pile back
+        self.discardPile.push(topDiscardedCard)
+        
+        return self.drawPile.pop()!
     }
 }
