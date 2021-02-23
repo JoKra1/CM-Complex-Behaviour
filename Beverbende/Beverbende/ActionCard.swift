@@ -9,7 +9,7 @@ import Foundation
 
 class ActionCard: Card {
     enum Values: Int, CaseIterable {
-        case inspect = 0, double, shuffle
+        case inspect = 0, double, swap
     }
     
     var value: Values
@@ -18,6 +18,11 @@ class ActionCard: Card {
     
     required init(value: Int) {
         self.value = Values(rawValue: value)!
+        self.faceUp = false
+    }
+    
+    init(value: Values) {
+        self.value = value
         self.faceUp = false
     }
     
