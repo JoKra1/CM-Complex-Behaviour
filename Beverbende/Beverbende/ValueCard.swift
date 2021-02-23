@@ -14,4 +14,8 @@ class ValueCard: Card {
     required init(value: Int) {
         self.value = value
     }
+    
+    func getValue() -> Int {
+        return self.value
+    }
 }

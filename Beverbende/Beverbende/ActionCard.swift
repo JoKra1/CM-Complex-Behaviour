@@ -8,19 +8,20 @@
 import Foundation
 
 class ActionCard: Card {
-    enum Values: CaseIterable {
-        case inspect, double, shuffle
+    enum Values: Int, CaseIterable {
+        case inspect = 0, double, shuffle
     }
     
-    var value: Int
+    var value: Values
     
     var faceUp: Bool
     
     required init(value: Int) {
-        if (value in Values.allCases) { // <-- NEEDS TO BE FIXED
-            
-        }
+        self.value = Values(rawValue: value)!
+        self.faceUp = false
     }
     
-    
+    func getValue() -> Int {
+        return self.value.rawValue
+    }
 }

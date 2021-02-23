@@ -8,8 +8,8 @@
 import Foundation
 
 protocol Card {
-    var value: Int { get }
     var faceUp: Bool { get set }
     
     init(value: Int)
+    func getValue() -> Int
 }
