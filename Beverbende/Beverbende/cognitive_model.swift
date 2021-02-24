@@ -52,14 +52,22 @@ class BeverbendeOpponent:Model{
         chunk.slotvals["pos"] = Value.Number(Double(position))
         let cardType = card.getType()
         switch cardType {
-        case .regular(let points):
+        case .value(let points):
             print("Regular card")
             chunk.slotvals["type"] = Value.Text("regular")
             chunk.slotvals["value"] = Value.Number(Double(points))
         case .action(let action):
             print("Action card")
             chunk.slotvals["type"] = Value.Text("action")
-            chunk.slotvals["value"] = Value.Text(action)
+            switch action {
+            case .twice:
+                chunk.slotvals["value"] = Value.Text("twice")
+            case .inspect:
+                chunk.slotvals["value"] = Value.Text("inspect")
+            case .swap:
+                chunk.slotvals["value"] = Value.Text("swap")
+            }
+            
         }
         
         self.dm.addToDM(chunk)
@@ -135,8 +143,8 @@ class BeverbendeOpponent:Model{
         return (false,nil)
     }
     
-    private func decideRegular(for card:RegularCard) -> (decision: Bool, replace: Int?) {
-        let value = card.points
+    private func decideRegular(for card:ValueCard) -> (decision: Bool, replace: Int?) {
+        let value = card.value
         let (known_max, unknown) = compareHand(for: value)
         if let found_max = known_max {
             print("I decided to use the card to replace the one in the \(found_max) position, because I remembered it to be higher.")
@@ -160,8 +168,8 @@ class BeverbendeOpponent:Model{
          */
         
         switch card.getType(){
-        case .regular(_):
-            return decideRegular(for: card as! RegularCard)
+        case .value(_):
+            return decideRegular(for: card as! ValueCard)
         case .action(_):
             return decideAction(for: card as! ActionCard)
         }
@@ -209,6 +217,9 @@ class BeverbendeOpponent:Model{
         case .DecideContinue:
             print("Model has decided to continue")
             goal = .Begin
+        
+        case .DecideEnd:
+            print("I am out of the game")
         }
     }
     
