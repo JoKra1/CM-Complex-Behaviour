@@ -16,6 +16,11 @@
 		04EA846D25DC238000B68C48 /* BeverbendeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA846C25DC238000B68C48 /* BeverbendeTests.swift */; };
 		04EA847825DC238000B68C48 /* BeverbendeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA847725DC238000B68C48 /* BeverbendeUITests.swift */; };
 		5E1CC81025E54F0D00D1B515 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1CC80F25E54F0D00D1B515 /* Stack.swift */; };
+		80786DAF25E65A0500707799 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DAC25E65A0500707799 /* Chunk.swift */; };
+		80786DB025E65A0500707799 /* Declarative.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DAD25E65A0500707799 /* Declarative.swift */; };
+		80786DB125E65A0500707799 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DAE25E65A0500707799 /* Model.swift */; };
+		80786DB625E65A3100707799 /* Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DB525E65A3100707799 /* Support.swift */; };
+		80786DBC25E65A7000707799 /* cognitive_model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DBB25E65A7000707799 /* cognitive_model.swift */; };
 		F9CDFBC125DD267800CCAF9F /* Beverbende.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC025DD267400CCAF9F /* Beverbende.swift */; };
 		F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC525DD279800CCAF9F /* Card.swift */; };
 		F9CDFBCB25DD2EB600CCAF9F /* ValueCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */; };
@@ -55,6 +60,11 @@
 		04EA847725DC238000B68C48 /* BeverbendeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeverbendeUITests.swift; sourceTree = "<group>"; };
 		04EA847925DC238000B68C48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5E1CC80F25E54F0D00D1B515 /* Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
+		80786DAC25E65A0500707799 /* Chunk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chunk.swift; sourceTree = "<group>"; };
+		80786DAD25E65A0500707799 /* Declarative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Declarative.swift; sourceTree = "<group>"; };
+		80786DAE25E65A0500707799 /* Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		80786DB525E65A3100707799 /* Support.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Support.swift; sourceTree = "<group>"; };
+		80786DBB25E65A7000707799 /* cognitive_model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cognitive_model.swift; sourceTree = "<group>"; };
 		F9CDFBC025DD267400CCAF9F /* Beverbende.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beverbende.swift; sourceTree = "<group>"; };
 		F9CDFBC525DD279800CCAF9F /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueCard.swift; sourceTree = "<group>"; };
@@ -117,8 +127,10 @@
 				F9CDFBC025DD267400CCAF9F /* Beverbende.swift */,
 				F9CDFBC525DD279800CCAF9F /* Card.swift */,
 				F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */,
+				80786DBB25E65A7000707799 /* cognitive_model.swift */,
 				F9CDFBCF25DD307100CCAF9F /* ActionCard.swift */,
 				5E1CC80F25E54F0D00D1B515 /* Stack.swift */,
+				80786DBA25E65A4300707799 /* CoreACTR */,
 			);
 			path = Beverbende;
 			sourceTree = "<group>";
@@ -144,11 +156,22 @@
 		04EA848825DC243E00B68C48 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				80786DB525E65A3100707799 /* Support.swift */,
 				04EA845E25DC238000B68C48 /* Assets.xcassets */,
 				04EA845525DC237F00B68C48 /* AppDelegate.swift */,
 				04EA845725DC237F00B68C48 /* SceneDelegate.swift */,
 			);
 			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		80786DBA25E65A4300707799 /* CoreACTR */ = {
+			isa = PBXGroup;
+			children = (
+				80786DAC25E65A0500707799 /* Chunk.swift */,
+				80786DAD25E65A0500707799 /* Declarative.swift */,
+				80786DAE25E65A0500707799 /* Model.swift */,
+			);
+			path = CoreACTR;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -281,14 +304,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				80786DB025E65A0500707799 /* Declarative.swift in Sources */,
 				04EA845A25DC237F00B68C48 /* ViewController.swift in Sources */,
 				F9CDFBC125DD267800CCAF9F /* Beverbende.swift in Sources */,
 				F9CDFBD025DD307100CCAF9F /* ActionCard.swift in Sources */,
 				F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */,
+				80786DB625E65A3100707799 /* Support.swift in Sources */,
+				80786DBC25E65A7000707799 /* cognitive_model.swift in Sources */,
 				5E1CC81025E54F0D00D1B515 /* Stack.swift in Sources */,
 				F9CDFBCB25DD2EB600CCAF9F /* ValueCard.swift in Sources */,
 				04EA845625DC237F00B68C48 /* AppDelegate.swift in Sources */,
+				80786DB125E65A0500707799 /* Model.swift in Sources */,
 				04EA845825DC237F00B68C48 /* SceneDelegate.swift in Sources */,
+				80786DAF25E65A0500707799 /* Chunk.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
