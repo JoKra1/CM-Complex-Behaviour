@@ -7,23 +7,22 @@
 
 import Foundation
 
-class BeverbendeOpponent:Model{
+class BeverbendeOpponent:Model,Player{
+    
     /**
-     Beverbende opponent, inherits from Model class.
+     Beverbende opponent, inherits from Model class and implements Player protocol.
      */
+
     // Model tuning parameters (Class level)
     private static let cut_off_low = 6
     private static let cut_off_decide = 10
     
-    // ID Factory
-    private var id:Int // ID for model
+    // Model identifier and Player implmementation variables
+    var id: String
     
-    private static var IDfactory = 0
+    var cardOnHand: Card?
     
-    private static func setModelID() -> Int {
-        IDfactory += 1
-        return IDfactory
-    }
+    var cardsOnTable: [Card]
     
     // Game state, basically goal buffer (cognitive control)
     private enum GameState {
@@ -37,11 +36,81 @@ class BeverbendeOpponent:Model{
     
     private var goal:GameState
     
+    required init(with ID: String, with Cards: [Card]) {
+        self.id = ID
+        self.goal = .Begin
+        self.cardsOnTable = Cards
+        super.init()
+        self.memorizeCard(at: 1, with: self.cardsOnTable[0])
+        self.memorizeCard(at: 4, with: self.cardsOnTable[3])
+        print("DM: \(self.dm.chunks)")
+    }
+    
+    /**
+     PUBLIC API
+     */
+    
+    func getId() -> String {
+        return self.id
+    }
+    
+    func getCardOnHand() -> Card? {
+        if let currentCard = self.cardOnHand {
+            return currentCard
+        }
+        return nil
+    }
+    
+    func setCardOnHand(with card: Card) {
+        self.cardOnHand = card
+    }
+    
+    func getCardsOnTable() -> [Card] {
+        return self.cardsOnTable
+    }
+    
+    func replaceCardOnTable(at pos: Int, with card: Card) -> Card {
+        let currentCard = self.cardsOnTable[pos]
+        self.cardsOnTable[pos] = card
+        return currentCard
+    }
+    
     func summarizeDM(){
         for chunk in self.dm.chunks {
             print(chunk.value.slotvals)
         }
     }
+    
+    func rehearsal(at index:Int) -> (latency: Double,retrieved: Chunk?){
+        /**
+         Model rehearses card at a given position.
+         */
+        let request = Chunk(s: "Retrieval",m: self)
+        request.slotvals["isa"] = Value.Text("Pos_Fact")
+        request.slotvals["pos"] = Value.Number(Double(index))
+        let (latency,retrieval) = self.dm.retrieve(chunk: request)
+        self.time += latency
+        if let retrievedChunk = retrieval {
+            // Strengthen
+            self.dm.addToDM(retrievedChunk)
+            return (latency,retrievedChunk)
+        }
+        return (latency,nil)
+    }
+    
+    func advanceGame(for game: Beverbende) -> Bool {
+        /**
+         Model will perform a turn
+         */
+        repeat {
+            self.matchTurnDecision(with: game)
+            
+        } while !self.goal == GameState.DecideContinue 
+    }
+    
+    /**
+     PRIVATE
+     */
     
     private func memorizeCard(at position:Int, with card: Card) {
         /**
@@ -72,32 +141,6 @@ class BeverbendeOpponent:Model{
         
         self.dm.addToDM(chunk)
         self.time += 0.05
-    }
-    
-    func peak(at position:Int, with card:Card) {
-        /**
-         Model accesses information about a card and creates/reinforces the chunk for the position at which the card is.
-         Just a wrapper for public API.
-         */
-        memorizeCard(at: position, with: card)
-        
-    }
-    
-    func rehearsal(at index:Int) -> (latency: Double,retrieved: Chunk?){
-        /**
-         Model rehearses card at a given position.
-         */
-        let request = Chunk(s: "Retrieval",m: self)
-        request.slotvals["isa"] = Value.Text("Pos_Fact")
-        request.slotvals["pos"] = Value.Number(Double(index))
-        let (latency,retrieval) = self.dm.retrieve(chunk: request)
-        self.time += latency
-        if let retrievedChunk = retrieval {
-            // Strengthen
-            self.dm.addToDM(retrievedChunk)
-            return (latency,retrievedChunk)
-        }
-        return (latency,nil)
     }
     
     private func compareHand(for value:Int) -> (known_location: Int?,
@@ -175,7 +218,32 @@ class BeverbendeOpponent:Model{
         }
     }
     
-    func advanceGame(with game:Beverbende) {
+    private func decideGame() -> Bool{
+        /**
+         Model decides whether to end game or not.
+         */
+        var sum = 0
+        for pos in 1...4{
+            let (_,retrieved) = rehearsal(at: pos)
+            if let retrievedChunk = retrieved {
+                let retrievedType = retrievedChunk.slotvals["type"]!.text()
+                switch retrievedType {
+                case "action":
+                    return false
+                default:
+                    sum += Int(retrievedChunk.slotvals["value"]!.number()!)
+                }
+            } else {
+                return false
+            }
+        }
+        if sum < BeverbendeOpponent.cut_off_decide {
+            return true
+        }
+        return false
+    }
+    
+    private func matchTurnDecision(with game:Beverbende) {
         /**
          Advances model game by one step and returns
          */
@@ -183,13 +251,18 @@ class BeverbendeOpponent:Model{
         case .Begin:
             print("Model will look at discarded pile now:")
             let top_discarded = game.drawDiscardedCard()
+            self.cardOnHand = top_discarded
             let (decision, replace_loc) = self.decideDraw(for: top_discarded)
             switch decision {
             case true: // should replace
-                // ToDo: Change cards in player protocol hand.
+                let currentCard = self.cardsOnTable[replace_loc!]
+                game.discardPile.push(currentCard)
+                self.cardsOnTable[replace_loc!] = top_discarded
+                self.cardOnHand = nil
                 goal = .Processed_All
             case false: // Model does not want card on discarded pile
                 // move back top discarded to deck
+                game.discardPile.push(top_discarded)
                 goal = .Processed_Discarded
             }
         case .Processed_Discarded:
@@ -221,38 +294,5 @@ class BeverbendeOpponent:Model{
         case .DecideEnd:
             print("I am out of the game")
         }
-    }
-    
-    func decideGame() -> Bool{
-        /**
-         Model decides whether to end game or not.
-         */
-        var sum = 0
-        for pos in 1...4{
-            let (_,retrieved) = rehearsal(at: pos)
-            if let retrievedChunk = retrieved {
-                let retrievedType = retrievedChunk.slotvals["type"]!.text()
-                switch retrievedType {
-                case "action":
-                    return false
-                default:
-                    sum += Int(retrievedChunk.slotvals["value"]!.number()!)
-                }
-            } else {
-                return false
-            }
-        }
-        if sum < BeverbendeOpponent.cut_off_decide {
-            return true
-        }
-        return false
-    }
-    
-    override init() {
-        self.id = BeverbendeOpponent.setModelID()
-        self.goal = .Begin
-        super.init()
-        print("DM: \(self.dm.chunks)")
-        
     }
 }

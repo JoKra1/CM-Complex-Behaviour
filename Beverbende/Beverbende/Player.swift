@@ -9,16 +9,16 @@ import Foundation
 
 protocol Player {
     var id: String { get }
-    var cardOnHand: Card { get set }
+    var cardOnHand: Card? { get set }
     var cardsOnTable: [Card] { get set }
     
-    init(withID: String, withCards: [Card])
+    init(with ID: String, with Cards: [Card])
     
     func getId() -> String
-    func getCardOnHand() -> Card
-    func setCardOnHand(with: Card)
+    func getCardOnHand() -> Card?
+    func setCardOnHand(with card: Card)
     func getCardsOnTable() -> [Card]
     
-    func replaceCardOnTable(at: Int, with: Card) -> Card
+    func replaceCardOnTable(at pos: Int, with card: Card) -> Card
     
 }
