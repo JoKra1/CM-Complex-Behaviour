@@ -8,10 +8,10 @@
 import Foundation
 
 class Beverbende {
-    var models: [Int] // Int is just a placeholder
+    var playerIds: [String]
+    var players: [Player]
     var drawPile: Stack<Card>
     var discardPile: Stack<Card>
-    var playerCards: [Card]
     
     static func allCards() -> [Card] {
         var values = Array(repeating: 0, count: 4)
@@ -41,26 +41,27 @@ class Beverbende {
     }
     
     init() {
-        self.models = [] // Placeholder
+        self.playerIds = [] // Placeholder
+        self.players = [] // Placeholder
         self.discardPile = Stack<Card>()
         
         self.drawPile = Stack<Card>(initialArray: Beverbende.allCards().shuffled())
         self.discardPile.push(self.drawPile.pop()!)
         
-        self.playerCards = []
-        for _ in 0..<4 {
-            self.playerCards.append(self.drawPile.pop()!)
-        }
-        
-        for _ in self.models {
-            print("I still need to be implemented")
-            // Assign cards to every model
+        for _ in self.playerIds {
+            // Assign cards to every player
+            var cards: [Card] = []
+            for _ in 0..<4 {
+                cards.append(self.drawPile.pop()!)
+            }
+            // self.players.append(Player(withID: id, withCards: cards))
         }
     }
     
-    func drawCard() -> Card {
-        let card = self.drawPile.pop()
+    func drawCard(for player: Player) -> Card {
+        var card = self.drawPile.pop()
         if card != nil {
+            player.setCardOnHand(with: card!)
             return card!
         }
         
@@ -77,16 +78,51 @@ class Beverbende {
         // Place the card that was on the top of the discard pile back
         self.discardPile.push(topDiscardedCard)
         
-        return self.drawPile.pop()!
+        card = self.drawPile.pop()
+        player.setCardOnHand(with: card!)
+        return card!
     }
     
-    func drawDiscardedCard() -> Card {
-        return self.discardPile.pop()!
+    func drawDiscardedCard(for player: Player) -> Card {
+        let card = self.discardPile.pop()!
+        player.setCardOnHand(with: card)
+        return card
+    }
+    
+    func discardDrawnCard(for player: Player) {
+        let card = player.getCardOnHand()
+        self.discard(card: card)
     }
     
     func discard(card c: Card) {
         var card = c // Make the card mutable
         card.isFaceUp = true
         self.discardPile.push(card)
+    }
+    
+    func replaceCard(at index: Int, with c: Card, for player: Player) -> Card {
+        var replacementCard = c
+        replacementCard.isFaceUp = false
+        
+        let replacedCard = player.getCardsOnTable()[index]
+        // player.setCardOnTable(at: index, with: replacementCard)
+        return replacedCard
+    }
+    
+    func inspectCard(at index: Int, for player: Player) -> Card {
+        var card = player.getCardsOnTable()[index]
+        card.isFaceUp = true
+        return card
+    }
+    
+    func hideCard(at index: Int, for player: Player) {
+        var card = player.getCardsOnTable()[index]
+        card.isFaceUp = false
+    }
+    
+    func tradeDiscardedCardWithCard(at index: Int, for player: Player) {
+        let discardedCard = self.discardPile.pop()!
+        let replacedCard = self.replaceCard(at: index, with: discardedCard, for: player)
+        self.discard(card: replacedCard)
     }
 }
