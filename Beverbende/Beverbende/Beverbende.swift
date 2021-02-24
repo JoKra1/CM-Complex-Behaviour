@@ -25,9 +25,9 @@ class Beverbende {
         values = values + Array(repeating: 8, count: 4)
         values = values + Array(repeating: 9, count: 9)
         let actions =
-            Array(repeating: ActionCard.Values.inspect, count: 7) +
-            Array(repeating: ActionCard.Values.double, count: 5) +
-            Array(repeating: ActionCard.Values.swap, count: 9)
+            Array(repeating: Action.inspect, count: 7) +
+            Array(repeating: Action.double, count: 5) +
+            Array(repeating: Action.swap, count: 9)
         
         var cards: [Card] = []
         for v in values {
@@ -69,7 +69,7 @@ class Beverbende {
         let topDiscardedCard = self.discardPile.pop()!
         while self.discardPile.peek() != nil {
             var c = self.discardPile.pop()!
-            c.faceUp = false
+            c.isFaceUp = false
             self.drawPile.push(c)
         }
         // Shuffle the draw pile
@@ -86,7 +86,7 @@ class Beverbende {
     
     func discard(card c: Card) {
         var card = c // Make the card mutable
-        card.faceUp = true
+        card.isFaceUp = true
         self.discardPile.push(card)
     }
 }
