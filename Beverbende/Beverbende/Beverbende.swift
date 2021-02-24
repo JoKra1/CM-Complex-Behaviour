@@ -14,7 +14,7 @@ class Beverbende {
     var playerCards: [Card]
     
     static func allCards() -> [Card] {
-        var values = Array(repeating: 0, count: 1)
+        var values = Array(repeating: 0, count: 4)
         values = values + Array(repeating: 1, count: 4)
         values = values + Array(repeating: 2, count: 4)
         values = values + Array(repeating: 3, count: 4)
@@ -68,7 +68,9 @@ class Beverbende {
         // shuffle all but the top of the discard pile back into the draw pile
         let topDiscardedCard = self.discardPile.pop()!
         while self.discardPile.peek() != nil {
-            self.drawPile.push(self.discardPile.pop()!)
+            var c = self.discardPile.pop()!
+            c.faceUp = false
+            self.drawPile.push(c)
         }
         // Shuffle the draw pile
         self.drawPile.shuffle()
@@ -76,5 +78,15 @@ class Beverbende {
         self.discardPile.push(topDiscardedCard)
         
         return self.drawPile.pop()!
+    }
+    
+    func drawDiscardedCard() -> Card {
+        return self.discardPile.pop()!
+    }
+    
+    func discard(card c: Card) {
+        var card = c // Make the card mutable
+        card.faceUp = true
+        self.discardPile.push(card)
     }
 }
