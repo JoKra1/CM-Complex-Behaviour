@@ -41,23 +41,46 @@ class ViewController: UIViewController {
     var draw = 0
     
     @IBAction func drawCardFromDeck(_ sender: UIButton) {
-        //game.drawCard()
+//        game.drawCard() // draw a card from deck
+        
         draw += 1
         showFrontOfNumberCard(show: String(draw), on: playerDrawnCardButton)
         showDrawnCardInfoButton()
     }
     
     @IBAction func touchDiscardPile(_ sender: UIButton) {
+//        game.discardDrawnCard()
+        
         // either discard or draw from this pile depending on game state
         showFrontOfNumberCard(show: String(draw), on: discardPileButton)
         hideDrawnCardInfoButton()
         showEmptyDrawnCardButtons()
     }
     
+    var faceUp = false
+    
     @IBAction func touchPlayerCard(_ sender: UIButton) {
         let cardIndex = playerCardButtons.firstIndex(of: sender)!
         print("cardIndex \(cardIndex)")
-        // use game state to determine appropriate action
+        
+        UIView.transition(with: sender, duration: 0.6, options: .transitionFlipFromBottom, animations: {
+                            if self.faceUp == false {
+                                self.showFrontOfNumberCard(show: "4", on: sender)
+                                
+                            } else {
+                                self.showBackOfCard(for: sender)
+                            }
+            self.faceUp = !self.faceUp
+        }, completion: nil)
+        
+//        game.inspectCard(at: cardIndex)
+//
+//        game.hideCard(at: cardIndex)
+//
+//        game.tradeDiscardedCardWithCard(at: cardIndex) // if there is no drawn card
+//
+//        game.tradeDrawnCardWithCard(at: cardIndex) // if there is a drawn card and it is an valueCard
+        
     }
     
     @IBAction func touchLeftModelCard(_ sender: UIButton) {
@@ -99,8 +122,6 @@ class ViewController: UIViewController {
             sender.isHidden = true
         }
     }
-
-
     
     @IBOutlet weak var playerCardStack: UIStackView!
     @IBOutlet weak var leftCardStack: UIStackView!
@@ -180,8 +201,24 @@ class ViewController: UIViewController {
     }
     
     func loadViewFromModel() {
+    }
+    
+    func disableAllCardButtons(){
+        deckButton.isEnabled = false
+        discardPileButton.isEnabled = false
+        for cardButtonCollection in [playerCardButtons, leftModelCardButtons, topModelCardButtons, rightModelCardButtons] {
+            for cardButton in cardButtonCollection! {
+                cardButton.isEnabled = false
+            }
+        }
+        for cardButton in [playerDrawnCardButton, leftModelDrawnCardButton, topModelDrawnCardButton, rightModelDrawnCardButton] {
+            cardButton!.isEnabled = false
+        }
+        
         
     }
+    @IBOutlet var playerCardsView: [UIImageView]!
+    
     
 }
 
