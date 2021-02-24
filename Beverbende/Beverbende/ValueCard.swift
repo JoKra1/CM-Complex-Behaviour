@@ -8,14 +8,23 @@
 import Foundation
 
 class ValueCard: Card {
-    var value = 0
-    var faceUp = false
+    
+    var value: Int
+    
+    var isFaceUp: Bool
+    var type: CardType
     
     required init(value: Int) {
         self.value = value
+        self.isFaceUp = false
+        self.type = CardType.value(self.value)
     }
     
     func getValue() -> Int {
         return self.value
+    }
+    
+    func getType() -> CardType {
+        return self.type
     }
 }
