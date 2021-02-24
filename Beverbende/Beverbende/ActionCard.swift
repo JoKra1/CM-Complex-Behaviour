@@ -8,25 +8,33 @@
 import Foundation
 
 class ActionCard: Card {
-    enum Values: Int, CaseIterable {
-        case inspect = 0, double, swap
-    }
     
-    var value: Values
+    var action: Action
     
-    var faceUp: Bool
+    var type: CardType
+    var isFaceUp: Bool
     
     required init(value: Int) {
-        self.value = Values(rawValue: value)!
-        self.faceUp = false
+        self.action = Action(rawValue: value)!
+        self.isFaceUp = false
+        self.type = CardType.action(self.action)
     }
     
-    init(value: Values) {
-        self.value = value
-        self.faceUp = false
+    init(value action: Action) {
+        self.action = action
+        self.isFaceUp = false
+        self.type = CardType.action(self.action)
     }
     
     func getValue() -> Int {
-        return self.value.rawValue
+        return self.action.rawValue
+    }
+    
+    func getAction() -> Action {
+        return self.action
+    }
+    
+    func getType() -> CardType {
+        return self.type
     }
 }

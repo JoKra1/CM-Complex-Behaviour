@@ -7,9 +7,20 @@
 
 import Foundation
 
+enum Action: Int, CaseIterable {
+    case inspect = 0, twice, swap
+}
+
+enum CardType {
+    case value(Int)
+    case action(Action)
+}
+
 protocol Card {
-    var faceUp: Bool { get set }
+    var type:CardType { get }
+    var isFaceUp: Bool { get set }
     
     init(value: Int)
     func getValue() -> Int
+    func getType() -> CardType
 }
