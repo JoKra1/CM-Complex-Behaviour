@@ -8,7 +8,7 @@
 import Foundation
 
 enum Action: Int, CaseIterable {
-    case inspect = 0, double, swap
+    case inspect = 0, twice, swap
 }
 
 enum CardType {
