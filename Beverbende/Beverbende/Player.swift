@@ -18,6 +18,7 @@ protocol Player {
     func getCardOnHand() -> Card?
     func setCardOnHand(with card: Card)
     func getCardsOnTable() -> [Card]
+    func setCardOnTable(with card: Card, at index: Int)
     
     func replaceCardOnTable(at pos: Int, with card: Card) -> Card
     

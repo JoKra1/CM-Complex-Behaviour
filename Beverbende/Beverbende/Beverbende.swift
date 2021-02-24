@@ -90,7 +90,7 @@ class Beverbende {
     }
     
     func discardDrawnCard(for player: Player) {
-        let card = player.getCardOnHand()
+        let card = player.getCardOnHand()!
         self.discard(card: card)
     }
     
@@ -105,7 +105,7 @@ class Beverbende {
         replacementCard.isFaceUp = false
         
         let replacedCard = player.getCardsOnTable()[index]
-        // player.setCardOnTable(at: index, with: replacementCard)
+        player.setCardOnTable(with: replacementCard, at: index)
         return replacedCard
     }
     
