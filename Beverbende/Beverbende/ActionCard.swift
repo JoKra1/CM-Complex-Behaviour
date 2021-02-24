@@ -30,6 +30,10 @@ class ActionCard: Card {
         return self.action.rawValue
     }
     
+    func getAction() -> Action {
+        return self.action
+    }
+    
     func getType() -> CardType {
         return self.type
     }
