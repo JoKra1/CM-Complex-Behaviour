@@ -31,6 +31,7 @@
 		80786DB125E65A0500707799 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DAE25E65A0500707799 /* Model.swift */; };
 		80786DB625E65A3100707799 /* Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DB525E65A3100707799 /* Support.swift */; };
 		80786DBC25E65A7000707799 /* cognitive_model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DBB25E65A7000707799 /* cognitive_model.swift */; };
+		80AC09BE25ED798C0054B68D /* box_muller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AC09BD25ED798C0054B68D /* box_muller.swift */; };
 		F909C39B25E6621200848876 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = F909C39A25E6621200848876 /* Player.swift */; };
 		F9CDFBC125DD267800CCAF9F /* Beverbende.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC025DD267400CCAF9F /* Beverbende.swift */; };
 		F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC525DD279800CCAF9F /* Card.swift */; };
@@ -86,6 +87,7 @@
 		80786DAE25E65A0500707799 /* Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		80786DB525E65A3100707799 /* Support.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Support.swift; sourceTree = "<group>"; };
 		80786DBB25E65A7000707799 /* cognitive_model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cognitive_model.swift; sourceTree = "<group>"; };
+		80AC09BD25ED798C0054B68D /* box_muller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = box_muller.swift; sourceTree = "<group>"; };
 		F909C39A25E6621200848876 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		F9CDFBC025DD267400CCAF9F /* Beverbende.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beverbende.swift; sourceTree = "<group>"; };
 		F9CDFBC525DD279800CCAF9F /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 				04EA845E25DC238000B68C48 /* Assets.xcassets */,
 				04EA845525DC237F00B68C48 /* AppDelegate.swift */,
 				04EA845725DC237F00B68C48 /* SceneDelegate.swift */,
+				80AC09BD25ED798C0054B68D /* box_muller.swift */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -355,6 +358,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				80AC09BE25ED798C0054B68D /* box_muller.swift in Sources */,
 				80786DB025E65A0500707799 /* Declarative.swift in Sources */,
 				04EA845A25DC237F00B68C48 /* ViewController.swift in Sources */,
 				F9CDFBC125DD267800CCAF9F /* Beverbende.swift in Sources */,
