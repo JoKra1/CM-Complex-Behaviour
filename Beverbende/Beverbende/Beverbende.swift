@@ -10,6 +10,7 @@ import Foundation
 class Beverbende {
     var playerIds: [String]
     var players: [Player]
+    var currentPlayerIndex: Int
     var drawPile: Stack<Card>
     var discardPile: Stack<Card>
     
@@ -43,6 +44,7 @@ class Beverbende {
     init() {
         self.playerIds = [] // Placeholder
         self.players = [] // Placeholder
+        self.currentPlayerIndex = 0
         self.discardPile = Stack<Card>()
         
         self.drawPile = Stack<Card>(initialArray: Beverbende.allCards().shuffled())
@@ -58,6 +60,12 @@ class Beverbende {
         }
     }
     
+    func nextPlayer() -> Player {
+        self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
+        return self.players[self.currentPlayerIndex]
+    }
+    
+    // Note: Does not set card.isFaceUp to true
     func drawCard(for player: Player) -> Card {
         var card = self.drawPile.pop()
         if card != nil {
@@ -83,6 +91,7 @@ class Beverbende {
         return card!
     }
     
+    // Will probably be superseded by tradeDiscardedCardWithCard
     func drawDiscardedCard(for player: Player) -> Card {
         let card = self.discardPile.pop()!
         player.setCardOnHand(with: card)
@@ -118,6 +127,13 @@ class Beverbende {
     func hideCard(at index: Int, for player: Player) {
         var card = player.getCardsOnTable()[index]
         card.isFaceUp = false
+    }
+    
+    func tradeDrawnCardWithCard(at index: Int, for player: Player) {
+        let heldCard = player.getCardOnHand()!
+        player.setCardOnHand(with: nil)
+        let replacedCard = self.replaceCard(at: index, with: heldCard, for: player)
+        self.discard(card: replacedCard)
     }
     
     func tradeDiscardedCardWithCard(at index: Int, for player: Player) {
