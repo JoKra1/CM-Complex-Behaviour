@@ -8,7 +8,6 @@
 import Foundation
 
 class BeverbendeOpponent:Model,Player{
-    
     /**
      Beverbende opponent, inherits from Model class and implements Player protocol.
      */
@@ -69,6 +68,10 @@ class BeverbendeOpponent:Model,Player{
         return self.cardsOnTable
     }
     
+    func setCardOnTable(with card: Card, at index: Int) {
+        self.cardsOnTable[index] = card
+    }
+    
     func replaceCardOnTable(at pos: Int, with card: Card) -> Card {
         let currentCard = self.cardsOnTable[pos]
         self.cardsOnTable[pos] = card
@@ -100,12 +103,18 @@ class BeverbendeOpponent:Model,Player{
     
     func advanceGame(for game: Beverbende) -> Bool {
         /**
-         Model will perform a turn
+         Model will perform a turn and signals whether it wants to end or not
          */
         repeat {
             self.matchTurnDecision(with: game)
-            
-        } while !self.goal == GameState.DecideContinue 
+            if self.goal == .DecideContinue {
+                self.goal = .Begin
+                return false
+            } else if self.goal == .DecideEnd{
+                return true
+            }
+        } while self.goal != .Begin
+        return false
     }
     
     /**
@@ -243,56 +252,60 @@ class BeverbendeOpponent:Model,Player{
         return false
     }
     
+    private func replaceCardInHand(in game: Beverbende, at pos: Int, for card:Card) {
+        let currentCard = self.cardsOnTable[pos]
+        game.discardPile.push(currentCard)
+        setCardOnTable(with: card, at: pos)
+        self.cardOnHand = nil
+    }
+    
     private func matchTurnDecision(with game:Beverbende) {
         /**
          Advances model game by one step and returns
          */
         switch goal {
-        case .Begin:
-            print("Model will look at discarded pile now:")
-            let top_discarded = game.drawDiscardedCard()
-            self.cardOnHand = top_discarded
-            let (decision, replace_loc) = self.decideDraw(for: top_discarded)
-            switch decision {
-            case true: // should replace
-                let currentCard = self.cardsOnTable[replace_loc!]
-                game.discardPile.push(currentCard)
-                self.cardsOnTable[replace_loc!] = top_discarded
-                self.cardOnHand = nil
+            case .Begin:
+                print("Model will look at discarded pile now:")
+                let top_discarded = game.drawDiscardedCard(for: self)
+                setCardOnHand(with: top_discarded)
+                let (decision, replace_loc) = self.decideDraw(for: top_discarded)
+                switch decision {
+                    case true: // should replace
+                        replaceCardInHand(in: game, at: replace_loc!, for: top_discarded)
+                        goal = .Processed_All
+                    case false: // Model does not want card on discarded pile
+                        // move back top discarded to deck
+                        game.discardPile.push(top_discarded)
+                        goal = .Processed_Discarded
+                }
+            case .Processed_Discarded:
+                print("Model looked at discarded, will look at Deck as well.")
+                let top_deck = game.drawCard(for: self)
+                let (decision, replace_loc) = self.decideDraw(for: top_deck)
+                switch decision {
+                    case true: // should replace
+                        replaceCardInHand(in: game, at: replace_loc!, for: top_deck)
+                        // ToDo: change player card
+                    case false: // Model does not want card on deck pile
+                        game.discardPile.push(top_deck)
+                }
                 goal = .Processed_All
-            case false: // Model does not want card on discarded pile
-                // move back top discarded to deck
-                game.discardPile.push(top_discarded)
-                goal = .Processed_Discarded
-            }
-        case .Processed_Discarded:
-            print("Model looked at discarded, will look at Deck as well.")
-            let top_deck = game.drawCard()
-            let (decision, replace_loc) = self.decideDraw(for: top_deck)
-            switch decision {
-            case true: // should replace
-                game.discardPile.push(<#T##element: Card##Card#>) // needs to be player card
-                // ToDo: change player card
-            case false: // Model does not want card on deck pile
-                game.discardPile.push(top_deck)
-            }
-            goal = .Processed_All
-        case .Processed_All:
-            print("Model looked at Discarded pile and/or Deck")
-            let decision = self.decideGame()
-            if decision {
-                print("I knock")
-                goal = .DecideEnd
-            } else {
-                goal = .DecideContinue
-            }
+            case .Processed_All:
+                print("Model looked at Discarded pile and/or Deck")
+                let decision = self.decideGame()
+                if decision {
+                    print("I knock")
+                    goal = .DecideEnd
+                } else {
+                    goal = .DecideContinue
+                }
+                
+            case .DecideContinue:
+                print("Model has decided to continue")
+                goal = .Begin
             
-        case .DecideContinue:
-            print("Model has decided to continue")
-            goal = .Begin
-        
-        case .DecideEnd:
-            print("I am out of the game")
+            case .DecideEnd:
+                print("I am out of the game")
         }
     }
 }
