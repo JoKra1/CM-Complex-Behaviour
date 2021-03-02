@@ -60,8 +60,13 @@ class BeverbendeOpponent:Model,Player{
         return nil
     }
     
-    func setCardOnHand(with card: Card) {
-        self.cardOnHand = card
+    func setCardOnHand(with card: Card?) {
+        if let isaCard = card {
+            self.cardOnHand = isaCard
+        } else {
+            self.cardOnHand = nil
+        }
+        
     }
     
     func getCardsOnTable() -> [Card] {
