@@ -3,7 +3,6 @@
     <device id="ipad12_9" orientation="landscape" layout="fullscreen" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
-        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -21,62 +20,18 @@
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="Vk9-nN-8Av">
                                 <rect key="frame" x="455.5" y="820" width="455" height="184"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Ju-DE-Kgh">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Lq7-rZ-5Xg">
                                         <rect key="frame" x="0.0" y="0.0" width="107.5" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="touchPlayerCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Oig-Ea-9jX"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4W9-1z-xsI">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KCE-gM-OXt">
                                         <rect key="frame" x="115.5" y="0.0" width="108" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="touchPlayerCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="1h9-ZM-gnT"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5I3-EU-FKC">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="sWq-Ar-cmw">
                                         <rect key="frame" x="231.5" y="0.0" width="108" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="touchPlayerCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="nTR-hl-VZb"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WuP-oJ-hYZ">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Kg6-6n-zjl">
                                         <rect key="frame" x="347.5" y="0.0" width="107.5" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="touchPlayerCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Jag-r9-5yB"/>
-                                        </connections>
-                                    </button>
+                                    </imageView>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="height" multiplier="4:1.618" id="r2f-SW-EcZ"/>
@@ -85,157 +40,52 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="3UE-dg-Ecd">
                                 <rect key="frame" x="20" y="284.5" width="184" height="455"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K8M-WJ-4er">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="s9Z-k5-SS0">
                                         <rect key="frame" x="0.0" y="0.0" width="184" height="107.5"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VR8-SW-TKi">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="7KW-Rg-Eg0">
                                         <rect key="frame" x="0.0" y="115.5" width="184" height="108"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bjG-Yu-l2T">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="bxi-ot-dq2">
                                         <rect key="frame" x="0.0" y="231.5" width="184" height="108"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fZg-pO-Fis">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="UrH-7W-TSV">
                                         <rect key="frame" x="0.0" y="347.5" width="184" height="107.5"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="touchLeftModelCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="YqD-4Y-XX9"/>
-                                        </connections>
-                                    </button>
+                                    </imageView>
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="y0F-xD-sFd">
                                 <rect key="frame" x="455.5" y="20" width="455" height="184"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xl5-uA-FD7">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="JSk-UP-fep">
                                         <rect key="frame" x="0.0" y="0.0" width="107.5" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7jz-Cw-Wq9">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="uDh-Cf-8mL">
                                         <rect key="frame" x="115.5" y="0.0" width="108" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hUJ-ww-pbB">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="kDm-Fj-hyM">
                                         <rect key="frame" x="231.5" y="0.0" width="108" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="touchTopModelCard:" destination="BYZ-38-t0r" eventType="touchUpInside" id="EGz-Ey-wPm"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BEr-Rt-mC8">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="RKW-yV-bjh">
                                         <rect key="frame" x="347.5" y="0.0" width="107.5" height="184"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
+                                    </imageView>
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="zTA-CD-xZW">
                                 <rect key="frame" x="1162" y="284.5" width="184" height="455"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cb6-tJ-t3z">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="1wA-ai-kyl">
                                         <rect key="frame" x="0.0" y="0.0" width="184" height="107.5"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WWT-gm-gcU">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="qQZ-4F-JNH">
                                         <rect key="frame" x="0.0" y="115.5" width="184" height="108"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Srq-Ga-T27">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fx8-2t-0Rs">
                                         <rect key="frame" x="0.0" y="231.5" width="184" height="108"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="touchRightModelCards:" destination="BYZ-38-t0r" eventType="touchUpInside" id="2nd-be-G4m"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zeM-AQ-TzT">
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="qvZ-Sl-cDd">
                                         <rect key="frame" x="0.0" y="347.5" width="184" height="107.5"/>
-                                        <color key="backgroundColor" name="AccentColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                        <state key="normal" title="🦫"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </button>
+                                    </imageView>
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Ej-Vr-p8e">
@@ -247,159 +97,113 @@
                                     <action selector="touchInspectButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="guE-U1-II7"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qci-PB-Pk9">
-                                <rect key="frame" x="60" y="117" width="181" height="107.5"/>
-                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hra-eO-3qU">
-                                <rect key="frame" x="1122" y="785" width="184" height="108"/>
-                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="rightModelDrawnCardButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hLf-ub-Gv8"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4iO-Km-ibL">
-                                <rect key="frame" x="287.5" y="780" width="108" height="184"/>
-                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hqp-ee-n37">
-                                <rect key="frame" x="538.5" y="420" width="110.5" height="184"/>
-                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="touchDiscardPile:" destination="BYZ-38-t0r" eventType="touchUpInside" id="k8D-io-mmG"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xhG-Rf-aqw">
-                                <rect key="frame" x="717" y="420" width="110.5" height="184"/>
-                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="drawCardFromDeck:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yKR-Nr-ml7"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JAC-g3-SNY">
-                                <rect key="frame" x="970.5" y="60" width="108" height="184"/>
-                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="75"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="fill" contentVerticalAlignment="fill" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2jY-Ke-cGh">
-                                <rect key="frame" x="395.5" y="708" width="30" height="72"/>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="fill" contentVerticalAlignment="fill" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2jY-Ke-cGh">
+                                <rect key="frame" x="424" y="722" width="30" height="72"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="50"/>
                             </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="v5G-ec-era">
+                                <rect key="frame" x="559" y="420" width="108" height="184"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ZVh-9f-JmA">
+                                <rect key="frame" x="707" y="420" width="108" height="184"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="NtA-jW-US5">
+                                <rect key="frame" x="1142" y="779.5" width="184" height="108"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xzj-N5-4Ha">
+                                <rect key="frame" x="303" y="799" width="108" height="184"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KD6-5W-jUC">
+                                <rect key="frame" x="40" y="136.5" width="184" height="108"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="f0s-tB-xvf">
+                                <rect key="frame" x="950.5" y="40" width="108" height="184"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xc8-nu-MmA">
+                                <rect key="frame" x="891" y="334" width="108" height="184"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="4iO-Km-ibL" firstAttribute="top" secondItem="2jY-Ke-cGh" secondAttribute="bottom" id="06i-DG-QHa"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="0og-aI-nSU"/>
-                            <constraint firstItem="hqp-ee-n37" firstAttribute="trailing" secondItem="4W9-1z-xsI" secondAttribute="trailing" constant="-30" id="3fX-3s-RM3"/>
+                            <constraint firstItem="v5G-ec-era" firstAttribute="width" secondItem="Lq7-rZ-5Xg" secondAttribute="width" id="3K2-mW-zkR"/>
                             <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerX" secondItem="Vk9-nN-8Av" secondAttribute="centerX" id="3tJ-qf-5hy"/>
-                            <constraint firstItem="JAC-g3-SNY" firstAttribute="width" secondItem="BEr-Rt-mC8" secondAttribute="width" id="4Nl-lX-FcB"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="height" id="4zt-o2-nJw"/>
-                            <constraint firstItem="4iO-Km-ibL" firstAttribute="width" secondItem="4Ju-DE-Kgh" secondAttribute="width" id="5XB-wT-VBt"/>
+                            <constraint firstItem="f0s-tB-xvf" firstAttribute="height" secondItem="RKW-yV-bjh" secondAttribute="height" id="5qK-jr-57c"/>
                             <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerY" secondItem="Vk9-nN-8Av" secondAttribute="centerY" id="5zK-5n-kyN"/>
+                            <constraint firstItem="f0s-tB-xvf" firstAttribute="width" secondItem="RKW-yV-bjh" secondAttribute="width" id="73B-9E-YE9"/>
+                            <constraint firstItem="Xzj-N5-4Ha" firstAttribute="width" secondItem="Lq7-rZ-5Xg" secondAttribute="width" id="7Qx-Lq-bd0"/>
+                            <constraint firstItem="ZVh-9f-JmA" firstAttribute="height" secondItem="Lq7-rZ-5Xg" secondAttribute="height" id="8CF-Pu-OZe"/>
+                            <constraint firstItem="v5G-ec-era" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="8Dn-2h-jxb"/>
                             <constraint firstItem="Vk9-nN-8Av" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="AAF-Es-0ED"/>
-                            <constraint firstItem="JAC-g3-SNY" firstAttribute="height" secondItem="BEr-Rt-mC8" secondAttribute="height" id="CP3-3o-cQ2"/>
-                            <constraint firstItem="qci-PB-Pk9" firstAttribute="width" secondItem="K8M-WJ-4er" secondAttribute="width" multiplier="0.983696" id="Die-wj-FVJ"/>
+                            <constraint firstItem="ZVh-9f-JmA" firstAttribute="leading" secondItem="sWq-Ar-cmw" secondAttribute="leading" constant="20" id="BiO-ci-RVi"/>
+                            <constraint firstItem="Xzj-N5-4Ha" firstAttribute="height" secondItem="Lq7-rZ-5Xg" secondAttribute="height" id="CMg-8v-L29"/>
+                            <constraint firstItem="v5G-ec-era" firstAttribute="height" secondItem="Lq7-rZ-5Xg" secondAttribute="height" id="CU1-M9-GCm"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="EQM-yI-9GG"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Xzj-N5-4Ha" secondAttribute="bottom" constant="40" id="Exb-6w-v0E"/>
+                            <constraint firstItem="KD6-5W-jUC" firstAttribute="width" secondItem="s9Z-k5-SS0" secondAttribute="width" id="Hqa-JA-LJ0"/>
                             <constraint firstItem="3UE-dg-Ecd" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="height" id="J0X-8c-ezi"/>
-                            <constraint firstItem="hra-eO-3qU" firstAttribute="width" secondItem="zeM-AQ-TzT" secondAttribute="width" id="Lh2-Ku-s0N"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="4iO-Km-ibL" secondAttribute="bottom" constant="60" id="MW7-rw-rLI"/>
-                            <constraint firstItem="xhG-Rf-aqw" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="N9N-TL-5Bp"/>
+                            <constraint firstItem="3UE-dg-Ecd" firstAttribute="top" secondItem="KD6-5W-jUC" secondAttribute="bottom" constant="40" id="KRo-Up-ijM"/>
+                            <constraint firstItem="ZVh-9f-JmA" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="LCE-vN-mam"/>
+                            <constraint firstItem="KD6-5W-jUC" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="40" id="LCZ-oy-3Q6"/>
+                            <constraint firstItem="NtA-jW-US5" firstAttribute="width" secondItem="qvZ-Sl-cDd" secondAttribute="width" id="OJR-FM-0ph"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Vk9-nN-8Av" secondAttribute="bottom" constant="20" id="PJn-oP-fUy"/>
-                            <constraint firstItem="2jY-Ke-cGh" firstAttribute="leading" secondItem="4iO-Km-ibL" secondAttribute="trailing" id="SeG-as-a0i"/>
-                            <constraint firstItem="JAC-g3-SNY" firstAttribute="leading" secondItem="BEr-Rt-mC8" secondAttribute="trailing" constant="60" id="UbH-w8-06E"/>
-                            <constraint firstItem="5I3-EU-FKC" firstAttribute="leading" secondItem="xhG-Rf-aqw" secondAttribute="leading" constant="-30" id="VC7-VI-7Xe"/>
+                            <constraint firstItem="Xzj-N5-4Ha" firstAttribute="top" secondItem="2jY-Ke-cGh" secondAttribute="bottom" id="Uif-Kn-iUr"/>
+                            <constraint firstItem="ZVh-9f-JmA" firstAttribute="leading" secondItem="v5G-ec-era" secondAttribute="trailing" constant="40" id="X0W-kr-Rbk"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="YGI-z7-oWA"/>
                             <constraint firstItem="3UE-dg-Ecd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="Zx5-Pq-2jq"/>
-                            <constraint firstItem="xhG-Rf-aqw" firstAttribute="height" secondItem="4Ju-DE-Kgh" secondAttribute="height" id="aah-u6-aqp"/>
-                            <constraint firstItem="hqp-ee-n37" firstAttribute="width" secondItem="xhG-Rf-aqw" secondAttribute="width" id="atc-AU-7C6"/>
+                            <constraint firstItem="xc8-nu-MmA" firstAttribute="height" secondItem="ZVh-9f-JmA" secondAttribute="height" id="apD-X1-zWh"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="width" id="dpb-Xz-yds"/>
-                            <constraint firstItem="4Ju-DE-Kgh" firstAttribute="leading" secondItem="4iO-Km-ibL" secondAttribute="trailing" constant="60" id="e8n-WI-plA"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="hra-eO-3qU" secondAttribute="trailing" constant="60" id="eTf-ev-A4f"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="height" secondItem="Vk9-nN-8Av" secondAttribute="height" id="esr-Vc-kSq"/>
-                            <constraint firstItem="K8M-WJ-4er" firstAttribute="top" secondItem="qci-PB-Pk9" secondAttribute="bottom" constant="60" id="fjK-60-m4E"/>
-                            <constraint firstItem="JAC-g3-SNY" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="60" id="huq-xa-uqa"/>
-                            <constraint firstItem="qci-PB-Pk9" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="60" id="i5m-oP-icR"/>
-                            <constraint firstItem="hqp-ee-n37" firstAttribute="height" secondItem="xhG-Rf-aqw" secondAttribute="height" id="jmV-zb-mla"/>
+                            <constraint firstItem="xc8-nu-MmA" firstAttribute="width" secondItem="ZVh-9f-JmA" secondAttribute="width" id="iVQ-gL-LMo"/>
+                            <constraint firstItem="NtA-jW-US5" firstAttribute="top" secondItem="zTA-CD-xZW" secondAttribute="bottom" constant="40" id="le1-8W-ymA"/>
+                            <constraint firstItem="Vk9-nN-8Av" firstAttribute="leading" secondItem="Xzj-N5-4Ha" secondAttribute="trailing" constant="40" id="lvm-ES-esL"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="zTA-CD-xZW" secondAttribute="trailing" constant="20" id="mEw-yl-KvT"/>
                             <constraint firstItem="3UE-dg-Ecd" firstAttribute="height" secondItem="Vk9-nN-8Av" secondAttribute="width" id="mZA-ft-KcU"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="height" secondItem="Vk9-nN-8Av" secondAttribute="width" id="msN-cm-w5P"/>
-                            <constraint firstItem="qci-PB-Pk9" firstAttribute="height" secondItem="K8M-WJ-4er" secondAttribute="height" multiplier="0.995349" id="nGG-68-LeM"/>
-                            <constraint firstItem="hqp-ee-n37" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="oQ3-yw-m48"/>
+                            <constraint firstItem="f0s-tB-xvf" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="40" id="nBq-nA-Q86"/>
+                            <constraint firstItem="NtA-jW-US5" firstAttribute="height" secondItem="qvZ-Sl-cDd" secondAttribute="height" id="oKe-uT-Sw1"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="NtA-jW-US5" secondAttribute="trailing" constant="40" id="pCx-bS-RFD"/>
+                            <constraint firstItem="f0s-tB-xvf" firstAttribute="leading" secondItem="y0F-xD-sFd" secondAttribute="trailing" constant="40" id="ryM-eP-tFT"/>
                             <constraint firstItem="Vk9-nN-8Av" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" multiplier="1:3" id="tF8-Yj-10D"/>
+                            <constraint firstItem="ZVh-9f-JmA" firstAttribute="width" secondItem="Lq7-rZ-5Xg" secondAttribute="width" id="u3o-Sd-P2N"/>
                             <constraint firstItem="3UE-dg-Ecd" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="uFz-0h-0Ot"/>
-                            <constraint firstItem="4iO-Km-ibL" firstAttribute="height" secondItem="4Ju-DE-Kgh" secondAttribute="height" id="uyJ-si-Y1q"/>
-                            <constraint firstItem="hra-eO-3qU" firstAttribute="height" secondItem="zeM-AQ-TzT" secondAttribute="height" id="xOw-7p-RFb"/>
-                            <constraint firstItem="hra-eO-3qU" firstAttribute="top" secondItem="zeM-AQ-TzT" secondAttribute="bottom" constant="45.5" id="xX8-n3-7zh"/>
-                            <constraint firstItem="xhG-Rf-aqw" firstAttribute="width" secondItem="4Ju-DE-Kgh" secondAttribute="width" multiplier="1.02326" id="yxV-mO-7VT"/>
+                            <constraint firstItem="KD6-5W-jUC" firstAttribute="height" secondItem="s9Z-k5-SS0" secondAttribute="height" id="vGF-sz-tMU"/>
+                            <constraint firstItem="2jY-Ke-cGh" firstAttribute="leading" secondItem="Xzj-N5-4Ha" secondAttribute="trailing" id="vXl-pi-ejl"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="InspectButton" destination="3Ej-Vr-p8e" id="5FC-fP-PFs"/>
-                        <outlet property="deckButton" destination="xhG-Rf-aqw" id="LyS-Lb-g7g"/>
-                        <outlet property="discardPileButton" destination="hqp-ee-n37" id="tg0-Ab-MKI"/>
+                        <outlet property="animationCardView" destination="xc8-nu-MmA" id="EOs-BY-fxO"/>
+                        <outlet property="deckView" destination="ZVh-9f-JmA" id="lOa-wb-XYB"/>
+                        <outlet property="discardPileView" destination="v5G-ec-era" id="VEu-a1-mgb"/>
                         <outlet property="drawnCardInfoButton" destination="2jY-Ke-cGh" id="ae7-qQ-iAN"/>
                         <outlet property="inspectButton" destination="3Ej-Vr-p8e" id="I13-a1-wb5"/>
                         <outlet property="leftCardStack" destination="3UE-dg-Ecd" id="5c6-wF-1Qb"/>
-                        <outlet property="leftModelDrawnCardButton" destination="qci-PB-Pk9" id="oD8-3f-NmQ"/>
+                        <outlet property="leftModelDrawnCardView" destination="KD6-5W-jUC" id="Nu0-Ws-Bbo"/>
                         <outlet property="playerCardStack" destination="Vk9-nN-8Av" id="46N-hY-pEc"/>
-                        <outlet property="playerDrawnCardButton" destination="4iO-Km-ibL" id="DDG-ZH-tja"/>
+                        <outlet property="playerDrawnCardView" destination="Xzj-N5-4Ha" id="7sn-Y9-q6n"/>
                         <outlet property="rightCardStack" destination="zTA-CD-xZW" id="9LC-8F-GLp"/>
-                        <outlet property="rightModelDrawnCardButton" destination="hra-eO-3qU" id="qS1-Nq-e9Y"/>
+                        <outlet property="rightModelDrawnCardView" destination="NtA-jW-US5" id="HWZ-tJ-5Ah"/>
                         <outlet property="topCardStack" destination="y0F-xD-sFd" id="epH-2s-fGV"/>
-                        <outlet property="topModelDrawnCardButton" destination="JAC-g3-SNY" id="1xJ-jZ-CK2"/>
-                        <outletCollection property="playerCardButtons" destination="4Ju-DE-Kgh" collectionClass="NSMutableArray" id="A17-1B-7qE"/>
-                        <outletCollection property="playerCardButtons" destination="4W9-1z-xsI" collectionClass="NSMutableArray" id="LlG-zT-Qi8"/>
-                        <outletCollection property="playerCardButtons" destination="5I3-EU-FKC" collectionClass="NSMutableArray" id="JOT-Pr-Z8v"/>
-                        <outletCollection property="playerCardButtons" destination="WuP-oJ-hYZ" collectionClass="NSMutableArray" id="IYr-vd-ZQs"/>
-                        <outletCollection property="playerCardButtons" destination="5I3-EU-FKC" collectionClass="NSMutableArray" id="5T1-1z-eEy"/>
-                        <outletCollection property="leftModelCardButtons" destination="K8M-WJ-4er" collectionClass="NSMutableArray" id="8vl-E3-r92"/>
-                        <outletCollection property="leftModelCardButtons" destination="VR8-SW-TKi" collectionClass="NSMutableArray" id="Urp-OG-lyV"/>
-                        <outletCollection property="leftModelCardButtons" destination="fZg-pO-Fis" collectionClass="NSMutableArray" id="qKz-vh-42Q"/>
-                        <outletCollection property="leftModelCardButtons" destination="bjG-Yu-l2T" collectionClass="NSMutableArray" id="u1e-ur-a1N"/>
-                        <outletCollection property="topModelCardButtons" destination="BEr-Rt-mC8" collectionClass="NSMutableArray" id="0pd-5W-vUD"/>
-                        <outletCollection property="topModelCardButtons" destination="hUJ-ww-pbB" collectionClass="NSMutableArray" id="69f-1a-EMi"/>
-                        <outletCollection property="topModelCardButtons" destination="7jz-Cw-Wq9" collectionClass="NSMutableArray" id="Yps-AH-72T"/>
-                        <outletCollection property="topModelCardButtons" destination="xl5-uA-FD7" collectionClass="NSMutableArray" id="H9A-1k-0D0"/>
-                        <outletCollection property="rightModelCardButtons" destination="zeM-AQ-TzT" collectionClass="NSMutableArray" id="CzR-sH-dKk"/>
-                        <outletCollection property="rightModelCardButtons" destination="Srq-Ga-T27" collectionClass="NSMutableArray" id="0dQ-up-pwQ"/>
-                        <outletCollection property="rightModelCardButtons" destination="WWT-gm-gcU" collectionClass="NSMutableArray" id="At5-PP-33s"/>
-                        <outletCollection property="rightModelCardButtons" destination="cb6-tJ-t3z" collectionClass="NSMutableArray" id="2sW-bT-EN6"/>
+                        <outlet property="toptModelDrawnCardView" destination="f0s-tB-xvf" id="SoZ-94-HeO"/>
+                        <outletCollection property="playerCardViews" destination="Lq7-rZ-5Xg" collectionClass="NSMutableArray" id="IOt-bG-zOs"/>
+                        <outletCollection property="playerCardViews" destination="KCE-gM-OXt" collectionClass="NSMutableArray" id="vDv-oH-czv"/>
+                        <outletCollection property="playerCardViews" destination="sWq-Ar-cmw" collectionClass="NSMutableArray" id="Rwf-o4-3bE"/>
+                        <outletCollection property="playerCardViews" destination="Kg6-6n-zjl" collectionClass="NSMutableArray" id="yjd-AV-FAJ"/>
+                        <outletCollection property="leftModelCardViews" destination="s9Z-k5-SS0" collectionClass="NSMutableArray" id="djO-BH-YNk"/>
+                        <outletCollection property="leftModelCardViews" destination="7KW-Rg-Eg0" collectionClass="NSMutableArray" id="5AX-T2-3bW"/>
+                        <outletCollection property="leftModelCardViews" destination="bxi-ot-dq2" collectionClass="NSMutableArray" id="iVA-iK-UQa"/>
+                        <outletCollection property="leftModelCardViews" destination="UrH-7W-TSV" collectionClass="NSMutableArray" id="j0L-2B-a9m"/>
+                        <outletCollection property="topModelCardViews" destination="RKW-yV-bjh" collectionClass="NSMutableArray" id="6j1-ew-hSR"/>
+                        <outletCollection property="topModelCardViews" destination="kDm-Fj-hyM" collectionClass="NSMutableArray" id="biN-Qk-DZp"/>
+                        <outletCollection property="topModelCardViews" destination="uDh-Cf-8mL" collectionClass="NSMutableArray" id="nG9-5t-a2I"/>
+                        <outletCollection property="topModelCardViews" destination="JSk-UP-fep" collectionClass="NSMutableArray" id="JcC-Mi-F6F"/>
+                        <outletCollection property="rightModelCardViews" destination="qvZ-Sl-cDd" collectionClass="NSMutableArray" id="GXV-DD-XDd"/>
+                        <outletCollection property="rightModelCardViews" destination="fx8-2t-0Rs" collectionClass="NSMutableArray" id="E0Q-sE-8BS"/>
+                        <outletCollection property="rightModelCardViews" destination="qQZ-4F-JNH" collectionClass="NSMutableArray" id="MDW-Nn-wV7"/>
+                        <outletCollection property="rightModelCardViews" destination="1wA-ai-kyl" collectionClass="NSMutableArray" id="ZtG-ky-OG8"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -408,12 +212,6 @@
         </scene>
     </scenes>
     <resources>
-        <namedColor name="AccentColor">
-            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <systemColor name="opaqueSeparatorColor">
-            <color red="0.77647058823529413" green="0.77647058823529413" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
