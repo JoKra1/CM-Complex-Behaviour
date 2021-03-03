@@ -20,7 +20,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         showBackOfAllCards()
-        animationViewOne.isHidden = true
+        view.bringSubviewToFront(animationViewTwo)
         view.bringSubviewToFront(animationViewOne)
 //        showEmptyDrawnCardButtons()
 //        showEmptyArea(for: discardPileButton)
@@ -79,18 +79,20 @@ class ViewController: UIViewController {
         switch recognizer.state {
         case .ended:
             print("here")
-            animateCardTrade(ofCardAtIndex: 0, by: .player, withCardAtIndex: 0, from: .topModel)
-//            if let chosenCardView = recognizer.view as? UIImageView {
-//                print("constraints")
-//                print(chosenCardView.constraints)
-//                if isFaceUp {
-//                    flipClosed(hide: chosenCardView, for: .player)
-//                    isFaceUp = !isFaceUp
-//                } else {
-//                    flipOpen(show: "4", on: chosenCardView, for: .player)
-//                    isFaceUp = !isFaceUp
-//                }
-//            }
+            if let chosenCardView = recognizer.view as? UIImageView {
+                let cardIndex = playerCardViews.firstIndex(of: chosenCardView)
+                switch cardIndex {
+                case 0:
+                    print("tradeOnHand")
+                    animateTradeOnHand(withCardAtIndex: 1, by: .player)
+                case 1:
+                    print("cardTrade")
+                    animateCardTrade(ofCardAtIndex: 1, by: .player, withCardAtIndex: 3, from: .rightModel)
+                default:
+                    break
+                }
+                
+            }
         default:
             break
         }
@@ -123,59 +125,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func flipOpen(show value: String, on cardView: UIImageView, for actor: Actor){
-        
-        var flipFrom: UIView.AnimationOptions {
-            switch actor {
-            case .leftModel:
-                return .transitionFlipFromRight
-            case .rightModel:
-                return .transitionFlipFromLeft
-            case .player:
-                return .transitionFlipFromTop
-            case .topModel:
-                return .transitionFlipFromBottom
-            case .game:
-                return .transitionFlipFromBottom
-            }
-        }
-        
-        UIView.transition(with: cardView,
-                          duration: 0.6,
-                          options: flipFrom,
-                          animations: {
-                            self.showFrontOfCard(show: "4", on: cardView, for: actor)
-                          },
-                          completion: nil
-        )
-    }
     
-    func flipClosed(hide cardView: UIImageView, for actor: Actor){
-        
-        var flipFrom: UIView.AnimationOptions {
-            switch actor {
-            case .leftModel:
-                return .transitionFlipFromLeft
-            case .rightModel:
-                return .transitionFlipFromRight
-            case .player:
-                return .transitionFlipFromBottom
-            case .topModel:
-                return .transitionFlipFromTop
-            default:
-                return .transitionFlipFromBottom
-            }
-        }
-        
-        UIView.transition(with: cardView,
-                          duration: 0.6,
-                          options: flipFrom,
-                          animations: {
-                            self.showBackOfCard(on: cardView, for: actor)
-                          },
-                          completion: nil
-        )
-    }
     
     @IBOutlet weak var playerCardStack: UIStackView!
     @IBOutlet weak var leftCardStack: UIStackView!
@@ -267,6 +217,7 @@ class ViewController: UIViewController {
     }
     
     // ############################ ANIMATIONS ############################
+    
     func retrieveOverlayConstraints(set animationView: UIImageView, to targetView: UIImageView) -> [NSLayoutConstraint] {
         var constraintCollection: [NSLayoutConstraint] = []
         for attribute in [NSLayoutConstraint.Attribute.centerX, .centerY] { //, .height, .width
@@ -286,7 +237,6 @@ class ViewController: UIViewController {
         //without animation
         let overlayConstraints = retrieveOverlayConstraints(set: animationView, to: targetView)
         NSLayoutConstraint.activate(overlayConstraints)
-        animationView.isHidden = false
         animationView.image = targetView.image
         animationView.superview?.layoutIfNeeded()
         if deactivateAfter {
@@ -297,20 +247,81 @@ class ViewController: UIViewController {
         }
     }
     
-    func animateMovingClosedCard(from viewA: UIImageView, to viewB: UIImageView, using animationView: UIImageView, withDuration dur: Double) {
-        _ = setViewToOverlay(set: animationView, to: viewA)
-        let overlayConstraints = retrieveOverlayConstraints(set: animationView, to: viewB)
-        NSLayoutConstraint.activate(overlayConstraints)
-        UIView.transition(with: animationView,
-                          duration: dur,
-                          options: [.curveEaseInOut],
-                          animations: {
-                            animationView.superview?.layoutIfNeeded()
-                          }, completion: {_ in
-                            animationView.isHidden = true
-                          } )
-        NSLayoutConstraint.deactivate(overlayConstraints)
+    func setViewToOverlayDouble(set animationView1: UIImageView, to targetView1: UIImageView, andSet animationView2: UIImageView, to targetView2: UIImageView) {
+        // function for trades
+        let startOverlayConstraints1 = setViewToOverlay(set: animationViewOne, to: targetView1, deactivateAfter: false)
+        let startOverlayConstraints2 = setViewToOverlay(set: animationViewTwo, to: targetView2, deactivateAfter: false)
+        self.animationViewOne.superview?.layoutIfNeeded()
+        NSLayoutConstraint.deactivate(startOverlayConstraints1)
+        NSLayoutConstraint.deactivate(startOverlayConstraints2)
     }
+    
+    func flipOpen(show value: String, on cardView: UIImageView, for actor: Actor){
+        var flipFrom: UIView.AnimationOptions {
+            switch actor {
+            case .leftModel:
+                return .transitionFlipFromRight
+            case .rightModel:
+                return .transitionFlipFromLeft
+            case .player:
+                return .transitionFlipFromTop
+            case .topModel:
+                return .transitionFlipFromBottom
+            case .game:
+                return .transitionFlipFromBottom
+            }
+        }
+        
+        UIView.transition(with: cardView,
+                          duration: 0.6,
+                          options: flipFrom,
+                          animations: {
+                            self.showFrontOfCard(show: "4", on: cardView, for: actor)
+                          },
+                          completion: nil
+        )
+    }
+    
+    func flipClosed(hide cardView: UIImageView, for actor: Actor){
+        var flipFrom: UIView.AnimationOptions {
+            switch actor {
+            case .leftModel:
+                return .transitionFlipFromLeft
+            case .rightModel:
+                return .transitionFlipFromRight
+            case .player:
+                return .transitionFlipFromBottom
+            case .topModel:
+                return .transitionFlipFromTop
+            default:
+                return .transitionFlipFromBottom
+            }
+        }
+        
+        UIView.transition(with: cardView,
+                          duration: 0.6,
+                          options: flipFrom,
+                          animations: {
+                            self.showBackOfCard(on: cardView, for: actor)
+                          },
+                          completion: nil
+        )
+    }
+    
+//    func animateMovingClosedCard(from viewA: UIImageView, to viewB: UIImageView, using animationView: UIImageView, withDuration dur: Double) {
+//        _ = setViewToOverlay(set: animationView, to: viewA)
+//        let overlayConstraints = retrieveOverlayConstraints(set: animationView, to: viewB)
+//        NSLayoutConstraint.activate(overlayConstraints)
+//        UIView.transition(with: animationView,
+//                          duration: dur,
+//                          options: [.curveEaseInOut],
+//                          animations: {
+//                            animationView.superview?.layoutIfNeeded()
+//                          }, completion: {_ in
+//                            animationView.image = nil
+//                          } )
+//        NSLayoutConstraint.deactivate(overlayConstraints)
+//    }
     
     func retrieveOnHandCardView(for actor: Actor) -> UIImageView {
         switch actor {
@@ -341,55 +352,60 @@ class ViewController: UIViewController {
                           animations: {
                             self.animationViewOne.superview?.layoutIfNeeded()
                           }, completion: {_ in
-                            self.animationViewOne.isHidden = true
+                            self.animationViewOne.image = nil
                             self.showBackOfCard(on: onHandCardView, for: actor)
-                            onHandCardView.isHidden = false
-                            // some work on timing
-                            if actor == .player { self.animateShowOfHand(by: actor) }
                           } )
         NSLayoutConstraint.deactivate(overlayConstraints)
-    }
-
-    func animateShowOfHand(by actor: Actor) {
-        // flip open the drawn card if the model chooses to play it, or discard it
-        let onHandView = retrieveOnHandCardView(for: actor)
-        flipOpen(show: "4", on: onHandView, for: actor)
+        
+        if actor == .player {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
+                self.flipOpen(show: "4", on: onHandCardView, for: actor)
+            }
+        }
+        
     }
 
     func animateDiscardFromHand(by actor: Actor) {
         let onHandView = retrieveOnHandCardView(for: actor)
         
-        animateShowOfHand(by: actor)
-
-        _ = setViewToOverlay(set: animationViewOne, to: onHandView)
-        onHandView.isHidden = true
+        var delayInSeconds = 0.0
         
-        let overlayConstraints = retrieveOverlayConstraints(set: animationViewOne, to: discardPileView)
-        NSLayoutConstraint.activate(overlayConstraints)
+        if actor != .player{
+            flipOpen(show: "4", on: onHandView, for: actor)
+            delayInSeconds = 0.61
+        }
         
-        UIView.transition(with: animationViewOne,
-                          duration: 1,
-                          options: [.curveEaseInOut],
-                          animations: {
-                            self.animationViewOne.superview?.layoutIfNeeded()
-                          }, completion: {_ in
-                            self.animationViewOne.isHidden = true
-                            self.showFrontOfCard(show: "4", on: self.discardPileView, for: .game)
-                          }
-        )
-        NSLayoutConstraint.deactivate(overlayConstraints)
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delayInSeconds) {
+            _ = self.setViewToOverlay(set: self.animationViewOne, to: onHandView)
+            onHandView.image = nil
+            
+            let overlayConstraints = self.retrieveOverlayConstraints(set: self.animationViewOne, to: self.discardPileView)
+            NSLayoutConstraint.activate(overlayConstraints)
+            
+            UIView.transition(with: self.animationViewOne,
+                              duration: 1,
+                              options: [.curveEaseInOut],
+                              animations: {
+                                self.animationViewOne.superview?.layoutIfNeeded()
+                              }, completion: {_ in
+                                self.animationViewOne.image = nil
+                                self.showFrontOfCard(show: "4", on: self.discardPileView, for: .game)
+                              }
+            )
+            NSLayoutConstraint.deactivate(overlayConstraints)
+        }
     }
     
-    func retrieveOnTableCardViews(for actor: Actor) -> [UIImageView] {
+    func retrieveOnTableCardViews(for actor: Actor, withIndex cardIndex: Int) -> UIImageView {
         switch actor {
         case .player:
-            return playerCardViews
+            return playerCardViews[cardIndex]
         case .leftModel:
-            return leftModelCardViews
+            return leftModelCardViews[cardIndex]
         case .rightModel:
-            return rightModelCardViews
+            return rightModelCardViews[cardIndex]
         case .topModel:
-            return topModelCardViews
+            return topModelCardViews[cardIndex]
         case .game:
             exit(0)
         }
@@ -398,16 +414,12 @@ class ViewController: UIViewController {
     func prepareAnimationFromViewToView(from view1: UIImageView, to view2: UIImageView) {
     }
     
-    func animateCardTrade(ofCardAtIndex CardIndex1: Int, by actor1: Actor, withCardAtIndex cardIndex2: Int, from actor2: Actor) {
+    func animateCardTrade(ofCardAtIndex cardIndex1: Int, by actor1: Actor, withCardAtIndex cardIndex2: Int, from actor2: Actor) {
         // Trade cars between Actors
-        let cardView1 = retrieveOnTableCardViews(for: actor1)[CardIndex1]
-        let cardView2 = retrieveOnTableCardViews(for: actor2)[cardIndex2]
+        let cardView1 = retrieveOnTableCardViews(for: actor1, withIndex: cardIndex1)
+        let cardView2 = retrieveOnTableCardViews(for: actor2, withIndex: cardIndex2)
         
-        let startOverlayConstraints1 = setViewToOverlay(set: animationViewOne, to: cardView1, deactivateAfter: false)
-        let startOverlayConstraints2 = setViewToOverlay(set: animationViewTwo, to: cardView2, deactivateAfter: false)
-        self.animationViewOne.superview?.layoutIfNeeded()
-        NSLayoutConstraint.deactivate(startOverlayConstraints1)
-        NSLayoutConstraint.deactivate(startOverlayConstraints2)
+        setViewToOverlayDouble(set: animationViewOne, to: cardView1, andSet: animationViewTwo, to: cardView2)
         
         cardView1.image = nil//.isHidden does not work as these are in a stackView
         cardView2.image = nil
@@ -419,21 +431,65 @@ class ViewController: UIViewController {
         NSLayoutConstraint.activate(endOverlayConstraints2)
         
         UIView.transition(with: animationViewOne,
-                          duration: 1, options: [.curveEaseIn],
+                          duration: 1,
+                          options: [.curveEaseInOut],
                           animations: {
                             self.animationViewOne.superview?.layoutIfNeeded()
                           }, completion: {_ in
                             self.showBackOfCard(on: cardView1, for: actor1)
                             self.showBackOfCard(on: cardView2, for: actor2)
-                            self.animationViewOne.isHidden = true
-                            self.animationViewTwo.isHidden = true
-                          })
+                            self.animationViewOne.image = nil
+                            self.animationViewTwo.image = nil
+                          }
+        )
         NSLayoutConstraint.deactivate(endOverlayConstraints1)
         NSLayoutConstraint.deactivate(endOverlayConstraints2)
     }
 //
-    func animateTradeOnHand(with cardIndex: Int, by actor: Actor) {
-//        trade the drawn card with onde of your own (for either model or player)
+    func animateTradeOnHand(withCardAtIndex cardIndex: Int, by actor: Actor) {
+//        trade the drawn card with one of your own (for either model or player)
+        
+        let onHandCardView = retrieveOnHandCardView(for: actor)
+        if actor == .player {
+            flipClosed(hide: onHandCardView, for: actor)
+        }
+        
+        let onTableCardView = retrieveOnTableCardViews(for: actor, withIndex: cardIndex)
+        flipOpen(show: "4", on: onTableCardView, for: actor)
+        
+        let delayInSeconds = 0.61
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delayInSeconds) {
+
+            self.setViewToOverlayDouble(set: self.animationViewOne, to: onHandCardView, andSet: self.animationViewTwo, to: onTableCardView)
+            
+            onHandCardView.image = nil
+            onTableCardView.image = nil
+            
+            let OverlayConstraints1 = self.retrieveOverlayConstraints(set: self.animationViewOne, to: onTableCardView)
+            let OverlayConstraints2 = self.retrieveOverlayConstraints(set: self.animationViewTwo, to: self.discardPileView)
+            
+            NSLayoutConstraint.activate(OverlayConstraints1)
+            NSLayoutConstraint.activate(OverlayConstraints2)
+            
+            UIView.animate(withDuration: 1,
+                           delay: 0,
+                           options: [.curveEaseInOut],
+                           animations: {
+                            self.animationViewOne.superview?.layoutIfNeeded()
+                           },
+                           completion: {_ in
+                            self.animationViewOne.image = nil
+                            self.animationViewTwo.image = nil
+                            self.showBackOfCard(on: onTableCardView, for: actor)
+                            self.showFrontOfCard(show: "4", on: self.discardPileView, for: actor)
+                           })
+
+            NSLayoutConstraint.deactivate(OverlayConstraints1)
+            NSLayoutConstraint.deactivate(OverlayConstraints2)
+
+        }
+        
+        
     }
 }
 
