@@ -257,12 +257,12 @@ class BeverbendeOpponent:Model,Player{
         return false
     }
     
-    private func replaceCardInHand(in game: Beverbende, at pos: Int, for card:Card) {
+    /*private func replaceCardInHand(in game: Beverbende, at pos: Int, for card:Card) {
         let currentCard = self.cardsOnTable[pos]
         game.discardPile.push(currentCard)
         setCardOnTable(with: card, at: pos)
         self.cardOnHand = nil
-    }
+    }*/
     
     private func matchTurnDecision(with game:Beverbende) {
         /**
@@ -271,28 +271,29 @@ class BeverbendeOpponent:Model,Player{
         switch goal {
             case .Begin:
                 print("Model will look at discarded pile now:")
-                let top_discarded = game.drawDiscardedCard(for: self)
-                setCardOnHand(with: top_discarded)
-                let (decision, replace_loc) = self.decideDraw(for: top_discarded)
+                // Place card in hand
+                let _ = game.drawDiscardedCard(for: self)
+                // Cast is safe because we just collected a card
+                let (decision, replace_loc) = self.decideDraw(for: self.cardOnHand!)
                 switch decision {
                     case true: // should replace
-                        replaceCardInHand(in: game, at: replace_loc!, for: top_discarded)
+                        game.tradeDrawnCardWithCard(at: replace_loc!, for: self)
                         goal = .Processed_All
                     case false: // Model does not want card on discarded pile
                         // move back top discarded to deck
-                        game.discardPile.push(top_discarded)
+                        game.discardDrawnCard(for: self)
                         goal = .Processed_Discarded
                 }
             case .Processed_Discarded:
                 print("Model looked at discarded, will look at Deck as well.")
-                let top_deck = game.drawCard(for: self)
-                let (decision, replace_loc) = self.decideDraw(for: top_deck)
+                let _ = game.drawCard(for: self)
+                let (decision, replace_loc) = self.decideDraw(for: self.cardOnHand!)
                 switch decision {
                     case true: // should replace
-                        replaceCardInHand(in: game, at: replace_loc!, for: top_deck)
+                        game.tradeDrawnCardWithCard(at: replace_loc!, for: self)
                         // ToDo: change player card
                     case false: // Model does not want card on deck pile
-                        game.discardPile.push(top_deck)
+                        game.discardDrawnCard(for: self)
                 }
                 goal = .Processed_All
             case .Processed_All:
