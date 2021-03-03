@@ -20,7 +20,6 @@ enum Actor {
     case leftModel
     case topModel
     case rightModel
-    
 }
 
 class ViewController: UIViewController {
@@ -59,33 +58,9 @@ class ViewController: UIViewController {
     
     var draw = 0
     
-//    @objc func drawCard(_ recognizer: UITapGestureRecognizer) {
-//            print("new call")
-//            switch recognizer.state {
-//            case .ended:
-//                deckViewLocationConstraints.forEach { constraint in constraint.isActive = false; print(constraint) }
-//                deckToDrawnLocationConstraints[.player]!.forEach { constraint in constraint.isActive = true; print(constraint) }
-//                UIView.transition(with: self.deckView,
-//                                  duration: 1,
-//                                  options: [.transitionFlipFromBottom, .curveEaseInOut],
-//                                  animations: {
-//                                    self.deckView.superview?.layoutIfNeeded()
-//                                    self.showFrontOfNumberCard(show: String(self.draw), on: self.deckView, at: .central)
-//                                  }, completion: { _ in
-//                                    print("complete")
-//                                    self.showFrontOfNumberCard(show: String(self.draw), on: self.playerDrawnCardView, at: .bottom)
-//                                    self.showBackOfCard(for: self.deckView, at: .central)
-//                                    self.draw += 1
-//                                  })
-//
-//                self.deckView.superview?.layoutIfNeeded()
-//                print("old2")
-//            default:
-//                break
-//            }
-    //        }
-    
     @objc func drawCard(_ recognizer: UITapGestureRecognizer) {
+        print("constrains!")
+        print(animationCardView.constraints)
         switch recognizer.state {
         case .ended:
             animateMovingCard(from: deckView, to: playerDrawnCardView, withDuration: 1)
@@ -107,15 +82,13 @@ class ViewController: UIViewController {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.showFrontOfNumberCard(show: String(self.draw), on: self.discardPileView, at: .central)
                 }
-                
         default:
             break
         }
     }
     
     func animateMovingCard(from viewA: UIImageView, to viewB: UIImageView, withDuration dur: Double) {
-        
-        print(animationCardView.constraints)
+
         var fromConstraintCollection: [NSLayoutConstraint] = []
         for attribute in [NSLayoutConstraint.Attribute.centerX, .centerY] {
             let newConstraint = NSLayoutConstraint(item: animationCardView!,
@@ -133,7 +106,7 @@ class ViewController: UIViewController {
         self.animationCardView.image = viewA.image
         
         NSLayoutConstraint.deactivate(fromConstraintCollection)
-        print(animationCardView.constraints)
+
         var toConstraintCollection: [NSLayoutConstraint] = []
         for attribute in [NSLayoutConstraint.Attribute.centerX, .centerY] {
             let newConstraint = NSLayoutConstraint(item: animationCardView!,
@@ -387,5 +360,14 @@ class ViewController: UIViewController {
     
     var deckToDrawnLocationConstraints: [Actor:[NSLayoutConstraint]] { return runConstraintFactory() }
     
+//    func animateCardDraw(by actor: Actor)// from the deck to a onHand location
+//
+//    func animateShowOfHand(by actor: Actor) // flip open the drawn card if the model chooses to play it, or discard it
+//
+//    func animateDiscardFromHand(by actor: Actor) //speaks for itself
+//
+//    func animateCardTrade(of byCardIndex1: Int, by actor1: Actor, with cardIndex2: Int, from actor2: Actor) // Trade cars between Actors
+//
+//    func animateTradeOnHand(with cardIndex: Int, by actor: Actor) //trade the drawn card with onde of your own (for either model or player)
 }
 
