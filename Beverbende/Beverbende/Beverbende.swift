@@ -100,18 +100,19 @@ class Beverbende {
     
     func discardDrawnCard(for player: Player) {
         let card = player.getCardOnHand()!
+        player.setCardOnHand(with: nil)
         self.discard(card: card)
     }
     
     func discard(card c: Card) {
-        var card = c // Make the card mutable
-        card.isFaceUp = true
+        let card = c // Make the card mutable
+        // card.isFaceUp = true
         self.discardPile.push(card)
     }
     
     func replaceCard(at index: Int, with c: Card, for player: Player) -> Card {
-        var replacementCard = c
-        replacementCard.isFaceUp = false
+        let replacementCard = c
+        // replacementCard.isFaceUp = false
         
         let replacedCard = player.getCardsOnTable()[index]
         player.setCardOnTable(with: replacementCard, at: index)
@@ -119,8 +120,8 @@ class Beverbende {
     }
     
     func inspectCard(at index: Int, for player: Player) -> Card {
-        var card = player.getCardsOnTable()[index]
-        card.isFaceUp = true
+        let card = player.getCardsOnTable()[index]
+        // card.isFaceUp = true
         return card
     }
     

@@ -34,6 +34,7 @@
 		F94B992725EF95AA002FFEE3 /* SlotCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94B991C25EF95AA002FFEE3 /* SlotCondition.swift */; };
 		F94B992825EF95AA002FFEE3 /* Temporal.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94B991D25EF95AA002FFEE3 /* Temporal.swift */; };
 		F94B992925EF95AA002FFEE3 /* Tokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94B991E25EF95AA002FFEE3 /* Tokenizer.swift */; };
+		F94B993125EFA485002FFEE3 /* BeverbendeDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94B993025EFA485002FFEE3 /* BeverbendeDelegate.swift */; };
 		F9CDFBC125DD267800CCAF9F /* Beverbende.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC025DD267400CCAF9F /* Beverbende.swift */; };
 		F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBC525DD279800CCAF9F /* Card.swift */; };
 		F9CDFBCB25DD2EB600CCAF9F /* ValueCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */; };
@@ -91,6 +92,7 @@
 		F94B991C25EF95AA002FFEE3 /* SlotCondition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlotCondition.swift; sourceTree = "<group>"; };
 		F94B991D25EF95AA002FFEE3 /* Temporal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Temporal.swift; sourceTree = "<group>"; };
 		F94B991E25EF95AA002FFEE3 /* Tokenizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tokenizer.swift; sourceTree = "<group>"; };
+		F94B993025EFA485002FFEE3 /* BeverbendeDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeverbendeDelegate.swift; sourceTree = "<group>"; };
 		F9CDFBC025DD267400CCAF9F /* Beverbende.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beverbende.swift; sourceTree = "<group>"; };
 		F9CDFBC525DD279800CCAF9F /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		F9CDFBCA25DD2EB600CCAF9F /* ValueCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueCard.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 		04EA845425DC237F00B68C48 /* Beverbende */ = {
 			isa = PBXGroup;
 			children = (
+				F94B993025EFA485002FFEE3 /* BeverbendeDelegate.swift */,
 				04EA848825DC243E00B68C48 /* Supporting Files */,
 				04EA845925DC237F00B68C48 /* ViewController.swift */,
 				04EA845B25DC237F00B68C48 /* Main.storyboard */,
@@ -358,6 +361,7 @@
 				F94B992425EF95AA002FFEE3 /* Procedural.swift in Sources */,
 				F909C39B25E6621200848876 /* Player.swift in Sources */,
 				F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */,
+				F94B993125EFA485002FFEE3 /* BeverbendeDelegate.swift in Sources */,
 				80786DB625E65A3100707799 /* Support.swift in Sources */,
 				F94B992325EF95AA002FFEE3 /* Parser.swift in Sources */,
 				80786DBC25E65A7000707799 /* cognitive_model.swift in Sources */,
