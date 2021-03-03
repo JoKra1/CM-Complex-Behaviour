@@ -119,8 +119,11 @@
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="f0s-tB-xvf">
                                 <rect key="frame" x="950.5" y="40" width="108" height="184"/>
                             </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pPO-Rd-kYr">
+                                <rect key="frame" x="256" y="549" width="108" height="184"/>
+                            </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xc8-nu-MmA">
-                                <rect key="frame" x="20" y="820" width="108" height="184"/>
+                                <rect key="frame" x="403" y="589" width="108" height="184"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -138,6 +141,7 @@
                             <constraint firstItem="v5G-ec-era" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="8Dn-2h-jxb"/>
                             <constraint firstItem="Vk9-nN-8Av" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="AAF-Es-0ED"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="leading" secondItem="sWq-Ar-cmw" secondAttribute="leading" constant="20" id="BiO-ci-RVi"/>
+                            <constraint firstItem="pPO-Rd-kYr" firstAttribute="height" secondItem="ZVh-9f-JmA" secondAttribute="height" id="BjV-Db-nBR"/>
                             <constraint firstItem="Xzj-N5-4Ha" firstAttribute="height" secondItem="Lq7-rZ-5Xg" secondAttribute="height" id="CMg-8v-L29"/>
                             <constraint firstItem="v5G-ec-era" firstAttribute="height" secondItem="Lq7-rZ-5Xg" secondAttribute="height" id="CU1-M9-GCm"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="EQM-yI-9GG"/>
@@ -149,6 +153,7 @@
                             <constraint firstItem="KD6-5W-jUC" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="40" id="LCZ-oy-3Q6"/>
                             <constraint firstItem="NtA-jW-US5" firstAttribute="width" secondItem="qvZ-Sl-cDd" secondAttribute="width" id="OJR-FM-0ph"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Vk9-nN-8Av" secondAttribute="bottom" constant="20" id="PJn-oP-fUy"/>
+                            <constraint firstItem="pPO-Rd-kYr" firstAttribute="width" secondItem="ZVh-9f-JmA" secondAttribute="width" id="Ufe-Y9-sUR"/>
                             <constraint firstItem="Xzj-N5-4Ha" firstAttribute="top" secondItem="2jY-Ke-cGh" secondAttribute="bottom" id="Uif-Kn-iUr"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="leading" secondItem="v5G-ec-era" secondAttribute="trailing" constant="40" id="X0W-kr-Rbk"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="YGI-z7-oWA"/>
@@ -175,7 +180,8 @@
                     </view>
                     <connections>
                         <outlet property="InspectButton" destination="3Ej-Vr-p8e" id="5FC-fP-PFs"/>
-                        <outlet property="animationCardView" destination="xc8-nu-MmA" id="EOs-BY-fxO"/>
+                        <outlet property="animationViewOne" destination="xc8-nu-MmA" id="EOs-BY-fxO"/>
+                        <outlet property="animationViewTwo" destination="pPO-Rd-kYr" id="dZJ-zl-a8s"/>
                         <outlet property="deckView" destination="ZVh-9f-JmA" id="lOa-wb-XYB"/>
                         <outlet property="discardPileView" destination="v5G-ec-era" id="VEu-a1-mgb"/>
                         <outlet property="drawnCardInfoButton" destination="2jY-Ke-cGh" id="ae7-qQ-iAN"/>
@@ -187,7 +193,7 @@
                         <outlet property="rightCardStack" destination="zTA-CD-xZW" id="9LC-8F-GLp"/>
                         <outlet property="rightModelDrawnCardView" destination="NtA-jW-US5" id="HWZ-tJ-5Ah"/>
                         <outlet property="topCardStack" destination="y0F-xD-sFd" id="epH-2s-fGV"/>
-                        <outlet property="toptModelDrawnCardView" destination="f0s-tB-xvf" id="SoZ-94-HeO"/>
+                        <outlet property="topModelDrawnCardView" destination="f0s-tB-xvf" id="SoZ-94-HeO"/>
                         <outletCollection property="playerCardViews" destination="Lq7-rZ-5Xg" collectionClass="NSMutableArray" id="IOt-bG-zOs"/>
                         <outletCollection property="playerCardViews" destination="KCE-gM-OXt" collectionClass="NSMutableArray" id="vDv-oH-czv"/>
                         <outletCollection property="playerCardViews" destination="sWq-Ar-cmw" collectionClass="NSMutableArray" id="Rwf-o4-3bE"/>
