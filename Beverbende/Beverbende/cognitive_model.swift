@@ -7,7 +7,8 @@
 
 import Foundation
 
-class BeverbendeOpponent:Model,Player{
+class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
+    
     /**
      Beverbende opponent, inherits from Model class and implements Player protocol.
      */
@@ -83,6 +84,25 @@ class BeverbendeOpponent:Model,Player{
         return currentCard
     }
     
+    func handleEvent(for event: EventType, with info: [String : Any]) {
+        switch event {
+        case .nextTurn:
+            let player = info["Player"] as! Player
+            let game = info["Game"] as! Beverbende
+            if player.id == self.id {
+                self.advanceGame(for: game)
+            } else {
+                for card_index in 1...4 {
+                    _ = self.rehearsal(at: card_index)
+                }
+            }
+            
+        default:
+            // Do nothing.
+            ()
+        }
+    }
+    
     func summarizeDM(){
         for chunk in self.dm.chunks {
             print(chunk.value.slotvals)
@@ -105,22 +125,7 @@ class BeverbendeOpponent:Model,Player{
         }
         return (latency,nil)
     }
-    
-    func advanceGame(for game: Beverbende) -> Bool {
-        /**
-         Model will perform a turn and signals whether it wants to end or not
-         */
-        repeat {
-            self.matchTurnDecision(with: game)
-            if self.goal == .DecideContinue {
-                self.goal = .Begin
-                return false
-            } else if self.goal == .DecideEnd{
-                return true
-            }
-        } while self.goal != .Begin
-        return false
-    }
+
     
     /**
      PRIVATE
@@ -313,5 +318,17 @@ class BeverbendeOpponent:Model,Player{
             case .DecideEnd:
                 print("I am out of the game")
         }
+    }
+    
+    private func advanceGame(for game: Beverbende) {
+        /**
+         Model will perform a turn and signals whether it wants to end or not
+         */
+        repeat {
+            self.matchTurnDecision(with: game)
+            if self.goal == .DecideContinue {
+                self.goal = .Begin
+            }
+        } while (self.goal != .Begin) && (self.goal != .DecideEnd)
     }
 }
