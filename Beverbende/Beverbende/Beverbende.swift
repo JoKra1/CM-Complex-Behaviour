@@ -122,6 +122,9 @@ class Beverbende {
     func inspectCard(at index: Int, for player: Player) -> Card {
         let card = player.getCardsOnTable()[index]
         // card.isFaceUp = true
+        // ToDo: Allow for: player.setCardOnHand(with: card) which requires a moveCardBackFromHand method
+        // ToDo: Should probably be followed with: player.setCardOnTable(with: nil, at: index)
+        // but that requires player.cardsOnTable to be of type [Card?]
         return card
     }
     

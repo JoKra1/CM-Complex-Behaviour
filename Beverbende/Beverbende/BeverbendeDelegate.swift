@@ -12,5 +12,5 @@ enum EventType {
 }
 
 protocol BeverbendeDelegate {
-    handleEvent(for event: EventType, with info: [String: Any])
+    func handleEvent(for event: EventType, with info: [String: Any])
 }

@@ -15,6 +15,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
 
     // Model tuning parameters (Class level)
     private static let cut_off_low = 6
+    
     private static let cut_off_decide = 10
     
     // Model identifier and Player implmementation variables
@@ -25,13 +26,33 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     var cardsOnTable: [Card]
     
     // Game state, basically goal buffer (cognitive control)
-    private enum GameState {
+    private enum GameState:Equatable {
         case Begin // Begin of a turn, model decides whether to take top card from discarded.
-        case Processed_Discarded // Model has decided not to take discarded. Draws card from Deck.
+        case Processed_Discarded(remembered: [CardType?],latencies: [Double]) // Model has decided not to take discarded. Draws card from Deck.
         case Processed_All // Model either looked at deck or discarded, is ready to decide.
         case DecideContinue // turn decision made to continue.
         
         case DecideEnd // turn decision made to end.
+        
+        static func == (lhs: BeverbendeOpponent.GameState,
+                        rhs: BeverbendeOpponent.GameState) -> Bool {
+            // Source: https://medium.com/flawless-app-stories/equatable-for-enum-with-associated-value-e07d9ab20e8e
+            switch (lhs,rhs) {
+            case (.Begin, .Begin):
+                return true
+            case (.Processed_Discarded(remembered: _, latencies: _),
+                  .Processed_Discarded(remembered: _, latencies: _)):
+                return true
+            case (.Processed_All, .Processed_All):
+                return true
+            case (.DecideContinue, .DecideContinue):
+                return true
+            case (.DecideEnd, .DecideEnd):
+                return true
+            default:
+                return false
+            }
+        }
     }
     
     private var goal:GameState
@@ -54,12 +75,14 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         return self.id
     }
     
+    
     func getCardOnHand() -> Card? {
         if let currentCard = self.cardOnHand {
             return currentCard
         }
         return nil
     }
+    
     
     func setCardOnHand(with card: Card?) {
         if let isaCard = card {
@@ -70,13 +93,16 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
     }
     
+    
     func getCardsOnTable() -> [Card] {
         return self.cardsOnTable
     }
     
+    
     func setCardOnTable(with card: Card, at index: Int) {
         self.cardsOnTable[index] = card
     }
+    
     
     func replaceCardOnTable(at pos: Int, with card: Card) -> Card {
         let currentCard = self.cardsOnTable[pos]
@@ -84,9 +110,11 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         return currentCard
     }
     
+    
     func handleEvent(for event: EventType, with info: [String : Any]) {
         switch event {
         case .nextTurn:
+            
             let player = info["Player"] as! Player
             let game = info["Game"] as! Beverbende
             if player.id == self.id {
@@ -103,11 +131,13 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
     }
     
+    
     func summarizeDM(){
         for chunk in self.dm.chunks {
             print(chunk.value.slotvals)
         }
     }
+    
     
     func rehearsal(at index:Int) -> (latency: Double,retrieved: Chunk?){
         /**
@@ -134,6 +164,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private func memorizeCard(at position:Int, with card: Card) {
         /**
          Creates memory for new card.
+         
+         Acts as the interface from cards to ACT-R chunks.
          */
         let chunk = self.generateNewChunk(string: "Pos")
         chunk.slotvals["isa"] = Value.Text("Pos_Fact")
@@ -162,80 +194,314 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         self.time += 0.05
     }
     
-    private func compareHand(for value:Int) -> (known_location: Int?,
-                                                    unknown_locations: Array<Int>){
-        /**
-         Model compares its hand to a card. Returns
-         a known location (if there is any) of the current highest card that
-         the model knows about and the array of unknown location.
-         */
+    
+    private func compareHand(for newCard: ValueCard,
+                             with hand: [CardType?]) -> (known_max: Int?,
+                                                         unknown: [Int]) {
+        /*
+         Model compares its hand to a value card. Returns the location of the
+         highest card it remembers that is higher than the presented card. If the model
+         encounters a card position for which it cannot remember the corresponding card,
+         it will add this location to the list of positions it does not remember.
+         **/
         var unknown = Array<Int>()
-        var max_val = value
+        var max_val = newCard.getValue()
         var max_loc: Int?
-        // Iterate over all positional facts.
+        
         for pos in 1...4 {
-            print("I am thinking about the card in the \(pos) position...")
-            // We could use the latency here as a measure of confidence as well.
-            let (_,retrieval) = rehearsal(at: pos)
-            if let retrievedChunk = retrieval {
-                print("I remembered the value of the card in the \(pos) position.")
-                
-                let retrievedType = retrievedChunk.slotvals["type"]!.text()
-                
-                switch retrievedType {
-                case "action":
-                    // What to do if action card on hand? Always replace, or just if lower than cut-off?
-                    continue
-                default: // card is regular.
-                    let retrieved_value = Int(retrievedChunk.slotvals["value"]!.number()!)
-                    print("I remembered the value \(retrieved_value).")
-                    if  retrieved_value > max_val {
+            if let card = hand[pos - 1] {
+                switch card {
+                case .action(let action):
+                    switch action {
+                        // If we go with the current strategy we can simply default here.
+                        case .inspect:
+                            max_val = 10 // not in game so will always be replaced
+                            max_loc = pos
+                        case .swap:
+                            max_val = 10
+                            max_loc = pos
+                        case .twice:
+                            max_val = 10
+                            max_loc = pos
+                    }
+                case .value(let value):
+                    if value > max_val {
                         max_val = value
                         max_loc = pos
                     }
                 }
             } else {
+                // Did not remember the card at this position
                 unknown.append(pos)
             }
         }
         return (max_loc,unknown)
     }
     
-    private func decideAction(for card:ActionCard) -> (decision: Bool, replace: Int?) {
-        return (false,nil)
+    
+    private func rememberHand() -> (remembered: [CardType?], latencies: [Double]){
+        /**
+         At the beginning of a turn model tries to remember its own cards. It therefore
+         requests the retrieval of position facts from the DM and "stores" the retrieved representations
+         in the active part of its working memory.
+         
+         Acts as the interface back from ACT-R chunks to card-types.
+         */
+        var representationHand = Array<CardType?>()
+        var latencies = Array<Double>()
+
+        // Iterate over all positional facts.
+        for pos in 1...4 {
+            
+            let (latency ,retrieval) = rehearsal(at: pos)
+            latencies.append(latency)
+            if let retrievedChunk = retrieval {
+                
+                let retrievedType = retrievedChunk.slotvals["type"]!.text()
+                
+                if retrievedType == "action"{
+                    // Retrieved card is an action card
+                    let retrieved_action = String(retrievedChunk.slotvals["value"]!.text()!)
+                    // Check possible cases
+                    if retrieved_action == "twice" {
+                        representationHand.append(.action(.twice))
+                    } else if retrieved_action == "inspect" {
+                        representationHand.append(.action(.inspect))
+                    } else {
+                        representationHand.append(.action(.swap))
+                    }
+                    
+                } else {
+                    // Retrieved card is a value card
+                    let retrieved_value = Int(retrievedChunk.slotvals["value"]!.number()!)
+                    representationHand.append(.value(retrieved_value))
+                }
+            } else {
+                representationHand.append(nil)
+            }
+        }
+        return (representationHand,latencies)
     }
     
-    private func decideRegular(for card:ValueCard) -> (decision: Bool, replace: Int?) {
+    
+    private func findLeastCertain(for remembered: [CardType?], with uncertainty: [Double]) -> Int{
+        /**
+         Uses latency as a measure of certainty. If one or more cards could not be remembered at all
+         one of their positions (at random if there are multiple) will be returned. Otherwise it returns the
+         location for which the initial retrieval took the longest.
+         */
+        var unknown = Array<Int>()
+        var max_uncertainty = 0.0
+        var max_uncertain_loc = 1
+        for pos in 1...4{
+            if let _ = remembered[pos - 1] {
+                if uncertainty[pos - 1] > max_uncertainty {
+                    max_uncertainty = uncertainty[pos - 1]
+                    max_uncertain_loc = pos
+                }
+            } else {
+                unknown.append(pos)
+            }
+        }
+        if unknown.count > 0 {
+            return Int.random(in:0..<unknown.count)
+        }
+        return max_uncertain_loc
+    }
+    
+    private func decideInspect(with remembered: [CardType?],
+                               and uncertainty: [Double],
+                               in game: Beverbende) {
+        game.discardDrawnCard(for: self)
+        let least_certain_pos = self.findLeastCertain(for: remembered, with: uncertainty)
+        let hidden_cards = game.inspectCard(at: least_certain_pos - 1, for: self)
+        // ToDo: remove inspected card again
+        self.memorizeCard(at: least_certain_pos, with: hidden_cards)
+    }
+    
+    
+    private func decideTwice(with remembered: [CardType?],
+                             in game: Beverbende) {
+        game.discardDrawnCard(for: self)
+        for _ in 0..<2 {
+            let newCard = game.drawCard(for: self)
+            switch newCard.getType() {
+            case .action(_):
+                // Model wants value cards, discards new .action cards.
+                game.discardDrawnCard(for: self)
+                continue
+            case .value(_):
+                let decision = self.decideValue(for: newCard as! ValueCard,
+                                                with: remembered,
+                                                in: game)
+                switch decision {
+                case true:
+                    break
+                case false:
+                    game.discardDrawnCard(for: self)
+                    continue
+                }
+            }
+        }
+    }
+    
+    
+    private func decideSwap(with remembered: [CardType?],
+                            and uncertainty: [Double],
+                            in game: Beverbende) {
+        game.discardDrawnCard(for: self)
+        // Too: Implement strategy
+    }
+        
+    
+    private func matchAction(for card:ActionCard,
+                              with remembered: [CardType?],
+                              and uncertainty: [Double],
+                              in game: Beverbende) {
+        /**
+         Decides how to deal with an action card
+         */
+        let action = card.getAction()
+        switch action {
+        case .inspect:
+            // Always plays this card.
+            self.decideInspect(with: remembered,
+                               and: uncertainty,
+                               in: game)
+        case .twice:
+            // Always play this card.
+            self.decideTwice(with: remembered,
+                             in: game)
+        case .swap:
+            self.decideSwap(with: remembered,
+                            and: uncertainty,
+                            in: game)
+        }
+        // No matter the outcome set goal to processed all
+        goal = .Processed_All
+    }
+    
+    
+    private func decideValue(for card:ValueCard,
+                             with hand: [CardType?],
+                             in game: Beverbende) -> Bool{
         let value = card.value
-        let (known_max, unknown) = compareHand(for: value)
+        let (known_max, unknown) = compareHand(for: card, with: hand)
         if let found_max = known_max {
-            print("I decided to use the card to replace the one in the \(found_max) position, because I remembered it to be higher.")
+            
             memorizeCard(at: found_max, with: card)
-            return (true,found_max) // Accept card to replace highest current card.
+            game.tradeDrawnCardWithCard(at: found_max,
+                                        for: self)
+            return true // Replace card
         } else if unknown.count > 0, value < BeverbendeOpponent.cut_off_low {
             
             let choice = Int.random(in:0..<unknown.count)
-            print("I decided to replace the unknown card in the \(unknown[choice]) position, because it is lower than my decision value.")
+            
             memorizeCard(at: unknown[choice], with: card)
-            return (true,unknown[choice]) // Accept card to replace a random unknown card.
+            game.tradeDrawnCardWithCard(at: unknown[choice],
+                                        for: self)
+            return true // Replace card
         }
         
-        print("I decided to discard this card.")
-        return (false,nil) // Reject card
+        return false // Reject card
     }
     
-    private func decideDraw(for card:Card) ->  (decision: Bool, replace: Int?) {
-        /**
-         Model decides whether to use a card or whether to discard it.
-         */
+    
+    private func matchValue(for card: ValueCard,
+                            with remembered: [CardType?],
+                            and uncertainty: [Double],
+                            in game: Beverbende) {
         
-        switch card.getType(){
-        case .value(_):
-            return decideRegular(for: card as! ValueCard)
-        case .action(_):
-            return decideAction(for: card as! ActionCard)
+        let didReplace = self.decideValue(for: card,
+                                          with: remembered,
+                                          in: game)
+        if !didReplace {
+            // Discard the card on hand.
+            game.discardDrawnCard(for: self)
+            // Update Goal based on current game state
+            if goal == .Begin {
+                goal = .Processed_Discarded(remembered: remembered,
+                                            latencies: uncertainty)
+            } else {
+                goal = .Processed_All
+            }
+        } else {
+            goal = .Processed_All
         }
     }
+    
+    
+    private func matchTurnDecision(with game:Beverbende) {
+        /**
+         Advances model game by one step and returns
+         */
+        
+        switch goal {
+            case .Begin:
+                self.time += 0.05
+                print("Model will look at discarded pile now:")
+                // Place card in hand
+                let card = game.drawDiscardedCard(for: self)
+            
+                // Attempt to remember the deck
+                print("Model will try to remember its cards now!")
+                let (remembered,latencies) = self.rememberHand()
+                
+                // Make decision based on card type.
+                switch card.getType(){
+                case .value(_):
+                    self.matchValue(for: card as! ValueCard,
+                                    with: remembered,
+                                    and: latencies,
+                                    in: game)
+                case .action(_):
+                    self.matchAction(for: card as! ActionCard,
+                                      with: remembered,
+                                      and: latencies,
+                                      in: game)
+                }
+                
+            case .Processed_Discarded(let remembered, let latencies):
+                self.time += 0.05
+                print("Model looked at discarded, will look at Deck as well.")
+                // Place card in hand
+                let card = game.drawCard(for: self)
+                // Make decision based on card type.
+                switch card.getType(){
+                case .value(_):
+                    self.matchValue(for: card as! ValueCard,
+                                    with: remembered,
+                                    and: latencies,
+                                    in: game)
+                case .action(_):
+                    self.matchAction(for: card as! ActionCard,
+                                      with: remembered,
+                                      and: latencies,
+                                      in: game)
+                }
+
+            case .Processed_All:
+                self.time += 0.05
+                print("Model looked at Discarded pile and/or Deck")
+                let decision = self.decideGame()
+                switch decision {
+                    case true:
+                        print("I knock")
+                        goal = .DecideEnd
+                    case false:
+                        goal = .DecideContinue
+                }
+                
+            case .DecideContinue:
+                self.time += 0.05
+                print("Model has decided to continue")
+                goal = .Begin
+            
+            case .DecideEnd:
+                print("I am out of the game")
+        }
+    }
+    
     
     private func decideGame() -> Bool{
         /**
@@ -262,63 +528,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         return false
     }
     
-    /*private func replaceCardInHand(in game: Beverbende, at pos: Int, for card:Card) {
-        let currentCard = self.cardsOnTable[pos]
-        game.discardPile.push(currentCard)
-        setCardOnTable(with: card, at: pos)
-        self.cardOnHand = nil
-    }*/
-    
-    private func matchTurnDecision(with game:Beverbende) {
-        /**
-         Advances model game by one step and returns
-         */
-        switch goal {
-            case .Begin:
-                print("Model will look at discarded pile now:")
-                // Place card in hand
-                let _ = game.drawDiscardedCard(for: self)
-                // Cast is safe because we just collected a card
-                let (decision, replace_loc) = self.decideDraw(for: self.cardOnHand!)
-                switch decision {
-                    case true: // should replace
-                        game.tradeDrawnCardWithCard(at: replace_loc!, for: self)
-                        goal = .Processed_All
-                    case false: // Model does not want card on discarded pile
-                        // move back top discarded to deck
-                        game.discardDrawnCard(for: self)
-                        goal = .Processed_Discarded
-                }
-            case .Processed_Discarded:
-                print("Model looked at discarded, will look at Deck as well.")
-                let _ = game.drawCard(for: self)
-                let (decision, replace_loc) = self.decideDraw(for: self.cardOnHand!)
-                switch decision {
-                    case true: // should replace
-                        game.tradeDrawnCardWithCard(at: replace_loc!, for: self)
-                        // ToDo: change player card
-                    case false: // Model does not want card on deck pile
-                        game.discardDrawnCard(for: self)
-                }
-                goal = .Processed_All
-            case .Processed_All:
-                print("Model looked at Discarded pile and/or Deck")
-                let decision = self.decideGame()
-                if decision {
-                    print("I knock")
-                    goal = .DecideEnd
-                } else {
-                    goal = .DecideContinue
-                }
-                
-            case .DecideContinue:
-                print("Model has decided to continue")
-                goal = .Begin
-            
-            case .DecideEnd:
-                print("I am out of the game")
-        }
-    }
     
     private func advanceGame(for game: Beverbende) {
         /**
