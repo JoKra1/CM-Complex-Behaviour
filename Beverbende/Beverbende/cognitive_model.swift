@@ -175,7 +175,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         return (latency,nil)
     }
 
-    
     /**
      PRIVATE
      */
@@ -191,6 +190,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             self.dm.addToDM(factChunk)
         }
     }
+    
     
     private func memorizeCard(at position:Int, with card: Card) {
         /**
@@ -339,6 +339,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
         return max_uncertain_loc
     }
+    
     
     private func decideInspect(with remembered: [CardType?],
                                and uncertainty: [Double],
@@ -505,6 +506,28 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
+    private func matchCard(for card: Card,
+                           with remembered: [CardType?],
+                           and uncertainty: [Double],
+                           in game: Beverbende) {
+        /**
+         Match card type.
+         */
+        switch card.getType(){
+            case .value(_):
+                self.matchValue(for: card as! ValueCard,
+                                with: remembered,
+                                and: uncertainty,
+                                in: game)
+            case .action(_):
+                self.matchAction(for: card as! ActionCard,
+                                  with: remembered,
+                                  and: uncertainty,
+                                  in: game)
+        }
+    }
+    
+    
     private func matchTurnDecision(with game:Beverbende) {
         /**
          Advances model game by one step and returns
@@ -522,18 +545,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 let (remembered,latencies) = self.rememberHand()
                 
                 // Make decision based on card type.
-                switch card.getType(){
-                case .value(_):
-                    self.matchValue(for: card as! ValueCard,
-                                    with: remembered,
-                                    and: latencies,
-                                    in: game)
-                case .action(_):
-                    self.matchAction(for: card as! ActionCard,
-                                      with: remembered,
-                                      and: latencies,
-                                      in: game)
-                }
+                self.matchCard(for: card,
+                               with: remembered,
+                               and: latencies,
+                               in: game)
                 
             case .Processed_Discarded(let remembered, let latencies):
                 self.time += 0.05
@@ -541,18 +556,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 // Place card in hand
                 let card = game.drawCard(for: self)
                 // Make decision based on card type.
-                switch card.getType(){
-                case .value(_):
-                    self.matchValue(for: card as! ValueCard,
-                                    with: remembered,
-                                    and: latencies,
-                                    in: game)
-                case .action(_):
-                    self.matchAction(for: card as! ActionCard,
-                                      with: remembered,
-                                      and: latencies,
-                                      in: game)
-                }
+                self.matchCard(for: card,
+                               with: remembered,
+                               and: latencies,
+                               in: game)
 
             case .Processed_All:
                 self.time += 0.05
