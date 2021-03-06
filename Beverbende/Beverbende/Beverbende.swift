@@ -140,22 +140,28 @@ class Beverbende {
         let replacementCard = c
         // replacementCard.isFaceUp = false
         
-        let replacedCard = player.getCardsOnTable()[index]
+        let replacedCard = player.getCardsOnTable()[index]!
         player.setCardOnTable(with: replacementCard, at: index)
         return replacedCard
     }
     
     func inspectCard(at index: Int, for player: Player) -> Card {
-        let card = player.getCardsOnTable()[index]
+        let card = player.getCardsOnTable()[index]!
         // card.isFaceUp = true
-        // ToDo: Allow for: player.setCardOnHand(with: card) which requires a moveCardBackFromHand method
-        // ToDo: Should probably be followed with: player.setCardOnTable(with: nil, at: index)
-        // but that requires player.cardsOnTable to be of type [Card?]
+        player.setCardOnHand(with: card)
+        player.setCardOnTable(with: nil, at: index)
+        
         return card
     }
     
+    func moveCardBackFromHand(to index: Int, for player: Player) {
+        let card = player.getCardOnHand()!
+        player.setCardOnHand(with: nil)
+        player.setCardOnTable(with: card, at: index)
+    }
+    
     func hideCard(at index: Int, for player: Player) {
-        var card = player.getCardsOnTable()[index]
+        var card = player.getCardsOnTable()[index]!
         card.isFaceUp = false
     }
     
