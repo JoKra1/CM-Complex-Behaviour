@@ -8,9 +8,21 @@
 import Foundation
 
 enum EventType {
-    case nextTurn
+    case nextTurn, cardDrawn, discardedCardDrawn, cardPlayed, cardDiscarded, cardsSwapped, cardReplaced
 }
 
-protocol BeverbendeDelegate {
+protocol BeverbendeDelegate: AnyObject {
     func handleEvent(for event: EventType, with info: [String: Any])
 }
+
+/*
+ EventType          Info object
+ ---------          -----------
+ nextTurn           ["player": Player]
+ cardDrawn          ["player": Player]
+ discardedCardDrawn ["player": Player]
+ cardPlayed         ["player": Player, "card": ActionCard]
+ cardDiscarded      ["player": Player, "card": Card]
+ cardsSwapped       ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player]
+ cardReplaced       ["cardIndex": Int, "player": Player]
+ */

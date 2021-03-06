@@ -13,6 +13,7 @@ class Beverbende {
     var currentPlayerIndex: Int
     var drawPile: Stack<Card>
     var discardPile: Stack<Card>
+    var delegates: [WeakContainer<BeverbendeDelegate>]
     
     static func allCards() -> [Card] {
         var values = Array(repeating: 0, count: 4)
@@ -58,43 +59,66 @@ class Beverbende {
             }
             // self.players.append(Player(withID: id, withCards: cards))
         }
+        
+        self.delegates = []
     }
     
+    func add(delegate: BeverbendeDelegate) {
+        var wd = WeakContainer<BeverbendeDelegate>()
+        wd.value = delegate
+        self.delegates.append(wd)
+    }
+    
+    private func notifyDelegates(for event: EventType, with info: [String: Any]) {
+        for wd in self.delegates {
+            let delegate = wd.value
+            delegate?.handleEvent(for: event, with: info)
+        }
+    }
+
     func nextPlayer() -> Player {
         self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
-        return self.players[self.currentPlayerIndex]
+        
+        let player = self.players[self.currentPlayerIndex]
+        self.notifyDelegates(for: EventType.nextTurn, with: ["player": player])
+        
+        return player
     }
     
     // Note: Does not set card.isFaceUp to true
     func drawCard(for player: Player) -> Card {
         var card = self.drawPile.pop()
-        if card != nil {
-            player.setCardOnHand(with: card!)
-            return card!
+        if card == nil {
+            // Draw pile was empty,
+            // shuffle all but the top of the discard pile back into the draw pile
+            let topDiscardedCard = self.discardPile.pop()!
+            while self.discardPile.peek() != nil {
+                var c = self.discardPile.pop()!
+                c.isFaceUp = false
+                self.drawPile.push(c)
+            }
+            // Shuffle the draw pile
+            self.drawPile.shuffle()
+            // Place the card that was on the top of the discard pile back
+            self.discardPile.push(topDiscardedCard)
+            
+            card = self.drawPile.pop()
         }
         
-        // Draw pile was empty,
-        // shuffle all but the top of the discard pile back into the draw pile
-        let topDiscardedCard = self.discardPile.pop()!
-        while self.discardPile.peek() != nil {
-            var c = self.discardPile.pop()!
-            c.isFaceUp = false
-            self.drawPile.push(c)
-        }
-        // Shuffle the draw pile
-        self.drawPile.shuffle()
-        // Place the card that was on the top of the discard pile back
-        self.discardPile.push(topDiscardedCard)
-        
-        card = self.drawPile.pop()
         player.setCardOnHand(with: card!)
+        
+        self.notifyDelegates(for: EventType.cardDrawn, with: ["player": player])
+        
         return card!
     }
     
-    // Will probably be superseded by tradeDiscardedCardWithCard
+    // Might supersede tradeDiscardedCardWithCard
     func drawDiscardedCard(for player: Player) -> Card {
         let card = self.discardPile.pop()!
         player.setCardOnHand(with: card)
+        
+        self.notifyDelegates(for: EventType.discardedCardDrawn, with: ["player": player])
+        
         return card
     }
     
@@ -102,10 +126,12 @@ class Beverbende {
         let card = player.getCardOnHand()!
         player.setCardOnHand(with: nil)
         self.discard(card: card)
+        
+        self.notifyDelegates(for: EventType.cardDiscarded, with: ["player": player, "card": card])
     }
     
     func discard(card c: Card) {
-        let card = c // Make the card mutable
+        let card = c
         // card.isFaceUp = true
         self.discardPile.push(card)
     }
@@ -138,6 +164,8 @@ class Beverbende {
         player.setCardOnHand(with: nil)
         let replacedCard = self.replaceCard(at: index, with: heldCard, for: player)
         self.discard(card: replacedCard)
+        
+        self.notifyDelegates(for: EventType.cardReplaced, with: ["cardIndex": index, "player": player])
     }
     
     func tradeDiscardedCardWithCard(at index: Int, for player: Player) {
