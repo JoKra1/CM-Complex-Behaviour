@@ -62,6 +62,25 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         self.goal = .Begin
         self.cardsOnTable = Cards
         super.init()
+        
+        /**
+         Instantiate cut-off for the decision about whether a card is low or not.
+         */
+        let sampler = BoxMuller(mu: Double(BeverbendeOpponent.cut_off_low), sd: 1.5)
+        let (sample_low,_,_) = sampler.sample(for: 150)
+        self.instantiateMemory(for: "low_value_fact", with: sampler.castToInt(for: sample_low))
+        
+        /**
+         Instantiate cut-off for the decision about whether the model should end the game.
+         */
+        sampler.mu = Double(BeverbendeOpponent.cut_off_decide)
+        sampler.sd =  3.0
+        let (sample_decide,_,_) = sampler.sample(for: 150)
+        self.instantiateMemory(for: "end_value_fact", with: sampler.castToInt(for: sample_decide))
+        
+        /**
+         Peak first two cards. ToDo: make use of Game api.
+         */
         self.memorizeCard(at: 1, with: self.cardsOnTable[0])
         self.memorizeCard(at: 4, with: self.cardsOnTable[3])
         print("DM: \(self.dm.chunks)")
@@ -115,8 +134,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         switch event {
         case .nextTurn:
             
-            let player = info["Player"] as! Player
-            let game = info["Game"] as! Beverbende
+            let player = info["player"] as! Player
+            let game = info["game"] as! Beverbende
             if player.id == self.id {
                 self.advanceGame(for: game)
             } else {
@@ -160,6 +179,18 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     /**
      PRIVATE
      */
+    
+    private func instantiateMemory(for fact:String, with values:[Int]) {
+        /**
+         Instantiates/updates a cut-off fact using a sample of values, generated using the Box-Mueller algorithm.
+         */
+        for val in values {
+            let factChunk = self.generateNewChunk(string: fact)
+            factChunk.slotvals["isa"] = Value.Text(fact)
+            factChunk.slotvals["value"] = Value.Number(Double(val))
+            self.dm.addToDM(factChunk)
+        }
+    }
     
     private func memorizeCard(at position:Int, with card: Card) {
         /**
@@ -393,14 +424,57 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             game.tradeDrawnCardWithCard(at: found_max,
                                         for: self)
             return true // Replace card
-        } else if unknown.count > 0, value < BeverbendeOpponent.cut_off_low {
+        } else if unknown.count > 0 {
+            /**
+             Retrieve a blend of the cut-off for what counts as a low enough card.
+             If the value of the current card  is lower than the retrieved cut-off
+             decide to replace a random one.
+             */
             
-            let choice = Int.random(in:0..<unknown.count)
-            
-            memorizeCard(at: unknown[choice], with: card)
-            game.tradeDrawnCardWithCard(at: unknown[choice],
-                                        for: self)
-            return true // Replace card
+            let request = Chunk(s: "Retrieval",m: self)
+            request.slotvals["isa"] = Value.Text("low_value_fact")
+            let (latency,retrieval) = self.dm.blendedRetrieve(chunk: request)
+            self.time += latency
+            if let retrievedChunk = retrieval {
+                let retrievedCutoff = Int(retrievedChunk.slotvals["value"]!.number()!)
+                if value < retrievedCutoff {
+                    let choice = Int.random(in:0..<unknown.count)
+                    
+                    memorizeCard(at: unknown[choice], with: card)
+                    game.tradeDrawnCardWithCard(at: unknown[choice],
+                                                for: self)
+                    /**
+                     Now model gets feedback whether replacing the card was a good decision. If the card
+                     picked at random was higher in value (or an action card) the selected cutoff should be
+                     reinforced.
+                     */
+                    let previousCard = game.drawDiscardedCard(for: self)
+                    switch previousCard.getType() {
+                    case .action(_):
+                        /**
+                        Action cards can be beneficial or detrimental at the end
+                        of a game. Thus, their usefulness is hard (if not impossible)
+                        to predict, which is why replacing them is always considered
+                        a good idea.
+                        */
+                        self.instantiateMemory(for: "low_value_fact", with: [retrievedCutoff])
+                        self.time += 0.05
+                    case .value(let previousValue):
+                        /**
+                        The retrieved cut-off should be reinforced only if the previousValue (the
+                         value of the previously unknown card) was higher or equal to the value of the
+                         card with which this unknown was replaced. Equal cards are still considered an
+                         improvement since knowing the value of the card is beneficial in any case.
+                        */
+                        if previousValue > value {
+                            self.instantiateMemory(for: "low_value_fact", with: [retrievedCutoff])
+                            self.time += 0.05
+                        }
+                    }
+                    game.discardDrawnCard(for: self)
+                    return true // Replace card
+                }
+            }
         }
         
         return false // Reject card
@@ -522,8 +596,24 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 return false
             }
         }
-        if sum < BeverbendeOpponent.cut_off_decide {
-            return true
+        
+        /**
+         Retrieve a blend of the cut-off for the decision to end the game.
+         If the calculated sum is lower than the retrieved cut-off
+         decide to end the game.
+         */
+        
+        let request = Chunk(s: "Retrieval",m: self)
+        request.slotvals["isa"] = Value.Text("end_value_fact")
+        let (latency,retrieval) = self.dm.blendedRetrieve(chunk: request)
+        self.time += latency
+        if let retrievedChunk = retrieval {
+            let retrievedCutoff = Int(retrievedChunk.slotvals["value"]!.number()!)
+            if sum < retrievedCutoff {
+                // ToDo: Implement reinforcement of this retrieved cut-off,
+                // if the model ends winning the game.
+                return true
+            }
         }
         return false
     }
