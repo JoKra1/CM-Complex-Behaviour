@@ -16,24 +16,34 @@ enum Actor {
 }
 
 class ViewController: UIViewController {
-
-//    var animationViewThree: UIImageView = UIImageView(image: UIImage(named: "back"));
     
-//    var animationViewThree: UIImageView = {
-//        let theImageView = UIImageView()
-//        theImageView.image = nil
-//        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
-//        return theImageView
-//        }()
+    var animationViewOne: UIImageView = {
+        let theImageView = UIImageView()
+        theImageView.image = nil
+        theImageView.contentMode = .scaleAspectFit
+        theImageView.clipsToBounds = true
+        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
+        
+        return theImageView
+        }()
+    
+    var animationViewTwo: UIImageView = {
+        let theImageView = UIImageView()
+        theImageView.image = nil
+        theImageView.contentMode = .scaleAspectFit
+        theImageView.clipsToBounds = true
+        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
+        return theImageView
+        }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         showBackOfAllCards()
+        view.addSubview(animationViewOne)
+        view.addSubview(animationViewTwo)
+        sizeUpAnimationViews()
         view.bringSubviewToFront(animationViewTwo)
         view.bringSubviewToFront(animationViewOne)
-//        print(animationViewThree.constraints)
-//        view.addSubview(animationViewThree)
-//        view.bringSubviewToFront(animationViewThree)
 //        showEmptyDrawnCardButtons()
 //        showEmptyArea(for: discardPileButton)
 //        showInspectButton()
@@ -58,14 +68,15 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var drawnCardInfoButton: UIButton!
     
-    @IBOutlet weak var animationViewOne: UIImageView!
-    @IBOutlet weak var animationViewTwo: UIImageView!
-    
     @objc func drawCard(_ recognizer: UITapGestureRecognizer) {
         print("constrains!")
 //        print(animationViewThree.constraints)
         switch recognizer.state {
         case .ended:
+            print("deckView.constraint:")
+            print(deckView.constraints)
+            print("animationViewOne.constraints")
+            print(animationViewOne.constraints)
             animateCardDraw(by: .leftModel)
         default:
             break
@@ -243,22 +254,20 @@ class ViewController: UIViewController {
         drawnCardInfoButton.isHidden = true
     }
     
+    func sizeUpAnimationViews() {
+        NSLayoutConstraint.activate([animationViewOne.widthAnchor.constraint(equalTo: deckView.widthAnchor),
+                                     animationViewOne.heightAnchor.constraint(equalTo: deckView.heightAnchor),
+                                     animationViewTwo.widthAnchor.constraint(equalTo: deckView.widthAnchor),
+                                     animationViewTwo.heightAnchor.constraint(equalTo: deckView.heightAnchor),
+                                     ])
+    }
+    
+    
     // ############################ ANIMATIONS ############################
     
     func retrieveOverlayConstraints(set animationView: UIImageView, to targetView: UIImageView) -> [NSLayoutConstraint] {
-        NSLayoutConstraint.deactivate(animationView.constraints)
-        var constraintCollection: [NSLayoutConstraint] = []
-        for attribute in [NSLayoutConstraint.Attribute.centerX, .centerY] { //, .height, .width
-            let newConstraint = NSLayoutConstraint(item: animationView,
-                                          attribute: attribute,
-                                          relatedBy: .equal,
-                                          toItem: targetView,
-                                          attribute: attribute,
-                                          multiplier: CGFloat(1),
-                                          constant: CGFloat(0))
-            constraintCollection.append(newConstraint)
-        }
-        return constraintCollection
+        return [animationView.centerXAnchor.constraint(equalTo: targetView.centerXAnchor),
+                animationView.centerYAnchor.constraint(equalTo: targetView.centerYAnchor)]
     }
     
     func setViewToOverlay(set animationView: UIImageView, to targetView: UIImageView, deactivateAfter: Bool = true) -> [NSLayoutConstraint] {
@@ -269,11 +278,7 @@ class ViewController: UIViewController {
         animationView.image = UIImage(cgImage: (targetView.image?.cgImage)!, scale: 1, orientation: .up)
         animationView.superview?.layoutIfNeeded()
         if deactivateAfter {
-            print("constraints before deactivate")
-            print(animationView.constraints)
             NSLayoutConstraint.deactivate(overlayConstraints)
-            print("constraints after deactivate")
-            print(animationView.constraints)
             return []
         } else {
             return overlayConstraints
