@@ -73,11 +73,9 @@ class ViewController: UIViewController {
 //        print(animationViewThree.constraints)
         switch recognizer.state {
         case .ended:
-            print("deckView.constraint:")
-            print(deckView.constraints)
-            print("animationViewOne.constraints")
-            print(animationViewOne.constraints)
-            animateCardDraw(by: .leftModel)
+            let duration = animateCardDraw(by: .player)
+            print("animateCardDrawDuration: \(duration)")
+            
         default:
             break
         }
@@ -87,7 +85,8 @@ class ViewController: UIViewController {
     @objc func tapDiscardPile(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
         case .ended:
-            animateDiscardFromHand(by: .leftModel)
+            let duration = animateDiscardFromHand(by: .player, openOnHand: false)
+            print("animateDiscardFromHand duration: \(duration)")
         default:
             break
         }
@@ -104,22 +103,63 @@ class ViewController: UIViewController {
                 switch cardIndex {
                 case 0:
                     print("tradeOnHand")
-                    animateTradeOnHand(withCardAtIndex: 1, by: .leftModel)
+                    disableUserInteraction()
+                    let duration = animateTradeOnHand(withCardAtIndex: 1, by: .player, closeOnHand: true)
+                    enableUserInteractionAfterDelay(lasting: duration)
+                    print("animateTradeOnHand duration: \(duration)")
                 case 1:
                     print("cardTrade")
-                    animateCardTrade(ofCardAtIndex: 1, by: .player, withCardAtIndex: 3, from: .rightModel)
+                    let duration = animateCardTrade(ofCardAtIndex: 1, by: .player, withCardAtIndex: 3, from: .rightModel)
+                    print("animateCardTrade duration: \(duration)")
                 case 2:
                     print("cardTrade")
-                    animateTradeFromDiscardPile(withCardAtIndex: 0, by: .leftModel)
+                    _ = animateTradeFromDiscardPile(withCardAtIndex: 0, by: .player)
                 case 3:
                     print("cardTrade")
-                    flipOpenAllCards()
+                    _ = flipOpenAllCards()
                 default:
                     break
                 }
             }
         default:
             break
+        }
+    }
+    
+    func disableUserInteraction(){
+        view.isUserInteractionEnabled = false
+    }
+    
+    func enableUserInteractionAfterDelay(lasting delay: Double) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
+            self.view.isUserInteractionEnabled = true
+        }
+    }
+    
+    @objc func tapModelCard(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            if let chosenCardView = recognizer.view as? UIImageView {
+                let (actor, cardIndex) = findActorAndIndexForView(for: chosenCardView)
+                print("actor: \(actor), cardIndex: \(cardIndex)")
+                chosenCardView.alpha = (chosenCardView.alpha == 0.5) ? 1 : 0.5 // to indicate that it is selected
+                // set as card that you want to trade
+            }
+        default:
+            break
+        }
+    }
+    
+    func findActorAndIndexForView(for cardView: UIImageView) -> (Actor, Int) {
+        if let cardIndex = leftModelCardViews.firstIndex(of: cardView){
+            return (.leftModel, cardIndex)
+        } else if let cardIndex = rightModelCardViews.firstIndex(of: cardView){
+            return (.rightModel, cardIndex)
+        } else if let cardIndex = topModelCardViews.firstIndex(of: cardView) {
+            return (.topModel, cardIndex)
+        } else {
+            print("the selected UIImageView does not belong to any of the models. return (Actor.game, 0)")
+            return (.game, 0)
         }
     }
     
@@ -183,17 +223,18 @@ class ViewController: UIViewController {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapPlayerCard(_:))))
             cardView.isUserInteractionEnabled = true
         }
-//        for cardView in leftModelCardViews {
-//            showBackOfCard(for: cardView, at: .left)
-//        }
-//        for cardView in topModelCardViews {
-//            showBackOfCard(for: cardView, at: .top)
-////            cardView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
-//        }
-//        for cardView in rightModelCardViews {
-//            showBackOfCard(for: cardView, at: .right)
-////            cardView.transform = CGAffineTransform(rotationAngle:  -CGFloat.pi / 2)
-//        }
+        for cardView in leftModelCardViews {
+            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
+            cardView.isUserInteractionEnabled = true
+        }
+        for cardView in topModelCardViews {
+            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
+            cardView.isUserInteractionEnabled = true
+        }
+        for cardView in rightModelCardViews {
+            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
+            cardView.isUserInteractionEnabled = true
+        }
     }
 
     func showFrontOfCard(show value: String, on cardView: UIImageView, for actor: Actor) {
@@ -314,7 +355,7 @@ class ViewController: UIViewController {
                           duration: 0.6,
                           options: flipFrom,
                           animations: {
-                            self.showFrontOfCard(show: "4", on: cardView, for: actor)
+                            self.showFrontOfCard(show: value, on: cardView, for: actor)
                           },
                           completion: nil
         )
@@ -361,8 +402,11 @@ class ViewController: UIViewController {
         }
     }
     
-    func animateCardDraw(by actor: Actor) {
+    func animateCardDraw(by actor: Actor) -> Double {
 //        from the deck to an onHand location
+        
+        var duration = 1.0
+
         let onHandCardView = retrieveOnHandCardView(for: actor)
         
         animationViewOne.transform = returnRotationTransform(for: .game)
@@ -384,14 +428,15 @@ class ViewController: UIViewController {
         NSLayoutConstraint.deactivate(overlayConstraints)
         
         if actor == .player {
+            duration += 1.01
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
                 self.flipOpen(show: "4", on: onHandCardView, for: actor)
             }
         }
-        
+        return duration + 0.01
     }
     
-    func animateTradeFromDiscardPile(withCardAtIndex cardIndex: Int, by actor: Actor){
+    func animateTradeFromDiscardPile(withCardAtIndex cardIndex: Int, by actor: Actor) -> Double {
 //        from the discard pile to an onHand location
         let onHandCardView = retrieveOnHandCardView(for: actor)
         
@@ -414,21 +459,24 @@ class ViewController: UIViewController {
         NSLayoutConstraint.deactivate(overlayConstraints)
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
-            self.animateTradeOnHand(withCardAtIndex: cardIndex, by: actor)
+           _ = self.animateTradeOnHand(withCardAtIndex: cardIndex, by: actor, closeOnHand: true)
         }
+        return 1 + 0.01 + 1.61 + 0.01
     }
 
-    func animateDiscardFromHand(by actor: Actor) {
+    func animateDiscardFromHand(by actor: Actor, openOnHand: Bool) -> Double {
+        var duration = 1.0
+        var delay = 0.0
+        
         let onHandView = retrieveOnHandCardView(for: actor)
-
-        var delayInSeconds = 0.0
-
-        if actor != .player{
+        
+        if openOnHand {
             flipOpen(show: "4", on: onHandView, for: actor)
-            delayInSeconds = 0.61
+            delay = 0.61
+            duration += delay
         }
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delayInSeconds) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
             self.animationViewOne.transform = self.returnRotationTransform(for: actor)
             _ = self.setViewToOverlay(set: self.animationViewOne, to: onHandView)
             onHandView.image = nil
@@ -449,6 +497,8 @@ class ViewController: UIViewController {
             )
             NSLayoutConstraint.deactivate(overlayConstraints)
         }
+        
+        return duration + 0.01
     }
     
     func retrieveOnTableCardViews(for actor: Actor, withIndex cardIndex: Int) -> UIImageView {
@@ -466,19 +516,19 @@ class ViewController: UIViewController {
         }
     }
 
-    func animateTradeOnHand(withCardAtIndex cardIndex: Int, by actor: Actor) {
+    func animateTradeOnHand(withCardAtIndex cardIndex: Int, by actor: Actor, closeOnHand: Bool) -> Double {
 //        trade the drawn card with one of your own (for either model or player)
         
         let onHandCardView = retrieveOnHandCardView(for: actor)
-        if true { //actor == .player
+        
+        if closeOnHand {
             flipClosed(hide: onHandCardView, for: actor)
         }
         
         let onTableCardView = retrieveOnTableCardViews(for: actor, withIndex: cardIndex)
         flipOpen(show: "4", on: onTableCardView, for: actor)
         
-        let delayInSeconds = 0.61
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delayInSeconds) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.61) { // delay due to card flip(s)
             
             self.animationViewOne.transform = self.returnRotationTransform(for: actor)
             self.animationViewTwo.transform = self.returnRotationTransform(for: actor)
@@ -512,9 +562,10 @@ class ViewController: UIViewController {
             NSLayoutConstraint.deactivate(OverlayConstraints2)
 
         }
+        return 1.61 + 0.01
     }
     
-    func animateCardTrade(ofCardAtIndex cardIndex1: Int, by actor1: Actor, withCardAtIndex cardIndex2: Int, from actor2: Actor) {
+    func animateCardTrade(ofCardAtIndex cardIndex1: Int, by actor1: Actor, withCardAtIndex cardIndex2: Int, from actor2: Actor) -> Double {
         // Trade cars between Actors
         let cardView1 = retrieveOnTableCardViews(for: actor1, withIndex: cardIndex1)
         let cardView2 = retrieveOnTableCardViews(for: actor2, withIndex: cardIndex2)
@@ -548,9 +599,11 @@ class ViewController: UIViewController {
         )
         NSLayoutConstraint.deactivate(endOverlayConstraints1)
         NSLayoutConstraint.deactivate(endOverlayConstraints2)
+        
+        return 1.0 + 0.01 // duration
     }
     
-    func flipOpenAllCards() {
+    func flipOpenAllCards() -> Double {
         var value = 0
         for cardView in playerCardViews {
             flipOpen(show: String(value), on: cardView, for: .player)
@@ -567,6 +620,7 @@ class ViewController: UIViewController {
         for cardView in rightModelCardViews {
             flipOpen(show: String(value), on: cardView, for: .rightModel)
         }
+        return 0.61
     }
 //
    
