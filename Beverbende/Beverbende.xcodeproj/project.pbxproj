@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04BB714C25F782070060DC73 /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BB714B25F782070060DC73 /* Queue.swift */; };
 		04EA845625DC237F00B68C48 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA845525DC237F00B68C48 /* AppDelegate.swift */; };
 		04EA845825DC237F00B68C48 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA845725DC237F00B68C48 /* SceneDelegate.swift */; };
 		04EA845A25DC237F00B68C48 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA845925DC237F00B68C48 /* ViewController.swift */; };
@@ -60,6 +61,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04BB714B25F782070060DC73 /* Queue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queue.swift; sourceTree = "<group>"; };
 		04EA845225DC237F00B68C48 /* Beverbende.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beverbende.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		04EA845525DC237F00B68C48 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		04EA845725DC237F00B68C48 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 				80786DBA25E65A4300707799 /* CoreACTR */,
 				F909C39A25E6621200848876 /* Player.swift */,
 				5E1B826325F3CDE70092EE72 /* WeakContainer.swift */,
+				04BB714B25F782070060DC73 /* Queue.swift */,
 			);
 			path = Beverbende;
 			sourceTree = "<group>";
@@ -366,6 +369,7 @@
 				F909C39B25E6621200848876 /* Player.swift in Sources */,
 				F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */,
 				F94B993125EFA485002FFEE3 /* BeverbendeDelegate.swift in Sources */,
+				04BB714C25F782070060DC73 /* Queue.swift in Sources */,
 				80786DB625E65A3100707799 /* Support.swift in Sources */,
 				F94B992325EF95AA002FFEE3 /* Parser.swift in Sources */,
 				80786DBC25E65A7000707799 /* cognitive_model.swift in Sources */,

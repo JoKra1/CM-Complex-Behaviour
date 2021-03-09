@@ -15,8 +15,28 @@ enum Actor {
     case game
 }
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, BeverbendeDelegate {
     
+    var eventQueue = Queue<(EventType, [String: Any])>()
+    
+    func handleEvent(for event: EventType, with info: [String : Any]) {
+        if event == .nextTurn {
+            if true { disableUserInteraction() } // if end of player turn
+            if true { enableUserInteractionAfterDelay(lasting: 0.0) } // if start of player turn
+        }
+        eventQueue.enqueue(element: (event, info))
+    }
+    
+    func animateEvent(for event: EventType, with info: [String : Any]) {
+//        EventType          Info object
+//        ---------          -----------
+//        nextTurn           ["player": Player]
+        
+        
+        
+        
+    }
+            
     var animationViewOne: UIImageView = {
         let theImageView = UIImageView()
         theImageView.image = nil
