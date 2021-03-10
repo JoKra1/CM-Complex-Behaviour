@@ -42,25 +42,31 @@ class Beverbende {
         return cards
     }
     
-    init() {
-        self.playerIds = [] // Placeholder
-        self.players = [] // Placeholder
+    init(with humanPlayer: Player, cognitiveIds: [String]) {
+        self.playerIds = [humanPlayer.getId()] + cognitiveIds
+        self.players = [humanPlayer]
+        
+        self.delegates = []
+        
         self.currentPlayerIndex = 0
         self.discardPile = Stack<Card>()
         
         self.drawPile = Stack<Card>(initialArray: Beverbende.allCards().shuffled())
         self.discardPile.push(self.drawPile.pop()!)
         
-        for _ in self.playerIds {
-            // Assign cards to every player
-            var cards: [Card] = []
+        for cognitiveId in cognitiveIds {
+            var cards: [Card?] = []
             for _ in 0..<4 {
                 cards.append(self.drawPile.pop()!)
             }
-            // self.players.append(Player(withID: id, withCards: cards))
+            
+            let opponent = BeverbendeOpponent(with: cognitiveId, with: cards, for: self)
+            self.players.append(opponent)
         }
         
-        self.delegates = []
+        for i in 0..<4 {
+            humanPlayer.setCardOnTable(with: self.drawPile.pop()!, at: i)
+        }
     }
     
     func add(delegate: BeverbendeDelegate) {
@@ -82,8 +88,16 @@ class Beverbende {
         let player = self.players[self.currentPlayerIndex]
         self.notifyDelegates(for: EventType.nextTurn, with: ["player": player])
         
+        // Check for end of game - if so, notify delegates
+        
         return player
     }
+    
+    func knock() {
+        // Emit knock event
+    }
+    
+    // TODO: make swapCard method
     
     // Note: Does not set card.isFaceUp to true
     func drawCard(for player: Player) -> Card {

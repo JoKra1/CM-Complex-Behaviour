@@ -59,11 +59,29 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     weak var game:Beverbende?
     
-    required init(with ID: String, with Cards: [Card]) {
+    required init(with ID: String) {
+        setup(with: ID)
+        super.init()
+    }
+    
+    init(with ID: String, with Cards: [Card?], for Game: Beverbende) {
+        setup(with: ID)
+        self.cardsOnTable = Cards
+        self.game = Game
+        self.game?.add(delegate: self)
+        super.init()
+        
+        /**
+         Peak first two cards. ToDo: make use of Game api.
+         */
+        self.memorizeCard(at: 1, with: self.cardsOnTable[0])
+        self.memorizeCard(at: 4, with: self.cardsOnTable[3])
+        print("DM: \(self.dm.chunks)")
+    }
+    
+    func setup(with ID: String) {
         self.id = ID
         self.goal = .Begin
-        self.cardsOnTable = Cards
-        super.init()
         
         /**
          Instantiate cut-off for the decision about whether a card is low or not.
@@ -88,12 +106,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                           "discard":["lower":0.8,"upper":1.0]]
         let categoricalSampler = CategoricalSampler(with:categories)
         let sampleCategories = categoricalSampler.sample(for: 150)
-        /**
-         Peak first two cards. ToDo: make use of Game api.
-         */
-        self.memorizeCard(at: 1, with: self.cardsOnTable[0])
-        self.memorizeCard(at: 4, with: self.cardsOnTable[3])
-        print("DM: \(self.dm.chunks)")
+        
     }
     
     /**
