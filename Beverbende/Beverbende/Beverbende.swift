@@ -64,9 +64,13 @@ class Beverbende {
             self.players.append(opponent)
         }
         
-        for i in 0..<4 {
-            humanPlayer.setCardOnTable(with: self.drawPile.pop()!, at: i)
+        // Quick and dirty fix here, I know I know its code repetition :-(
+        var cards: [Card?] = []
+        for _ in 0..<4 {
+            cards.append(self.drawPile.pop()!)
         }
+        humanPlayer.setCardsOnTable(with: cards)
+        
     }
     
     func add(delegate: BeverbendeDelegate) {
