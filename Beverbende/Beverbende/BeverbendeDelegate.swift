@@ -8,7 +8,7 @@
 import Foundation
 
 enum EventType {
-    case nextTurn, cardDrawn, discardedCardDrawn, cardPlayed, cardDiscarded, cardsSwapped, cardReplaced
+    case nextTurn, cardDrawn, discardedCardDrawn, discardedCardTraded, cardPlayed, cardDiscarded, cardsSwapped, cardReplaced, knocked, gameEnded
 }
 
 protocol BeverbendeDelegate: AnyObject {
@@ -19,13 +19,17 @@ protocol BeverbendeDelegate: AnyObject {
  EventType          Info object
  ---------          -----------
  nextTurn           ["player": Player]
- cardDrawn          ["player": Player]
+ cardDrawn          ["player": Player, "card": Card] changed
  discardedCardDrawn ["player": Player]
- discardedCardTraded ["cardIndex": Int, "player": Player]
+ discardedCardTraded ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int] changed
  cardPlayed         ["player": Player, "card": ActionCard]
- cardDiscarded      ["player": Player, "card": Card]
+ cardDiscarded      ["player": Player, "card": Card, "isFaceUp":Bool] changed
  cardsSwapped       ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player]
- cardReplaced       ["cardIndex": Int, "player": Player]
+ cardReplaced       ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool] changed
  knocked
  gameEnded
  */
+
+// a FROM card goed From the player to the discard pile, a TO card moves from the hand or the discard pile to the player's on table cards
+
+// is use this rather than onTable and onHand, as these obviously change during the animations
