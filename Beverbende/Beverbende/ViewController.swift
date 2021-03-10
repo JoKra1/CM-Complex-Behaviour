@@ -18,24 +18,6 @@ enum Actor {
 class ViewController: UIViewController, BeverbendeDelegate {
     
     var eventQueue = Queue<(EventType, [String: Any])>()
-    
-    func handleEvent(for event: EventType, with info: [String : Any]) {
-        if event == .nextTurn {
-            if true { disableUserInteraction() } // if end of player turn
-            if true { enableUserInteractionAfterDelay(lasting: 0.0) } // if start of player turn
-        }
-        eventQueue.enqueue(element: (event, info))
-    }
-    
-    func animateEvent(for event: EventType, with info: [String : Any]) {
-//        EventType          Info object
-//        ---------          -----------
-//        nextTurn           ["player": Player]
-        
-        
-        
-        
-    }
             
     var animationViewOne: UIImageView = {
         let theImageView = UIImageView()
@@ -93,7 +75,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
 //        print(animationViewThree.constraints)
         switch recognizer.state {
         case .ended:
-            let duration = animateCardDraw(by: .player)
+            let duration = animateCardDraw(by: .player, withValue: "4")
             print("animateCardDrawDuration: \(duration)")
             
         default:
@@ -422,7 +404,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
-    func animateCardDraw(by actor: Actor) -> Double {
+    func animateCardDraw(by actor: Actor, withValue value: String) -> Double {
 //        from the deck to an onHand location
         
         var duration = 1.0
@@ -450,7 +432,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         if actor == .player {
             duration += 1.01
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
-                self.flipOpen(show: "4", on: onHandCardView, for: actor)
+                self.flipOpen(show: value, on: onHandCardView, for: actor)
             }
         }
         return duration + 0.01
@@ -642,7 +624,82 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
         return 0.61
     }
-//
-   
+
+    // ############################ EVENT HANDLING ############################
+    
+    func handleEvent(for event: EventType, with info: [String : Any]) {
+        if event == .nextTurn {
+            if true { disableUserInteraction() } // if end of player turn
+            if true { enableUserInteractionAfterDelay(lasting: 0.0) } // if start of player turn
+        }
+        eventQueue.enqueue(element: (event, info))
+    }
+    
+    func animateEvent(for event: EventType, with info: [String : Any]) {
+//        Actor is the UI complement to the Player class
+        disableUserInteraction()
+        
+        switch event {
+        case .cardDrawn: // info: ["player": Player]
+            let player = info["player"] as! Player
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let cardValue = getStringMatchingWithCard(forCard: player.cardOnHand!)
+            let duration = animateCardDraw(by: actor, withValue: cardValue)
+    
+        case .cardDiscarded:// info: ["player": Player]
+            let player = info["player"] as! Player
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let openOnHand = player.cardOnHand!.isFaceUp ? false : true
+            let duration = animateDiscardFromHand(by: actor, openOnHand: openOnHand)
+        
+        case .cardPlayed: // info: ["player": Player, "card": ActionCard]
+            let player = info["player"] as! Player
+            let actionCard = info["card"] as! ActionCard
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let actionName = getStringMatchingWithAction(forAction: actionCard.getAction())
+            flipOpen(show: actionName, on: retrieveOnHandCardView(for: actor), for: actor)
+            let duration = 0.61
+        
+        case .cardsSwapped: // ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player]
+            let player1 = info["player1"] as! Player
+            let player2 = info["player2"] as! Player
+            let cardIndex1 = info["cardIndex1"] as! Int
+            let cardIndex2 = info["cardIndex2"] as! Int
+            let actor1 = findActorMatchingWithPLayer(withId: player1.getId())
+            let actor2 = findActorMatchingWithPLayer(withId: player2.getId())
+            let duration = animateCardTrade(ofCardAtIndex: cardIndex1, by: actor1, withCardAtIndex: cardIndex2, from: actor2)
+        
+        case .cardReplaced:
+            print("")
+        
+        default:
+            break
+        }
+        
+        
+    }
+    
+    func findActorMatchingWithPLayer(withId playerId: String) -> Actor {
+        return .game //TODO: match a string to an actor
+    }
+    
+    func getStringMatchingWithCard(forCard card: Card) -> String {
+        switch card.getType() {
+        case .value:
+            let valueCard = card as! ValueCard
+            return String(valueCard.getValue())
+        case .action:
+            let actionCard = card as! ActionCard
+            switch actionCard.getAction() {
+            case .inspect:
+                return "inspect"
+            case .swap:
+                return "swap"
+            case .twice:
+                return "twice"
+            }
+        }
+    }
+
 }
 
