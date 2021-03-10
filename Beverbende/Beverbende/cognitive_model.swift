@@ -57,6 +57,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     private var goal:GameState
     
+    weak var game:Beverbende?
+    
     required init(with ID: String, with Cards: [Card]) {
         self.id = ID
         self.goal = .Begin
@@ -68,7 +70,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         let sampler = BoxMuller(mu: Double(BeverbendeOpponent.cut_off_low), sd: 1.5)
         let (sample_low,_,_) = sampler.sample(for: 150)
-        self.instantiateMemory(for: "low_value_fact", with: sampler.castToInt(for: sample_low))
+        self.instantiateMemoryValues(for: "low_value_fact", with: sampler.castToInt(for: sample_low))
         
         /**
          Instantiate cut-off for the decision about whether the model should end the game.
@@ -76,8 +78,16 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         sampler.mu = Double(BeverbendeOpponent.cut_off_decide)
         sampler.sd =  3.0
         let (sample_decide,_,_) = sampler.sample(for: 150)
-        self.instantiateMemory(for: "end_value_fact", with: sampler.castToInt(for: sample_decide))
+        self.instantiateMemoryValues(for: "end_value_fact", with: sampler.castToInt(for: sample_decide))
         
+        /**
+         Instantiate decision for swapping.
+         */
+        let categories = ["swapRecent":["lower":0.0,"upper":0.6],
+                          "swapRandom":["lower":0.6,"upper":0.8],
+                          "discard":["lower":0.8,"upper":1.0]]
+        let categoricalSampler = CategoricalSampler(with:categories)
+        let sampleCategories = categoricalSampler.sample(for: 150)
         /**
          Peak first two cards. ToDo: make use of Game api.
          */
@@ -90,6 +100,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
      PUBLIC API
      */
     
+    /**
+     Player Protocol implementation
+     */
     func getId() -> String {
         return self.id
     }
@@ -129,14 +142,16 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         return currentCard
     }
     
+    /**
+     BeverbendeDelegate implementation
+     */
     
     func handleEvent(for event: EventType, with info: [String : Any]) {
         switch event {
         case .nextTurn:
             
             let player = info["player"] as! Player
-            let game = info["game"] as! Beverbende
-            if player.id == self.id {
+            if player.id == self.id, let game = self.game {
                 self.advanceGame(for: game)
             } else {
                 for card_index in 1...4 {
@@ -150,11 +165,18 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
     }
     
+    /**
+     Some wrappers to get information about the model
+     */
     
     func summarizeDM(){
         for chunk in self.dm.chunks {
             print(chunk.value.slotvals)
         }
+    }
+    
+    func attachGame(with game:Beverbende) {
+        self.game = game
     }
     
     
@@ -179,7 +201,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
      PRIVATE
      */
     
-    private func instantiateMemory(for fact:String, with values:[Int]) {
+    private func instantiateMemoryValues(for fact:String, with values:[Int]) {
         /**
          Instantiates/updates a cut-off fact using a sample of values, generated using the Box-Mueller algorithm.
          */
@@ -458,7 +480,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                         to predict, which is why replacing them is always considered
                         a good idea.
                         */
-                        self.instantiateMemory(for: "low_value_fact", with: [retrievedCutoff])
+                        self.instantiateMemoryValues(for: "low_value_fact", with: [retrievedCutoff])
                         self.time += 0.05
                     case .value(let previousValue):
                         /**
@@ -468,7 +490,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                          improvement since knowing the value of the card is beneficial in any case.
                         */
                         if previousValue > value {
-                            self.instantiateMemory(for: "low_value_fact", with: [retrievedCutoff])
+                            self.instantiateMemoryValues(for: "low_value_fact", with: [retrievedCutoff])
                             self.time += 0.05
                         }
                     }
