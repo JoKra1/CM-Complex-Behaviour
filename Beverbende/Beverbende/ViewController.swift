@@ -17,6 +17,9 @@ enum Actor {
 
 class ViewController: UIViewController, BeverbendeDelegate {
     
+    var user = User(with: "user")
+    lazy var game = Beverbende(with: user, cognitiveIds: ["left", "top", "right"])
+    
     var eventQueue = Queue<(EventType, [String: Any])>()
             
     var animationViewOne: UIImageView = {
@@ -51,6 +54,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
 //        showInspectButton()
         hideDrawnCardInfoButton()
         addCardGestures()
+        
+        self.game.add(delegate: self)
     }
 
     @IBOutlet weak var deckView: UIImageView!
