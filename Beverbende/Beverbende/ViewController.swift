@@ -56,6 +56,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
         addCardGestures()
         
         self.game.add(delegate: self)
+        let discardePileValue = getStringMatchingWithCard(forCard: game.discardPile.peek()!)
+        showFrontOfCard(show: discardePileValue, on: discardPileView, for: .game)
     }
 
     @IBOutlet weak var deckView: UIImageView!
@@ -75,13 +77,17 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBOutlet weak var drawnCardInfoButton: UIButton!
     
+    var twiceInPlay: Bool = false
     var discardPileSelected: Bool = false
-    var selectedForPlayerIndex: Int?
-    var selectedForModelAtIndex: (Actor, Int)?
+    var selectedForPlayerIndex: Int? = nil
+    var selectedForModelAtIndex: (Actor, Int)? = nil
     
     func endUserTurn() {
         _ = game.nextPlayer()
         isUserTurn = false
+        twiceInPlay = false
+        selectedForPlayerIndex = nil
+        selectedForModelAtIndex = nil
     }
     
     @objc func drawCard(_ recognizer: UITapGestureRecognizer) {
@@ -91,6 +97,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case .ended:
             if isUserTurn, user.getCardOnHand() == nil {
                 _ = game.drawCard(for: user)
+                undoCardSelections()
             }
         default:
             break
@@ -103,12 +110,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
             if isUserTurn {
                 if user.getCardOnHand() != nil { // discard drawn card
                     game.discardDrawnCard(for: user)
-                    endUserTurn()
+                    twiceInPlay ? twiceInPlay = false : endUserTurn() // a discard does not end the turn if the draw twice action card was played
                 } else { //user.getCardOnHand() == nil, get into the process of trading with the discarded pile
                     if let cardIndex = selectedForPlayerIndex { // the user already selected one of their own cards
                         game.tradeDiscardedCardWithCard(at: cardIndex, for: user)
-                        discardPileSelected = false
-                        selectedForPlayerIndex = nil
+                        undoCardSelections()
                         endUserTurn()
                     } else { // toggle between selected and not
                         discardPileView.alpha = (discardPileSelected) ? 1 : 0.5
@@ -134,6 +140,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
+    func undoCardSelections(){
+        discardPileView.alpha = 1
+        playerCardViews.forEach { $0.alpha = 1 }
+        leftModelCardViews.forEach { $0.alpha = 1 }
+        rightModelCardViews.forEach { $0.alpha = 1 }
+        topModelCardViews.forEach { $0.alpha = 1 }
+    }
+    
     func handleCardSelectionForModel(forModel actor: Actor, forView cardView: UIImageView, withIndex cardIndex: Int) {
         if let selectedIndex = selectedForPlayerIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
             cardView.alpha = 1
@@ -154,8 +168,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
                     if discardPileSelected { // the discarded pile was already selected
                         game.tradeDiscardedCardWithCard(at: TouchedCardIndex, for: user)
-                        discardPileSelected = false
-                        selectedForPlayerIndex = nil
+                        undoCardSelections()
                         endUserTurn()
                     } else { // handle selection of the player's cards
                         handleCardSelectionForPlayer(forView: touchedCardView, withIndex: TouchedCardIndex)
@@ -170,26 +183,23 @@ class ViewController: UIViewController, BeverbendeDelegate {
                         switch actionCard.getAction() {
                         case .inspect:
                             _ = game.inspectCard(at: TouchedCardIndex, for: user)
-                            game.moveCardBackFromHand(to: TouchedCardIndex, for: user)
+                            game.moveCardBackFromHand(to: TouchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
                             endUserTurn()
                         case .swap:
                             if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex {
                                 // TODO: do the trade, Loran adds this to the game model first
-                                selectedForPlayerIndex = nil
-                                selectedForModelAtIndex = nil
+                                undoCardSelections()
                                 endUserTurn()
                             } else { // handle selection of the player's cards
                                 handleCardSelectionForPlayer(forView: touchedCardView, withIndex: TouchedCardIndex)
                             }
                         case .twice:
-                            // TODO: implement, perhaps a counter??
-                            print("hoi")
+                            twiceInPlay = true // NOT GOOOOOOOD, this should happen at drawing, not at touching the players card
                         }
                     default:
                         break
                     }
                 }
-                
             }
         default:
             break
@@ -211,13 +221,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case .ended:
             if let touchedCardView = recognizer.view as? UIImageView {
                 let (touchedModel, touchedCardIndex) = findActorAndIndexForView(for: touchedCardView)
-                if let selectedPlayerIndex = selectedForPlayerIndex {
-                    // TODO: do the trade, Loran adds this to the game model first
-                    selectedForPlayerIndex = nil
-                    selectedForModelAtIndex = nil
-                    endUserTurn()
-                } else { // handle selection of the model's cards
-                    handleCardSelectionForModel(forModel: touchedModel, forView: touchedCardView, withIndex: touchedCardIndex)
+                if let onHandCard = user.getCardOnHand() as? ActionCard, onHandCard.getAction() == .swap { //a card needs to be on hand and it needs tobe the swap card specifically
+                    if let selectedPlayerIndex = selectedForPlayerIndex {
+                        // TODO: do the trade, Loran adds this to the game model first
+                        undoCardSelections()
+                        endUserTurn()
+                    } else { // handle selection of the model's cards
+                        handleCardSelectionForModel(forModel: touchedModel, forView: touchedCardView, withIndex: touchedCardIndex)
+                    }
                 }
             }
         default:
@@ -411,7 +422,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         NSLayoutConstraint.deactivate(startOverlayConstraints2)
     }
     
-    func flipOpen(show value: String, on cardView: UIImageView, for actor: Actor){
+    func flipOpen(show value: String, on cardView: UIImageView, for actor: Actor) {
         var flipFrom: UIView.AnimationOptions {
             switch actor {
             case .leftModel:
@@ -437,7 +448,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         )
     }
     
-    func flipClosed(hide cardView: UIImageView, for actor: Actor){
+    func flipClosed(hide cardView: UIImageView, for actor: Actor) {
         var flipFrom: UIView.AnimationOptions {
             switch actor {
             case .leftModel:
@@ -478,6 +489,40 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
+    func animateCardInspection(for actor: Actor, withCardatIndex cardIndex: Int, withValue value: String) -> Double {
+        let cardView = retrieveOnTableCardViews(for: actor)[cardIndex]
+        
+        var duration: Double
+        
+        if actor == .player {
+            duration = 0.61 * 2 + 1 // time to: flip open, flip closed, inspect
+            flipOpen(show: value, on: cardView, for: actor)
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.61 + 1) {
+                self.flipClosed(hide: cardView, for: actor)
+            }
+        } else { // model
+            duration = 1.01
+            
+            animationViewOne.transform = returnRotationTransform(for: actor)
+            _ = setViewToOverlay(set: animationViewOne, to: deckView)
+            
+            UIView.transition(with: animationViewOne,
+                              duration: 0.5,
+                              options: [.curveEaseInOut],
+                              animations: {
+                                self.animationViewOne.transform = CGAffineTransform(scaleX: 1.25, y: 1.25)
+                              }, completion: {_ in
+                                UIView.transition(with: self.animationViewOne,
+                                                  duration: 0.5,
+                                                  options: [.curveEaseInOut],
+                                                  animations: {
+                                                    self.animationViewOne.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+                                                  }, completion: nil)
+                              })
+        }
+        return duration
+    }
+    
     func animateCardDraw(by actor: Actor, withValue value: String) -> Double {
 //        from the deck to an onHand location
         
@@ -504,7 +549,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         NSLayoutConstraint.deactivate(overlayConstraints)
         
         if actor == .player {
-            duration += 1.01
+            duration += 0.01 + 0.61
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
                 self.flipOpen(show: value, on: onHandCardView, for: actor)
             }
@@ -537,7 +582,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
             _ = self.animateTradeOnHand(withCardAtIndex: cardIndex, by: actor, withValue: fromValue, closeOnHand: true)
         }
-        return 1 + 0.01 + 1.61 + 0.01
+        return 1 + 0.01 + 0.61 + 1.0 + 0.01 //time to move from pile, then to flip, then to move again
     }
 
     func animateDiscardFromHand(by actor: Actor, withValue value: String, openOnHand: Bool) -> Double {
@@ -757,7 +802,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let actor2 = findActorMatchingWithPLayer(withId: player2.getId())
             duration = animateCardTrade(ofCardAtIndex: cardIndex1, by: actor1, withCardAtIndex: cardIndex2, from: actor2)
         
-        case .cardReplaced: // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int,  "toIsFaceUp":Bool]
+        case .cardTraded: // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int,  "toIsFaceUp":Bool]
             let player = info["player"] as! Player
             let cardFromPlayer = info["cardFromPlayer"] as! Card
             let cardFromPlayerIndex = info["cardFromPlayerIndex"] as! Int
@@ -774,6 +819,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
             let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
             duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, by: actor)
+            
+        case .cardInspected: // ["player": Player, "card": Card, "cardIndex": Int]
+            let player = info["player"] as! Player
+            let card = info["card"] as! Card
+            let cardIndex = info["cardIndex"] as! Int
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let value = getStringMatchingWithCard(forCard: card)
+            duration = animateCardInspection(for: actor, withCardatIndex: cardIndex, withValue: value)
         default:
             break
         }

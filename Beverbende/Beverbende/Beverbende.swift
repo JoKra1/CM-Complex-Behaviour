@@ -26,18 +26,18 @@ class Beverbende {
         values = values + Array(repeating: 7, count: 4)
         values = values + Array(repeating: 8, count: 4)
         values = values + Array(repeating: 9, count: 9)
-        let actions =
-            Array(repeating: Action.inspect, count: 7) +
-            Array(repeating: Action.twice, count: 5) +
-            Array(repeating: Action.swap, count: 9)
+//        let actions = []
+//            Array(repeating: Action.inspect, count: 7) +
+//            Array(repeating: Action.twice, count: 5) +
+//            Array(repeating: Action.swap, count: 9)
         
         var cards: [Card] = []
         for v in values {
             cards.append(ValueCard(value: v))
         }
-        for a in actions {
-            cards.append(ActionCard(value: a))
-        }
+//        for a in actions {
+//            cards.append(ActionCard(value: a))
+//        }
         
         return cards
     }
@@ -125,7 +125,7 @@ class Beverbende {
         
         player.setCardOnHand(with: card!)
         
-        self.notifyDelegates(for: EventType.cardDrawn, with: ["player": player])
+        self.notifyDelegates(for: EventType.cardDrawn, with: ["player": player, "card": card!])
         
         return card!
     }
@@ -145,7 +145,7 @@ class Beverbende {
         player.setCardOnHand(with: nil)
         self.discard(card: card)
         
-        self.notifyDelegates(for: EventType.cardDiscarded, with: ["player": player, "card": card])
+        self.notifyDelegates(for: EventType.cardDiscarded, with: ["player": player, "card": card, "isFaceUp":false]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
     }
     
     func discard(card c: Card) {
@@ -189,12 +189,15 @@ class Beverbende {
         let replacedCard = self.replaceCard(at: index, with: heldCard, for: player)
         self.discard(card: replacedCard)
         
-        self.notifyDelegates(for: EventType.cardReplaced, with: ["cardIndex": index, "player": player])
+        self.notifyDelegates(for: EventType.cardTraded, with: ["player": player, "cardFromPlayer":replacedCard, "cardFromPlayerIndex": index, "toIsFaceUp": true]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
     }
     
     func tradeDiscardedCardWithCard(at index: Int, for player: Player) {
         let discardedCard = self.discardPile.pop()!
         let replacedCard = self.replaceCard(at: index, with: discardedCard, for: player)
         self.discard(card: replacedCard)
+        
+        self.notifyDelegates(for: .discardedCardTraded, with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index])
+        
     }
 }

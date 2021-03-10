@@ -8,7 +8,7 @@
 import Foundation
 
 enum EventType {
-    case nextTurn, cardDrawn, discardedCardDrawn, discardedCardTraded, cardPlayed, cardDiscarded, cardsSwapped, cardReplaced, knocked, gameEnded
+    case nextTurn, cardDrawn, discardedCardDrawn, discardedCardTraded, cardPlayed, cardDiscarded, cardsSwapped, cardTraded, cardInspected, knocked, gameEnded
 }
 
 protocol BeverbendeDelegate: AnyObject {
@@ -25,7 +25,8 @@ protocol BeverbendeDelegate: AnyObject {
  cardPlayed         ["player": Player, "card": ActionCard]
  cardDiscarded      ["player": Player, "card": Card, "isFaceUp":Bool] changed
  cardsSwapped       ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player]
- cardReplaced       ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool] changed
+ cardTraded       ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool] changed (also renamed form "cardReplaced", for consistency)
+ cardInspected      ["player": Player, "card": Card, "cardIndex": Int] added
  knocked
  gameEnded
  */
