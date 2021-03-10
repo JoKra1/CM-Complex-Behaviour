@@ -656,7 +656,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let player = info["player"] as! Player
             let actionCard = info["card"] as! ActionCard
             let actor = findActorMatchingWithPLayer(withId: player.getId())
-            let actionName = getStringMatchingWithAction(forAction: actionCard.getAction())
+            let actionName = getStringMatchingWithCard(forCard: actionCard)
             flipOpen(show: actionName, on: retrieveOnHandCardView(for: actor), for: actor)
             let duration = 0.61
         
