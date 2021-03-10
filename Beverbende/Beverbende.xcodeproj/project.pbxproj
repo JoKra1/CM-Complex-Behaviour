@@ -17,6 +17,7 @@
 		04EA846D25DC238000B68C48 /* BeverbendeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA846C25DC238000B68C48 /* BeverbendeTests.swift */; };
 		04EA847825DC238000B68C48 /* BeverbendeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA847725DC238000B68C48 /* BeverbendeUITests.swift */; };
 		5E1B826425F3CDE70092EE72 /* WeakContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1B826325F3CDE70092EE72 /* WeakContainer.swift */; };
+		5E1B826F25F8E09F0092EE72 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1B826E25F8E09F0092EE72 /* User.swift */; };
 		5E1CC81025E54F0D00D1B515 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1CC80F25E54F0D00D1B515 /* Stack.swift */; };
 		8077F0EC25F7A8D300A7A34D /* categorical_sampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8077F0EB25F7A8D300A7A34D /* categorical_sampler.swift */; };
 		80786DAF25E65A0500707799 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DAC25E65A0500707799 /* Chunk.swift */; };
@@ -78,6 +79,7 @@
 		04EA847725DC238000B68C48 /* BeverbendeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeverbendeUITests.swift; sourceTree = "<group>"; };
 		04EA847925DC238000B68C48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5E1B826325F3CDE70092EE72 /* WeakContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakContainer.swift; sourceTree = "<group>"; };
+		5E1B826E25F8E09F0092EE72 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		5E1CC80F25E54F0D00D1B515 /* Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
 		8077F0EB25F7A8D300A7A34D /* categorical_sampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = categorical_sampler.swift; sourceTree = "<group>"; };
 		80786DAC25E65A0500707799 /* Chunk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chunk.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 				F909C39A25E6621200848876 /* Player.swift */,
 				5E1B826325F3CDE70092EE72 /* WeakContainer.swift */,
 				04BB714B25F782070060DC73 /* Queue.swift */,
+				5E1B826E25F8E09F0092EE72 /* User.swift */,
 			);
 			path = Beverbende;
 			sourceTree = "<group>";
@@ -359,6 +362,7 @@
 				F94B991F25EF95AA002FFEE3 /* BufferCondition.swift in Sources */,
 				80786DB025E65A0500707799 /* Declarative.swift in Sources */,
 				F94B992125EF95AA002FFEE3 /* SlotAction.swift in Sources */,
+				5E1B826F25F8E09F0092EE72 /* User.swift in Sources */,
 				F94B992825EF95AA002FFEE3 /* Temporal.swift in Sources */,
 				F94B992525EF95AA002FFEE3 /* Production.swift in Sources */,
 				F94B992025EF95AA002FFEE3 /* Instantiation.swift in Sources */,
