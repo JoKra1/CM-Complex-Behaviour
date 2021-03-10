@@ -23,7 +23,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     var cardOnHand: Card?
     
-    var cardsOnTable: [Card]
+    var cardsOnTable: [Card?]
     
     // Game state, basically goal buffer (cognitive control)
     private enum GameState:Equatable {
@@ -60,28 +60,28 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     weak var game:Beverbende?
     
     required init(with ID: String) {
-        setup(with: ID)
+        //setup(with: ID)
+        self.id = ID
+        self.goal = .Begin
+        self.cardsOnTable = []
         super.init()
+        self.setup()
     }
     
     init(with ID: String, with Cards: [Card?], for Game: Beverbende) {
-        setup(with: ID)
+        
+        self.id = ID
+        self.goal = .Begin
         self.cardsOnTable = Cards
         self.game = Game
-        self.game?.add(delegate: self)
-        super.init()
         
-        /**
-         Peak first two cards. ToDo: make use of Game api.
-         */
-        self.memorizeCard(at: 1, with: self.cardsOnTable[0])
-        self.memorizeCard(at: 4, with: self.cardsOnTable[3])
+        super.init()
+        self.game?.add(delegate: self)
+        self.setup()
         print("DM: \(self.dm.chunks)")
     }
     
-    func setup(with ID: String) {
-        self.id = ID
-        self.goal = .Begin
+    func setup() {
         
         /**
          Instantiate cut-off for the decision about whether a card is low or not.
@@ -106,6 +106,22 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                           "discard":["lower":0.8,"upper":1.0]]
         let categoricalSampler = CategoricalSampler(with:categories)
         let sampleCategories = categoricalSampler.sample(for: 150)
+        /**
+         ToDo:
+         Implement chunks for category facts.
+         */
+        
+        
+        /**
+         Peak first two cards.
+         */
+        
+        let leftCard = self.game?.inspectCard(at: 0, for: self)
+        self.memorizeCard(at: 1, with: leftCard!)
+        self.game?.moveCardBackFromHand(to: 0, for: self)
+        let rightCard = self.game?.inspectCard(at: 3, for: self)
+        self.memorizeCard(at: 4, with: rightCard!)
+        self.game?.moveCardBackFromHand(to: 3, for: self)
         
     }
     
@@ -130,27 +146,26 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     
     func setCardOnHand(with card: Card?) {
-        if let isaCard = card {
-            self.cardOnHand = isaCard
-        } else {
-            self.cardOnHand = nil
-        }
-        
+        self.cardOnHand = card
     }
     
     
-    func getCardsOnTable() -> [Card] {
+    func getCardsOnTable() -> [Card?] {
         return self.cardsOnTable
     }
     
     
-    func setCardOnTable(with card: Card, at index: Int) {
+    func setCardOnTable(with card: Card?, at index: Int) {
         self.cardsOnTable[index] = card
+    }
+    
+    func setCardsOnTable(with cards: [Card?]) {
+        self.cardsOnTable = cards
     }
     
     
     func replaceCardOnTable(at pos: Int, with card: Card) -> Card {
-        let currentCard = self.cardsOnTable[pos]
+        let currentCard = self.cardsOnTable[pos]!
         self.cardsOnTable[pos] = card
         return currentCard
     }
@@ -384,6 +399,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         let hidden_cards = game.inspectCard(at: least_certain_pos - 1, for: self)
         // ToDo: remove inspected card again
         self.memorizeCard(at: least_certain_pos, with: hidden_cards)
+        game.moveCardBackFromHand(to: least_certain_pos - 1, for: self)
     }
     
     
