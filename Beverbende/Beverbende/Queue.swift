@@ -26,4 +26,8 @@ struct Queue<T>{
         }
     }
     
+    func isEmpty() -> Bool {
+        return items.isEmpty
+    }
+    
 }
