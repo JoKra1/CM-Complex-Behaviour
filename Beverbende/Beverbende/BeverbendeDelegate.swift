@@ -26,7 +26,7 @@ protocol BeverbendeDelegate: AnyObject {
  discardedCardTraded ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int] changed, also already in Beverbende.swift
  cardPlayed         ["player": Player, "card": ActionCard]
  cardDiscarded      ["player": Player, "card": Card, "isFaceUp":Bool] changed, we need to see who handles the isFaceUp, perhaps the controller.
- cardsSwapped       ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player] needs code implementation, animations should work
+ cardsSwapped       ["cardIndex1": Int, "player": Player, "cardIndex": Int, "player2" Player] needs code implementation, animations should work
  cardTraded       ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool] changed (also renamed form "cardReplaced", for consistency) already changed
  cardInspected      ["player": Player, "card": Card, "cardIndex": Int] added, not yet added to Beverbende.swift
  knocked            ["player": Player]

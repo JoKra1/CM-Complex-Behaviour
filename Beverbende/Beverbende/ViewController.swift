@@ -188,8 +188,16 @@ class ViewController: UIViewController, BeverbendeDelegate {
                             handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
                         }
                     case .twice:
-                        // like regular play
-                        break
+                        switch user.getCardOnHand()?.getType() {
+                        case .value:
+                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
+                            endUserTurn()
+                        case .action:
+                            // nothing should happen here, the player first had to discard the action card to play it
+                            break
+                        default:
+                            break
+                        }
                     }
                 } else { // there was no action card played
                     if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
@@ -762,6 +770,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var isUserTurn = true // user starts the game
     
     func handleEvent(for event: EventType, with info: [String : Any]) {
+        print("event: \(event)")
         let player = info["player"] as! Player
         if player.getId() == user.getId() {
             if event == .nextTurn { // start animating all the models actions

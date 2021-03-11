@@ -16,7 +16,7 @@ class Beverbende {
     var delegates: [WeakContainer<BeverbendeDelegate>]
     
     var knocked = false
-    var countdown = 0
+    var countdown = 10
     
     static func allCards() -> [Card] {
         var values = Array(repeating: 0, count: 4)
@@ -215,7 +215,7 @@ class Beverbende {
         player.setCardOnHand(with: card)
         player.setCardOnTable(with: nil, at: index)
         
-        
+        self.notifyDelegates(for: EventType.cardInspected, with: ["player": player, "card": card, "cardIndex": index])
         
         return card
     }
