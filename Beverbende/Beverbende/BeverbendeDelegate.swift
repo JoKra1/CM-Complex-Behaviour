@@ -22,8 +22,8 @@ protocol BeverbendeDelegate: AnyObject {
  ---------          -----------
  nextTurn           ["player": Player]
  cardDrawn          ["player": Player, "card": Card] changed, also already in Beverbende.swift
- discardedCardDrawn ["player": Player, "card": Card] changed, also already in Beverbende.swift
- discardedCardTraded ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int] changed, also already in Beverbende.swift
+ discardedCardDrawn ["player": Player, "card": Card, "topOfDeckCard": Card] changed, also already in Beverbende.swift
+ discardedCardTraded ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int, "topOfDeckCard": Card] changed, also already in Beverbende.swift
  cardPlayed         ["player": Player, "card": ActionCard]
  cardDiscarded      ["player": Player, "card": Card, "isFaceUp":Bool] changed, we need to see who handles the isFaceUp, perhaps the controller.
  cardsSwapped       ["cardIndex1": Int, "player": Player, "cardIndex": Int, "player2" Player] needs code implementation, animations should work

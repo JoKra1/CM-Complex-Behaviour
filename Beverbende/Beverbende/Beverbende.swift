@@ -181,19 +181,22 @@ class Beverbende {
     // Might supersede tradeDiscardedCardWithCard
     func drawDiscardedCard(for player: Player) -> Card {
         let card = self.discardPile.pop()!
+        let topOfDeckCard = self.discardPile.peek()!
         player.setCardOnHand(with: card)
         
-        self.notifyDelegates(for: EventType.discardedCardDrawn, with: ["player": player, "card":card])
+        self.notifyDelegates(for: EventType.discardedCardDrawn, with: ["player": player, "card":card, "topOfDeckCard": topOfDeckCard])
         
         return card
     }
     
     func discardDrawnCard(for player: Player) {
-        let card = player.getCardOnHand()!
+        var card = player.getCardOnHand()!
         player.setCardOnHand(with: nil)
         self.discard(card: card)
         
-        self.notifyDelegates(for: EventType.cardDiscarded, with: ["player": player, "card": card, "isFaceUp":false]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
+        self.notifyDelegates(for: EventType.cardDiscarded, with: ["player": player, "card": card, "isFaceUp":card.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
+        
+        card.isFaceUp = false // is it okay to do this here?
     }
     
     func discard(card c: Card) {
@@ -234,20 +237,23 @@ class Beverbende {
     }
     
     func tradeDrawnCardWithCard(at index: Int, for player: Player) {
-        let heldCard = player.getCardOnHand()!
+        var heldCard = player.getCardOnHand()!
         player.setCardOnHand(with: nil)
         let replacedCard = self.replaceCard(at: index, with: heldCard, for: player)
         self.discard(card: replacedCard)
         
-        self.notifyDelegates(for: EventType.cardTraded, with: ["player": player, "cardFromPlayer":replacedCard, "cardFromPlayerIndex": index, "toIsFaceUp": true]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
+        self.notifyDelegates(for: EventType.cardTraded, with: ["player": player, "cardFromPlayer":replacedCard, "cardFromPlayerIndex": index, "toIsFaceUp": heldCard.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
+        
+        heldCard.isFaceUp = false
     }
     
     func tradeDiscardedCardWithCard(at index: Int, for player: Player) {
         let discardedCard = self.discardPile.pop()!
+        let topOfDeckCard = self.discardPile.peek()!
         let replacedCard = self.replaceCard(at: index, with: discardedCard, for: player)
         self.discard(card: replacedCard)
         
-        self.notifyDelegates(for: .discardedCardTraded, with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index])
+        self.notifyDelegates(for: .discardedCardTraded, with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index, "topOfDeckCard": topOfDeckCard])
         
     }
 }
