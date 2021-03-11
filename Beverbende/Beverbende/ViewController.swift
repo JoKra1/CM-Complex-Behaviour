@@ -8,7 +8,7 @@
 import UIKit
 
 enum Actor {
-    case player
+    case user
     case leftModel
     case topModel
     case rightModel
@@ -65,28 +65,28 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBOutlet weak var inspectButton: UIButton!
     
-    @IBOutlet var playerCardViews: [UIImageView]!
-    @IBOutlet var leftModelCardViews: [UIImageView]!
-    @IBOutlet var topModelCardViews: [UIImageView]!
-    @IBOutlet var rightModelCardViews: [UIImageView]!
+    @IBOutlet var userOnTableCardViews: [UIImageView]!
+    @IBOutlet var leftModelOnTableCardViews: [UIImageView]!
+    @IBOutlet var topModelOnTableCardViews: [UIImageView]!
+    @IBOutlet var rightModelOnTableCardViews: [UIImageView]!
     
-    @IBOutlet weak var playerDrawnCardView: UIImageView!
-    @IBOutlet weak var leftModelDrawnCardView: UIImageView!
-    @IBOutlet weak var topModelDrawnCardView: UIImageView!
-    @IBOutlet weak var rightModelDrawnCardView: UIImageView!
+    @IBOutlet weak var userOnHandCardView: UIImageView!
+    @IBOutlet weak var leftModelOnHandCardView: UIImageView!
+    @IBOutlet weak var topModelOnHandCardView: UIImageView!
+    @IBOutlet weak var rightModelOnHandCardView: UIImageView!
     
-    @IBOutlet weak var drawnCardInfoButton: UIButton!
+    @IBOutlet weak var onHandCardInfoButton: UIButton!
     
     var twiceInPlay: Bool = false
     var discardPileSelected: Bool = false
-    var selectedForPlayerIndex: Int? = nil
+    var selectedForUserIndex: Int? = nil
     var selectedForModelAtIndex: (Actor, Int)? = nil
     
     func endUserTurn() {
         _ = game.nextPlayer()
         isUserTurn = false
         twiceInPlay = false
-        selectedForPlayerIndex = nil
+        selectedForUserIndex = nil
         selectedForModelAtIndex = nil
     }
     
@@ -108,11 +108,23 @@ class ViewController: UIViewController, BeverbendeDelegate {
         switch recognizer.state {
         case .ended:
             if isUserTurn {
-                if user.getCardOnHand() != nil { // discard drawn card
+                if let onHandCard = user.getCardOnHand() { // discard drawn card
                     game.discardDrawnCard(for: user)
-                    twiceInPlay ? twiceInPlay = false : endUserTurn() // a discard does not end the turn if the draw twice action card was played
+                    switch onHandCard.getType() {
+                    case .value:
+                        twiceInPlay ? twiceInPlay = false : endUserTurn()
+                    case .action:
+                        let actionCard = onHandCard as! ActionCard
+                        switch actionCard.getAction() {
+                        case .twice:
+                            twiceInPlay = true
+                        default:
+                            twiceInPlay ? twiceInPlay = false : endUserTurn()
+                        }
+                    }
+                     // a discard does not end the turn if the draw twice action card was played
                 } else { //user.getCardOnHand() == nil, get into the process of trading with the discarded pile
-                    if let cardIndex = selectedForPlayerIndex { // the user already selected one of their own cards
+                    if let cardIndex = selectedForUserIndex { // the user already selected one of their own cards
                         game.tradeDiscardedCardWithCard(at: cardIndex, for: user)
                         undoCardSelections()
                         endUserTurn()
@@ -129,29 +141,21 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     var isFaceUp: Bool = false
     
-    func handleCardSelectionForPlayer(forView cardView: UIImageView, withIndex cardIndex: Int) {
-        if let selectedIndex = selectedForPlayerIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
+    func handleCardSelectionForUser(forView cardView: UIImageView, withIndex cardIndex: Int) {
+        if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
             cardView.alpha = 1
-            selectedForPlayerIndex = nil
+            selectedForUserIndex = nil
         } else { // set the touched card as selected, doesnt matter if another one was already selected or not
-            playerCardViews.forEach { $0.alpha = 1 }
+            userOnTableCardViews.forEach { $0.alpha = 1 }
             cardView.alpha = 0.5
-            selectedForPlayerIndex = cardIndex
+            selectedForUserIndex = cardIndex
         }
     }
     
-    func undoCardSelections(){
-        discardPileView.alpha = 1
-        playerCardViews.forEach { $0.alpha = 1 }
-        leftModelCardViews.forEach { $0.alpha = 1 }
-        rightModelCardViews.forEach { $0.alpha = 1 }
-        topModelCardViews.forEach { $0.alpha = 1 }
-    }
-    
     func handleCardSelectionForModel(forModel actor: Actor, forView cardView: UIImageView, withIndex cardIndex: Int) {
-        if let selectedIndex = selectedForPlayerIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
+        if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
             cardView.alpha = 1
-            selectedForPlayerIndex = nil
+            selectedForUserIndex = nil
         } else { // set the touched card as selected, doesnt matter if another one was already selected or not
             retrieveOnTableCardViews(for: actor).forEach { $0.alpha = 1 }
             cardView.alpha = 0.5
@@ -159,11 +163,19 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
-    @objc func tapPlayerCard(_ recognizer: UITapGestureRecognizer) {
+    func undoCardSelections(){
+        discardPileView.alpha = 1
+        userOnTableCardViews.forEach { $0.alpha = 1 }
+        leftModelOnTableCardViews.forEach { $0.alpha = 1 }
+        rightModelOnTableCardViews.forEach { $0.alpha = 1 }
+        topModelOnTableCardViews.forEach { $0.alpha = 1 }
+    }
+    
+    @objc func tapUserCard(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
         case .ended:
-            if let touchedCardView = recognizer.view as? UIImageView {
-                let TouchedCardIndex = playerCardViews.firstIndex(of: touchedCardView)!
+            if let touchedCardView = recognizer.view as? UIImageView , isUserTurn {
+                let TouchedCardIndex = userOnTableCardViews.firstIndex(of: touchedCardView)!
                 
                 if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
                     if discardPileSelected { // the discarded pile was already selected
@@ -171,7 +183,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                         undoCardSelections()
                         endUserTurn()
                     } else { // handle selection of the player's cards
-                        handleCardSelectionForPlayer(forView: touchedCardView, withIndex: TouchedCardIndex)
+                        handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
                     }
                 } else { // user.getCardOnHand() != nil, a card was already drawn
                     switch user.getCardOnHand()?.getType() {
@@ -191,10 +203,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
                                 undoCardSelections()
                                 endUserTurn()
                             } else { // handle selection of the player's cards
-                                handleCardSelectionForPlayer(forView: touchedCardView, withIndex: TouchedCardIndex)
+                                handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
                             }
                         case .twice:
-                            twiceInPlay = true // NOT GOOOOOOOD, this should happen at drawing, not at touching the players card
+                            // Nothing happend, the player has to discard first, not optional to not play it, I see no case where this would not happen
+                            break
                         }
                     default:
                         break
@@ -222,7 +235,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             if let touchedCardView = recognizer.view as? UIImageView {
                 let (touchedModel, touchedCardIndex) = findActorAndIndexForView(for: touchedCardView)
                 if let onHandCard = user.getCardOnHand() as? ActionCard, onHandCard.getAction() == .swap { //a card needs to be on hand and it needs tobe the swap card specifically
-                    if let selectedPlayerIndex = selectedForPlayerIndex {
+                    if let selectedUserIndex = selectedForUserIndex {
                         // TODO: do the trade, Loran adds this to the game model first
                         undoCardSelections()
                         endUserTurn()
@@ -237,11 +250,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func findActorAndIndexForView(for cardView: UIImageView) -> (Actor, Int) {
-        if let cardIndex = leftModelCardViews.firstIndex(of: cardView){
+        if let cardIndex = leftModelOnTableCardViews.firstIndex(of: cardView){
             return (.leftModel, cardIndex)
-        } else if let cardIndex = rightModelCardViews.firstIndex(of: cardView){
+        } else if let cardIndex = rightModelOnTableCardViews.firstIndex(of: cardView){
             return (.rightModel, cardIndex)
-        } else if let cardIndex = topModelCardViews.firstIndex(of: cardView) {
+        } else if let cardIndex = topModelOnTableCardViews.firstIndex(of: cardView) {
             return (.topModel, cardIndex)
         } else {
             print("the selected UIImageView does not belong to any of the models. return (Actor.game, 0)")
@@ -264,20 +277,20 @@ class ViewController: UIViewController, BeverbendeDelegate {
             initialInspection = true
             sender.setTitle("Hide", for: UIControl.State.normal)
             for index in [0, 3] { // the outer cards
-                let cardView = playerCardViews[index]
+                let cardView = userOnTableCardViews[index]
                 let value = getStringMatchingWithCard(forCard: user.getCardsOnTable()[index]!)
-                flipOpen(show: value, on: cardView, for: .player)
+                flipOpen(show: value, on: cardView, for: .user)
             }
         } else {
             for index in [0, 3] {
-                let cardView = playerCardViews[index]
-                flipClosed(hide: cardView, for: .player)
+                let cardView = userOnTableCardViews[index]
+                flipClosed(hide: cardView, for: .user)
             }
             sender.isHidden = true
         }
     }
     
-    @IBOutlet weak var playerCardStack: UIStackView!
+    @IBOutlet weak var userCardStack: UIStackView!
     @IBOutlet weak var leftCardStack: UIStackView!
     @IBOutlet weak var topCardStack: UIStackView!
     @IBOutlet weak var rightCardStack: UIStackView!
@@ -285,16 +298,16 @@ class ViewController: UIViewController, BeverbendeDelegate {
     func showBackOfAllCards() {
         showBackOfCard(on: deckView, for: .game)
         // Rotate the figures on the back of the cards
-        for cardView in playerCardViews {
-            showBackOfCard(on: cardView, for: .player)
+        for cardView in userOnTableCardViews {
+            showBackOfCard(on: cardView, for: .user)
         }
-        for cardView in leftModelCardViews {
+        for cardView in leftModelOnTableCardViews {
             showBackOfCard(on: cardView, for: .leftModel)
         }
-        for cardView in topModelCardViews {
+        for cardView in topModelOnTableCardViews {
             showBackOfCard(on: cardView, for: .topModel)
         }
-        for cardView in rightModelCardViews {
+        for cardView in rightModelOnTableCardViews {
             showBackOfCard(on: cardView, for: .rightModel)
         }
     }
@@ -306,39 +319,39 @@ class ViewController: UIViewController, BeverbendeDelegate {
         discardPileView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapDiscardPile(_:))))
         discardPileView.isUserInteractionEnabled = true
         
-        for cardView in playerCardViews {
-            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapPlayerCard(_:))))
+        for cardView in userOnTableCardViews {
+            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapUserCard(_:))))
             cardView.isUserInteractionEnabled = true
         }
-        for cardView in leftModelCardViews {
+        for cardView in leftModelOnTableCardViews {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
             cardView.isUserInteractionEnabled = true
         }
-        for cardView in topModelCardViews {
+        for cardView in topModelOnTableCardViews {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
             cardView.isUserInteractionEnabled = true
         }
-        for cardView in rightModelCardViews {
+        for cardView in rightModelOnTableCardViews {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
             cardView.isUserInteractionEnabled = true
         }
     }
 
     func showFrontOfCard(show value: String, on cardView: UIImageView, for actor: Actor) {
-        let frontImage = UIImage(named: value)!
+        let frontImage = UIImage(named: value) ?? UIImage(named: "empty")
         
-        let orientedImage = UIImage(cgImage: frontImage.cgImage!,
-                                    scale: frontImage.scale,
+        let orientedImage = UIImage(cgImage: frontImage!.cgImage!,
+                                    scale: frontImage!.scale,
                                     orientation: returnImageOrientation(for: actor))
         
         cardView.image = orientedImage
     }
 
     func showBackOfCard(on cardView: UIImageView, for actor: Actor){
-        let backImage = UIImage(named: "back")!
+        let backImage = UIImage(named: "back") ?? UIImage(named: "empty")
         
-        let orientedImage = UIImage(cgImage: backImage.cgImage!,
-                                    scale: backImage.scale,
+        let orientedImage = UIImage(cgImage: backImage!.cgImage!,
+                                    scale: backImage!.scale,
                                     orientation: returnImageOrientation(for: actor))
         
         cardView.image = orientedImage
@@ -352,7 +365,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             return .left
         case .topModel:
             return .down
-        case .player:
+        case .user:
             return .up
         case .game:
             return .up
@@ -367,7 +380,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             return CGAffineTransform(rotationAngle: -CGFloat.pi/2)
         case .topModel:
             return CGAffineTransform(rotationAngle: CGFloat.pi)
-        case .player:
+        case .user:
             return CGAffineTransform(rotationAngle: 0)
         case .game:
             return CGAffineTransform(rotationAngle: 0)
@@ -375,11 +388,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
 
     func hideDrawnCardInfoButton() {
-        drawnCardInfoButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        drawnCardInfoButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
-        drawnCardInfoButton.setTitle("", for: UIControl.State.normal)
-        drawnCardInfoButton.setImage(UIImage(systemName: "info.circle"), for: UIControl.State.normal)
-        drawnCardInfoButton.isHidden = true
+        onHandCardInfoButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        onHandCardInfoButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        onHandCardInfoButton.setTitle("", for: UIControl.State.normal)
+        onHandCardInfoButton.setImage(UIImage(systemName: "info.circle"), for: UIControl.State.normal)
+        onHandCardInfoButton.isHidden = true
     }
     
     func sizeUpAnimationViews() {
@@ -429,7 +442,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 return .transitionFlipFromLeft
             case .rightModel:
                 return .transitionFlipFromRight
-            case .player:
+            case .user:
                 return .transitionFlipFromTop
             case .topModel:
                 return .transitionFlipFromBottom
@@ -455,7 +468,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 return .transitionFlipFromRight
             case .rightModel:
                 return .transitionFlipFromLeft
-            case .player:
+            case .user:
                 return .transitionFlipFromBottom
             case .topModel:
                 return .transitionFlipFromTop
@@ -476,14 +489,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
 
     func retrieveOnHandCardView(for actor: Actor) -> UIImageView {
         switch actor {
-        case .player:
-            return playerDrawnCardView
+        case .user:
+            return userOnHandCardView
         case .leftModel:
-            return leftModelDrawnCardView
+            return leftModelOnHandCardView
         case .rightModel:
-            return rightModelDrawnCardView
+            return rightModelOnHandCardView
         case .topModel:
-            return topModelDrawnCardView
+            return topModelOnHandCardView
         case .game:
             exit(0)
         }
@@ -494,7 +507,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         var duration: Double
         
-        if actor == .player {
+        if actor == .user {
             duration = 0.61 * 2 + 1 // time to: flip open, flip closed, inspect
             flipOpen(show: value, on: cardView, for: actor)
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.61 + 1) {
@@ -548,7 +561,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           } )
         NSLayoutConstraint.deactivate(overlayConstraints)
         
-        if actor == .player {
+        if actor == .user {
             duration += 0.01 + 0.61
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
                 self.flipOpen(show: value, on: onHandCardView, for: actor)
@@ -624,14 +637,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     func retrieveOnTableCardViews(for actor: Actor) -> [UIImageView] {
         switch actor {
-        case .player:
-            return playerCardViews
+        case .user:
+            return userOnTableCardViews
         case .leftModel:
-            return leftModelCardViews
+            return leftModelOnTableCardViews
         case .rightModel:
-            return rightModelCardViews
+            return rightModelOnTableCardViews
         case .topModel:
-            return topModelCardViews
+            return topModelOnTableCardViews
         case .game:
             exit(0)
         }
@@ -726,19 +739,19 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     func flipOpenAllCards() -> Double {
         var value = 0
-        for cardView in playerCardViews {
-            flipOpen(show: String(value), on: cardView, for: .player)
+        for cardView in userOnTableCardViews {
+            flipOpen(show: String(value), on: cardView, for: .user)
         }
         value += 1
-        for cardView in leftModelCardViews {
+        for cardView in leftModelOnTableCardViews {
             flipOpen(show: String(value), on: cardView, for: .leftModel)
         }
         value += 1
-        for cardView in topModelCardViews {
+        for cardView in topModelOnTableCardViews {
             flipOpen(show: String(value), on: cardView, for: .topModel)
         }
         value += 1
-        for cardView in rightModelCardViews {
+        for cardView in rightModelOnTableCardViews {
             flipOpen(show: String(value), on: cardView, for: .rightModel)
         }
         return 0.61
@@ -858,7 +871,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     func findActorMatchingWithPLayer(withId playerId: String) -> Actor {
         switch playerId {
         case "user":
-            return .player
+            return .user
         case "left":
             return .leftModel
         case "right":

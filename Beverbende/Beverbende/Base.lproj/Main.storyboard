@@ -172,32 +172,32 @@
                         <outlet property="InspectButton" destination="3Ej-Vr-p8e" id="5FC-fP-PFs"/>
                         <outlet property="deckView" destination="ZVh-9f-JmA" id="lOa-wb-XYB"/>
                         <outlet property="discardPileView" destination="v5G-ec-era" id="VEu-a1-mgb"/>
-                        <outlet property="drawnCardInfoButton" destination="2jY-Ke-cGh" id="ae7-qQ-iAN"/>
                         <outlet property="inspectButton" destination="3Ej-Vr-p8e" id="I13-a1-wb5"/>
                         <outlet property="leftCardStack" destination="3UE-dg-Ecd" id="5c6-wF-1Qb"/>
-                        <outlet property="leftModelDrawnCardView" destination="KD6-5W-jUC" id="Nu0-Ws-Bbo"/>
-                        <outlet property="playerCardStack" destination="Vk9-nN-8Av" id="46N-hY-pEc"/>
-                        <outlet property="playerDrawnCardView" destination="Xzj-N5-4Ha" id="7sn-Y9-q6n"/>
+                        <outlet property="leftModelOnHandCardView" destination="KD6-5W-jUC" id="Nu0-Ws-Bbo"/>
+                        <outlet property="onHandCardInfoButton" destination="2jY-Ke-cGh" id="ae7-qQ-iAN"/>
                         <outlet property="rightCardStack" destination="zTA-CD-xZW" id="9LC-8F-GLp"/>
-                        <outlet property="rightModelDrawnCardView" destination="NtA-jW-US5" id="HWZ-tJ-5Ah"/>
+                        <outlet property="rightModelOnHandCardView" destination="NtA-jW-US5" id="HWZ-tJ-5Ah"/>
                         <outlet property="topCardStack" destination="y0F-xD-sFd" id="epH-2s-fGV"/>
-                        <outlet property="topModelDrawnCardView" destination="f0s-tB-xvf" id="SoZ-94-HeO"/>
-                        <outletCollection property="playerCardViews" destination="Lq7-rZ-5Xg" collectionClass="NSMutableArray" id="IOt-bG-zOs"/>
-                        <outletCollection property="playerCardViews" destination="KCE-gM-OXt" collectionClass="NSMutableArray" id="vDv-oH-czv"/>
-                        <outletCollection property="playerCardViews" destination="sWq-Ar-cmw" collectionClass="NSMutableArray" id="Rwf-o4-3bE"/>
-                        <outletCollection property="playerCardViews" destination="Kg6-6n-zjl" collectionClass="NSMutableArray" id="yjd-AV-FAJ"/>
-                        <outletCollection property="leftModelCardViews" destination="s9Z-k5-SS0" collectionClass="NSMutableArray" id="djO-BH-YNk"/>
-                        <outletCollection property="leftModelCardViews" destination="7KW-Rg-Eg0" collectionClass="NSMutableArray" id="5AX-T2-3bW"/>
-                        <outletCollection property="leftModelCardViews" destination="bxi-ot-dq2" collectionClass="NSMutableArray" id="iVA-iK-UQa"/>
-                        <outletCollection property="leftModelCardViews" destination="UrH-7W-TSV" collectionClass="NSMutableArray" id="j0L-2B-a9m"/>
-                        <outletCollection property="topModelCardViews" destination="RKW-yV-bjh" collectionClass="NSMutableArray" id="6j1-ew-hSR"/>
-                        <outletCollection property="topModelCardViews" destination="kDm-Fj-hyM" collectionClass="NSMutableArray" id="biN-Qk-DZp"/>
-                        <outletCollection property="topModelCardViews" destination="uDh-Cf-8mL" collectionClass="NSMutableArray" id="nG9-5t-a2I"/>
-                        <outletCollection property="topModelCardViews" destination="JSk-UP-fep" collectionClass="NSMutableArray" id="JcC-Mi-F6F"/>
-                        <outletCollection property="rightModelCardViews" destination="qvZ-Sl-cDd" collectionClass="NSMutableArray" id="GXV-DD-XDd"/>
-                        <outletCollection property="rightModelCardViews" destination="fx8-2t-0Rs" collectionClass="NSMutableArray" id="E0Q-sE-8BS"/>
-                        <outletCollection property="rightModelCardViews" destination="qQZ-4F-JNH" collectionClass="NSMutableArray" id="MDW-Nn-wV7"/>
-                        <outletCollection property="rightModelCardViews" destination="1wA-ai-kyl" collectionClass="NSMutableArray" id="ZtG-ky-OG8"/>
+                        <outlet property="topModelOnHandCardView" destination="f0s-tB-xvf" id="SoZ-94-HeO"/>
+                        <outlet property="userCardStack" destination="Vk9-nN-8Av" id="46N-hY-pEc"/>
+                        <outlet property="userOnHandCardView" destination="Xzj-N5-4Ha" id="7sn-Y9-q6n"/>
+                        <outletCollection property="userOnTableCardViews" destination="Lq7-rZ-5Xg" collectionClass="NSMutableArray" id="IOt-bG-zOs"/>
+                        <outletCollection property="userOnTableCardViews" destination="KCE-gM-OXt" collectionClass="NSMutableArray" id="vDv-oH-czv"/>
+                        <outletCollection property="userOnTableCardViews" destination="sWq-Ar-cmw" collectionClass="NSMutableArray" id="Rwf-o4-3bE"/>
+                        <outletCollection property="userOnTableCardViews" destination="Kg6-6n-zjl" collectionClass="NSMutableArray" id="yjd-AV-FAJ"/>
+                        <outletCollection property="leftModelOnTableCardViews" destination="s9Z-k5-SS0" collectionClass="NSMutableArray" id="djO-BH-YNk"/>
+                        <outletCollection property="leftModelOnTableCardViews" destination="7KW-Rg-Eg0" collectionClass="NSMutableArray" id="5AX-T2-3bW"/>
+                        <outletCollection property="leftModelOnTableCardViews" destination="bxi-ot-dq2" collectionClass="NSMutableArray" id="iVA-iK-UQa"/>
+                        <outletCollection property="leftModelOnTableCardViews" destination="UrH-7W-TSV" collectionClass="NSMutableArray" id="j0L-2B-a9m"/>
+                        <outletCollection property="topModelOnTableCardViews" destination="RKW-yV-bjh" collectionClass="NSMutableArray" id="6j1-ew-hSR"/>
+                        <outletCollection property="topModelOnTableCardViews" destination="kDm-Fj-hyM" collectionClass="NSMutableArray" id="biN-Qk-DZp"/>
+                        <outletCollection property="topModelOnTableCardViews" destination="uDh-Cf-8mL" collectionClass="NSMutableArray" id="nG9-5t-a2I"/>
+                        <outletCollection property="topModelOnTableCardViews" destination="JSk-UP-fep" collectionClass="NSMutableArray" id="JcC-Mi-F6F"/>
+                        <outletCollection property="rightModelOnTableCardViews" destination="qvZ-Sl-cDd" collectionClass="NSMutableArray" id="GXV-DD-XDd"/>
+                        <outletCollection property="rightModelOnTableCardViews" destination="fx8-2t-0Rs" collectionClass="NSMutableArray" id="E0Q-sE-8BS"/>
+                        <outletCollection property="rightModelOnTableCardViews" destination="qQZ-4F-JNH" collectionClass="NSMutableArray" id="MDW-Nn-wV7"/>
+                        <outletCollection property="rightModelOnTableCardViews" destination="1wA-ai-kyl" collectionClass="NSMutableArray" id="ZtG-ky-OG8"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
