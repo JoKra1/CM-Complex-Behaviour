@@ -95,8 +95,8 @@ class Beverbende {
         self.notifyDelegates(for: EventType.nextTurn, with: ["player": player])
         
         // Check for end of game - if so, notify delegates
-        if self.countdown == 0 {
-            // Game has ended
+        if self.knocked && self.countdown == 0 {
+            // Game has ended, determine winner
             var scores: [String: Int] = [:]
             var lowestScore = 4 * 9
             var winner = self.players[0]
@@ -104,11 +104,13 @@ class Beverbende {
             for player in self.players {
                 scores[player.getId()] = 0
                 
+                // Sum all values
                 for (index, card) in player.getCardsOnTable().enumerated() {
                     let c = card!
                     var drawnCard: Card
                     switch c.getType() {
                     case .action:
+                        // Keep drawing until receiving a value card
                         repeat {
                             drawnCard = self.drawCard(for: player)
                             self.tradeDrawnCardWithCard(at: index, for: player)
