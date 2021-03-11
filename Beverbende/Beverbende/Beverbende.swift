@@ -31,7 +31,7 @@ class Beverbende {
         values = values + Array(repeating: 9, count: 9)
         let actions = Array(repeating: Action.inspect, count: 7) +
             Array(repeating: Action.twice, count: 5)
-//            + Array(repeating: Action.swap, count: 9)
+            + Array(repeating: Action.swap, count: 9)
         
         var cards: [Card] = []
         for v in values {
@@ -255,5 +255,15 @@ class Beverbende {
         
         self.notifyDelegates(for: .discardedCardTraded, with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index, "topOfDeckCard": topOfDeckCard])
         
+    }
+    
+    func swapCards(cardAt index1: Int, for player1: Player, withCardAt index2: Int, for player2: Player) {
+        let swappedCard1 = player1.getCardsOnTable()[index1]!
+        let swappedCard2 = self.replaceCard(at: index2, with: swappedCard1, for: player2)
+        _ = self.replaceCard(at: index1, with: swappedCard2, for: player1)
+        
+        // i think this is the correct way to swap them
+        
+        self.notifyDelegates(for: .cardsSwapped, with: ["cardIndex": index1, "player": player1, "cardIndex2": index2, "player2": player2])
     }
 }

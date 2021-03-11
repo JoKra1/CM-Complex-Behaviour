@@ -154,7 +154,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
             cardView.alpha = 1
             selectedForUserIndex = nil
         } else { // set the touched card as selected, doesnt matter if another one was already selected or not
-            retrieveOnTableCardViews(for: actor).forEach { $0.alpha = 1 }
+            leftModelOnTableCardViews.forEach { $0.alpha = 1 }
+            rightModelOnTableCardViews.forEach { $0.alpha = 1 }
+            topModelOnTableCardViews.forEach { $0.alpha = 1 }
             cardView.alpha = 0.5
             selectedForModelAtIndex = (actor, cardIndex)
         }
@@ -172,27 +174,28 @@ class ViewController: UIViewController, BeverbendeDelegate {
         switch recognizer.state {
         case .ended:
             if let touchedCardView = recognizer.view as? UIImageView , isUserTurn {
-                let TouchedCardIndex = userOnTableCardViews.firstIndex(of: touchedCardView)!
+                let touchedCardIndex = userOnTableCardViews.firstIndex(of: touchedCardView)!
                 
                 if let action = playedAction {
                     switch action {
                     case .inspect:
                         endUserTurn()
-                        _ = game.inspectCard(at: TouchedCardIndex, for: user)
-                        game.moveCardBackFromHand(to: TouchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
+                        _ = game.inspectCard(at: touchedCardIndex, for: user)
+                        game.moveCardBackFromHand(to: touchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
                     case .swap:
                         if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex {
-                            // TODO: do the trade, Loran adds this to the game model first
                             undoCardSelections()
                             endUserTurn()
+                            let otherPlayer = findPlayerMatchingWithActor(for: selectedModel)
+                            game.swapCards(cardAt: touchedCardIndex, for: user, withCardAt: selectedForModelIndex, for: otherPlayer)
                         } else { // handle selection of the player's cards
-                            handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
+                            handleCardSelectionForUser(forView: touchedCardView, withIndex: touchedCardIndex)
                         }
                     case .twice:
                         switch user.getCardOnHand()?.getType() {
                         case .value:
                             endUserTurn()
-                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
+                            game.tradeDrawnCardWithCard(at: touchedCardIndex, for: user)
                         case .action:
                             // nothing should happen here, the player first had to discard the action card to play it
                             break
@@ -204,16 +207,16 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
                         if discardPileSelected { // the discarded pile was already selected
                             endUserTurn()
-                            game.tradeDiscardedCardWithCard(at: TouchedCardIndex, for: user)
+                            game.tradeDiscardedCardWithCard(at: touchedCardIndex, for: user)
                             undoCardSelections()
                         } else { // handle selection of the player's cards
-                            handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
+                            handleCardSelectionForUser(forView: touchedCardView, withIndex: touchedCardIndex)
                         }
                     } else { // user.getCardOnHand() != nil, a card was already drawn
                         switch user.getCardOnHand()?.getType() {
                         case .value:
                             endUserTurn()
-                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
+                            game.tradeDrawnCardWithCard(at: touchedCardIndex, for: user)
                         case .action:
                             // nothing should happen here, the player first had to discard the action card to play it
                             break
@@ -243,11 +246,13 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case .ended:
             if let touchedCardView = recognizer.view as? UIImageView {
                 let (touchedModel, touchedCardIndex) = findActorAndIndexForView(for: touchedCardView)
-                if let onHandCard = user.getCardOnHand() as? ActionCard, onHandCard.getAction() == .swap { //a card needs to be on hand and it needs tobe the swap card specifically
+                if playedAction == .swap { // the action card had to be played for this to work
                     if let selectedUserIndex = selectedForUserIndex {
                         // TODO: do the trade, Loran adds this to the game model first
                         undoCardSelections()
                         endUserTurn()
+                        let otherPlayer = findPlayerMatchingWithActor(for: touchedModel)
+                        game.swapCards(cardAt: selectedUserIndex, for: user, withCardAt: touchedCardIndex, for: otherPlayer)
                     } else { // handle selection of the model's cards
                         handleCardSelectionForModel(forModel: touchedModel, forView: touchedCardView, withIndex: touchedCardIndex)
                     }
@@ -922,6 +927,21 @@ class ViewController: UIViewController, BeverbendeDelegate {
         default:
             print("this ID does not belong to a user as specified")
             return .game
+        }
+    }
+    
+    func findPlayerMatchingWithActor(for actor: Actor) -> Player {
+        switch actor {
+        case .user:
+            return user
+        case .leftModel:
+            return game.players[1]
+        case .topModel:
+            return game.players[2]
+        case .rightModel:
+            return game.players[3]
+        default:
+            return user
         }
     }
     
