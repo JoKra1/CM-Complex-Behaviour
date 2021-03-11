@@ -19,14 +19,14 @@ protocol BeverbendeDelegate: AnyObject {
  EventType          Info object
  ---------          -----------
  nextTurn           ["player": Player]
- cardDrawn          ["player": Player, "card": Card] changed
- discardedCardDrawn ["player": Player]
- discardedCardTraded ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int] changed
+ cardDrawn          ["player": Player, "card": Card] changed, also already in Beverbende.swift
+ discardedCardDrawn ["player": Player, "card": Card] changed, also already in Beverbende.swift
+ discardedCardTraded ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int] changed, also already in Beverbende.swift
  cardPlayed         ["player": Player, "card": ActionCard]
- cardDiscarded      ["player": Player, "card": Card, "isFaceUp":Bool] changed
- cardsSwapped       ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player]
- cardTraded       ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool] changed (also renamed form "cardReplaced", for consistency)
- cardInspected      ["player": Player, "card": Card, "cardIndex": Int] added
+ cardDiscarded      ["player": Player, "card": Card, "isFaceUp":Bool] changed, we need to see who handles the isFaceUp, perhaps the controller.
+ cardsSwapped       ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player] needs code implementation, animations should work
+ cardTraded       ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool] changed (also renamed form "cardReplaced", for consistency) already changed
+ cardInspected      ["player": Player, "card": Card, "cardIndex": Int] added, not yet added to Beverbende.swift
  knocked
  gameEnded
  */

@@ -135,7 +135,7 @@ class Beverbende {
         let card = self.discardPile.pop()!
         player.setCardOnHand(with: card)
         
-        self.notifyDelegates(for: EventType.discardedCardDrawn, with: ["player": player])
+        self.notifyDelegates(for: EventType.discardedCardDrawn, with: ["player": player, "card":card])
         
         return card
     }
@@ -168,6 +168,8 @@ class Beverbende {
         // card.isFaceUp = true
         player.setCardOnHand(with: card)
         player.setCardOnTable(with: nil, at: index)
+        
+        
         
         return card
     }

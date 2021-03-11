@@ -784,6 +784,20 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let value = getStringMatchingWithCard(forCard: card)
             let openOnHand = !(info["isFaceUp"] as! Bool)
             duration = animateDiscardFromHand(by: actor, withValue: value, openOnHand: openOnHand)
+            
+        case .discardedCardDrawn: // only ever issued by model, if followed by a trade, then the model chose to trade with discarded
+            let cardToPlayer = info["card"] as! Card
+            if let (nextEvent, nextInfo) = self.eventQueue.dequeue() {
+                if nextEvent == .cardTraded { // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool]
+                    let player = nextInfo["player"] as! Player
+                    let cardFromPlayer = nextInfo["cardFromPlayer"] as! Card
+                    let cardFromPlayerIndex = nextInfo["cardFromPlayerIndex"] as! Int
+                    let actor = findActorMatchingWithPLayer(withId: player.getId())
+                    let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
+                    let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
+                    duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, by: actor)
+                }
+            } else { print("I expected another event after a discarded card being drawn by the model") }
         
         case .cardPlayed: // info: ["player": Player, "card": ActionCard]
             let player = info["player"] as! Player
