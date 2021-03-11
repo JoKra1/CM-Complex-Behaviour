@@ -15,6 +15,9 @@ class Beverbende {
     var discardPile: Stack<Card>
     var delegates: [WeakContainer<BeverbendeDelegate>]
     
+    var knocked = false
+    var countdown = 0
+    
     static func allCards() -> [Card] {
         var values = Array(repeating: 0, count: 4)
         values = values + Array(repeating: 1, count: 4)
@@ -92,12 +95,56 @@ class Beverbende {
         self.notifyDelegates(for: EventType.nextTurn, with: ["player": player])
         
         // Check for end of game - if so, notify delegates
+        if self.countdown == 0 {
+            // Game has ended
+            var scores: [String: Int] = [:]
+            var lowestScore = 4 * 9
+            var winner = self.players[0]
+            
+            for player in self.players {
+                scores[player.getId()] = 0
+                
+                for (index, card) in player.getCardsOnTable().enumerated() {
+                    let c = card!
+                    var drawnCard: Card
+                    switch c.getType() {
+                    case .action:
+                        repeat {
+                            drawnCard = self.drawCard(for: player)
+                            self.tradeDrawnCardWithCard(at: index, for: player)
+                        } while !isValueCard(card: drawnCard)
+                        scores[player.getId()]! += drawnCard.getValue()
+                    case .value:
+                        scores[player.getId()]! += c.getValue()
+                    }
+                }
+                
+                if scores[player.getId()]! < lowestScore {
+                    lowestScore = scores[player.getId()]!
+                    winner = player
+                }
+            }
+            
+            self.notifyDelegates(for: EventType.gameEnded, with: ["winner": winner])
+        }
+        self.countdown -= 1
         
         return player
     }
     
-    func knock() {
-        // Emit knock event
+    func isValueCard(card: Card) -> Bool {
+        if case .value = card.getType() {
+            return true
+        }
+        
+        return false
+    }
+    
+    func knock(from player: Player) {
+        self.knocked = true
+        self.countdown = self.players.count - 1
+        
+        self.notifyDelegates(for: EventType.knocked, with: ["player": player])
     }
     
     // TODO: make swapCard method

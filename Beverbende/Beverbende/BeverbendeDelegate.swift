@@ -8,7 +8,9 @@
 import Foundation
 
 enum EventType {
-    case nextTurn, cardDrawn, discardedCardDrawn, discardedCardTraded, cardPlayed, cardDiscarded, cardsSwapped, cardTraded, cardInspected, knocked, gameEnded
+    case nextTurn, cardDrawn, discardedCardDrawn, discardedCardTraded,
+         cardPlayed, cardDiscarded, cardsSwapped, cardTraded, cardInspected,
+         knocked, gameEnded
 }
 
 protocol BeverbendeDelegate: AnyObject {
@@ -27,8 +29,8 @@ protocol BeverbendeDelegate: AnyObject {
  cardsSwapped       ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player] needs code implementation, animations should work
  cardTraded       ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool] changed (also renamed form "cardReplaced", for consistency) already changed
  cardInspected      ["player": Player, "card": Card, "cardIndex": Int] added, not yet added to Beverbende.swift
- knocked
- gameEnded
+ knocked            ["player": Player]
+ gameEnded          ["winner": Player]
  */
 
 // a FROM card goed From the player to the discard pile, a TO card moves from the hand or the discard pile to the player's on table cards
