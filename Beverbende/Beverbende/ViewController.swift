@@ -84,7 +84,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var playedAction: Action?
     
     func endUserTurn() {
-        _ = game.nextPlayer()
         isUserTurn = false
         playedAction = nil
         selectedForUserIndex = nil
@@ -110,7 +109,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case .ended:
             if isUserTurn {
                 if let onHandCard = user.getCardOnHand() { // discard drawn card
-                    game.discardDrawnCard(for: user)
                     switch onHandCard.getType() {
                     case .value:
                         playedAction == .twice ? playedAction = nil : endUserTurn() // a discard does not end the turn if the draw twice action card was played
@@ -118,11 +116,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
                         let actionCard = onHandCard as! ActionCard
                         playedAction = actionCard.getAction()
                     }
+                    game.discardDrawnCard(for: user)
                 } else { //user.getCardOnHand() == nil, get into the process of trading with the discarded pile
                     if let cardIndex = selectedForUserIndex { // the user already selected one of their own cards
-                        game.tradeDiscardedCardWithCard(at: cardIndex, for: user)
                         undoCardSelections()
                         endUserTurn()
+                        game.tradeDiscardedCardWithCard(at: cardIndex, for: user)
                     } else { // toggle between selected and not
                         discardPileView.alpha = (discardPileSelected) ? 1 : 0.5
                         discardPileSelected = !discardPileSelected
@@ -177,8 +176,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     switch action {
                     case .inspect:
                         _ = game.inspectCard(at: TouchedCardIndex, for: user)
-                        game.moveCardBackFromHand(to: TouchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
                         endUserTurn()
+                        game.moveCardBackFromHand(to: TouchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
                     case .swap:
                         if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex {
                             // TODO: do the trade, Loran adds this to the game model first
@@ -190,8 +189,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     case .twice:
                         switch user.getCardOnHand()?.getType() {
                         case .value:
-                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
                             endUserTurn()
+                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
                         case .action:
                             // nothing should happen here, the player first had to discard the action card to play it
                             break
@@ -202,17 +201,17 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 } else { // there was no action card played
                     if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
                         if discardPileSelected { // the discarded pile was already selected
+                            endUserTurn()
                             game.tradeDiscardedCardWithCard(at: TouchedCardIndex, for: user)
                             undoCardSelections()
-                            endUserTurn()
                         } else { // handle selection of the player's cards
                             handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
                         }
                     } else { // user.getCardOnHand() != nil, a card was already drawn
                         switch user.getCardOnHand()?.getType() {
                         case .value:
-                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
                             endUserTurn()
+                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
                         case .action:
                             // nothing should happen here, the player first had to discard the action card to play it
                             break
@@ -770,37 +769,51 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var isUserTurn = true // user starts the game
     
     func handleEvent(for event: EventType, with info: [String : Any]) {
-        print("event: \(event)")
+        print("incoming event: \(event)")
         let player = info["player"] as! Player
         if player.getId() == user.getId() {
-            if event == .nextTurn { // start animating all the models actions
+            if event == .nextTurn { // start animating once all models done their thing
                 if let (firstEvent, firstInfo) = eventQueue.dequeue() {
-                    animateEvent(for: firstEvent, with: firstInfo)
-                    isUserTurn = true
+                        self.animateEvent(for: firstEvent, with: firstInfo)
+                        self.isUserTurn = true
                 } else { print("there should be events in the eventQueueueue") }
             } else {
                 animateEvent(for: event, with: info) // imediatelly animate the user's actions
             }
-        } else { // event not pertaining to the user, but to a model
+        } else {
             eventQueue.enqueue(element: (event, info))
         }
     }
     
+    func tryProgressGameFromUser(forAnimationWithDuration duration: Double, testFor player: Player) {
+        /*
+         This function determines when not only the players actions, but also the acompanying animations, are done, before the the game progresses to the first model
+         */
+        if player.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the player performs his last gesture/action
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration + 1) {
+                _ = self.game.nextPlayer()
+            }
+        }
+    }
+    
     func animateEvent(for event: EventType, with info: [String : Any]) {
-//        Actor is the UI complement to the Player class
+//        Actor is the UI complement to the Player class, will be discarded at some time
         disableUserInteraction()
         var duration = 0.0
         
+        print("ANIMATION START")
+        print("WITH EVENT: \(event)")
+        
+        var player = info["player"] as! Player
+        
         switch event {
         case .cardDrawn: // info: ["player": Player]
-            let player = info["player"] as! Player
             let card = info["card"] as! Card
             let actor = findActorMatchingWithPLayer(withId: player.getId())
             let cardValue = getStringMatchingWithCard(forCard: card)
             duration = animateCardDraw(by: actor, withValue: cardValue)
     
         case .cardDiscarded:// info: ["player": Player]
-            let player = info["player"] as! Player
             let card = info["card"] as! Card
             let actor = findActorMatchingWithPLayer(withId: player.getId())
             let value = getStringMatchingWithCard(forCard: card)
@@ -811,7 +824,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let cardToPlayer = info["card"] as! Card
             if let (nextEvent, nextInfo) = self.eventQueue.dequeue() {
                 if nextEvent == .cardTraded { // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool]
-                    let player = nextInfo["player"] as! Player
+                    player = nextInfo["player"] as! Player
                     let cardFromPlayer = nextInfo["cardFromPlayer"] as! Card
                     let cardFromPlayerIndex = nextInfo["cardFromPlayerIndex"] as! Int
                     let actor = findActorMatchingWithPLayer(withId: player.getId())
@@ -822,7 +835,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
             } else { print("I expected another event after a discarded card being drawn by the model") }
         
         case .cardPlayed: // info: ["player": Player, "card": ActionCard]
-            let player = info["player"] as! Player
             let actionCard = info["card"] as! ActionCard
             let actor = findActorMatchingWithPLayer(withId: player.getId())
             let value = getStringMatchingWithCard(forCard: actionCard)
@@ -830,16 +842,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
             duration = 0.61
         
         case .cardsSwapped: // ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player]
-            let player1 = info["player1"] as! Player
             let player2 = info["player2"] as! Player
-            let cardIndex1 = info["cardIndex1"] as! Int
+            let cardIndex1 = info["cardIndex"] as! Int
             let cardIndex2 = info["cardIndex2"] as! Int
-            let actor1 = findActorMatchingWithPLayer(withId: player1.getId())
+            let actor1 = findActorMatchingWithPLayer(withId: player.getId())
             let actor2 = findActorMatchingWithPLayer(withId: player2.getId())
             duration = animateCardTrade(ofCardAtIndex: cardIndex1, by: actor1, withCardAtIndex: cardIndex2, from: actor2)
         
         case .cardTraded: // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int,  "toIsFaceUp":Bool]
-            let player = info["player"] as! Player
             let cardFromPlayer = info["cardFromPlayer"] as! Card
             let cardFromPlayerIndex = info["cardFromPlayerIndex"] as! Int
             let actor = findActorMatchingWithPLayer(withId: player.getId())
@@ -847,7 +857,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
             duration = animateTradeOnHand(withCardAtIndex: cardFromPlayerIndex, by: actor, withValue: getStringMatchingWithCard(forCard: cardFromPlayer), closeOnHand: closeOnHand)
             
         case .discardedCardTraded: // ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int]
-            let player = info["player"] as! Player
             let cardFromPlayer = info["cardFromPlayer"] as! Card
             let cardFromPlayerIndex = info["cardFromPlayerIndex"] as! Int
             let cardToPlayer = info["cardToPlayer"] as! Card
@@ -857,17 +866,23 @@ class ViewController: UIViewController, BeverbendeDelegate {
             duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, by: actor)
             
         case .cardInspected: // ["player": Player, "card": Card, "cardIndex": Int]
-            let player = info["player"] as! Player
             let card = info["card"] as! Card
             let cardIndex = info["cardIndex"] as! Int
             let actor = findActorMatchingWithPLayer(withId: player.getId())
             let value = getStringMatchingWithCard(forCard: card)
             duration = animateCardInspection(for: actor, withCardatIndex: cardIndex, withValue: value)
+            
+        case .nextTurn:
+            duration = 2
+            
         default:
-            break
+            duration = 0
         }
         
+        tryProgressGameFromUser(forAnimationWithDuration: duration, testFor: player)
+        
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
+            print("ANIMATION END")
             if let (nextEvent, nextInfo) = self.eventQueue.dequeue() { // there is a next event in the queue
                 self.animateEvent(for: nextEvent, with: nextInfo)
             } else { // the eventQueue is empty (during player turn, or at the end of all animations for the models)

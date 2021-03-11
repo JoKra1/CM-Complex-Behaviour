@@ -16,7 +16,7 @@ class Beverbende {
     var delegates: [WeakContainer<BeverbendeDelegate>]
     
     var knocked = false
-    var countdown = 10
+    var countdown = 100000
     
     static func allCards() -> [Card] {
         var values = Array(repeating: 0, count: 4)
@@ -30,8 +30,8 @@ class Beverbende {
         values = values + Array(repeating: 8, count: 4)
         values = values + Array(repeating: 9, count: 9)
         let actions = Array(repeating: Action.inspect, count: 7) +
-            Array(repeating: Action.twice, count: 5) +
-            Array(repeating: Action.swap, count: 9)
+            Array(repeating: Action.twice, count: 5)
+//            + Array(repeating: Action.swap, count: 9)
         
         var cards: [Card] = []
         for v in values {
