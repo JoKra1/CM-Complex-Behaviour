@@ -26,18 +26,18 @@ class Beverbende {
         values = values + Array(repeating: 7, count: 4)
         values = values + Array(repeating: 8, count: 4)
         values = values + Array(repeating: 9, count: 9)
-//        let actions = []
-//            Array(repeating: Action.inspect, count: 7) +
-//            Array(repeating: Action.twice, count: 5) +
-//            Array(repeating: Action.swap, count: 9)
+        let actions = []
+            Array(repeating: Action.inspect, count: 7) +
+            Array(repeating: Action.twice, count: 5) +
+            Array(repeating: Action.swap, count: 9)
         
         var cards: [Card] = []
         for v in values {
             cards.append(ValueCard(value: v))
         }
-//        for a in actions {
-//            cards.append(ActionCard(value: a))
-//        }
+        for a in actions {
+            cards.append(ActionCard(value: a))
+        }
         
         return cards
     }
