@@ -77,15 +77,16 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBOutlet weak var onHandCardInfoButton: UIButton!
     
-    var twiceInPlay: Bool = false
     var discardPileSelected: Bool = false
     var selectedForUserIndex: Int? = nil
     var selectedForModelAtIndex: (Actor, Int)? = nil
     
+    var playedAction: Action?
+    
     func endUserTurn() {
         _ = game.nextPlayer()
         isUserTurn = false
-        twiceInPlay = false
+        playedAction = nil
         selectedForUserIndex = nil
         selectedForModelAtIndex = nil
     }
@@ -95,7 +96,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
 //        print(animationViewThree.constraints)
         switch recognizer.state {
         case .ended:
-            if isUserTurn, user.getCardOnHand() == nil {
+            if isUserTurn, user.getCardOnHand() == nil, (playedAction == nil || playedAction == .twice) {
                 _ = game.drawCard(for: user)
                 undoCardSelections()
             }
@@ -112,17 +113,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     game.discardDrawnCard(for: user)
                     switch onHandCard.getType() {
                     case .value:
-                        twiceInPlay ? twiceInPlay = false : endUserTurn()
+                        playedAction == .twice ? playedAction = nil : endUserTurn() // a discard does not end the turn if the draw twice action card was played
                     case .action:
                         let actionCard = onHandCard as! ActionCard
-                        switch actionCard.getAction() {
-                        case .twice:
-                            twiceInPlay = true
-                        default:
-                            twiceInPlay ? twiceInPlay = false : endUserTurn()
-                        }
+                        playedAction = actionCard.getAction()
                     }
-                     // a discard does not end the turn if the draw twice action card was played
                 } else { //user.getCardOnHand() == nil, get into the process of trading with the discarded pile
                     if let cardIndex = selectedForUserIndex { // the user already selected one of their own cards
                         game.tradeDiscardedCardWithCard(at: cardIndex, for: user)
@@ -177,40 +172,45 @@ class ViewController: UIViewController, BeverbendeDelegate {
             if let touchedCardView = recognizer.view as? UIImageView , isUserTurn {
                 let TouchedCardIndex = userOnTableCardViews.firstIndex(of: touchedCardView)!
                 
-                if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
-                    if discardPileSelected { // the discarded pile was already selected
-                        game.tradeDiscardedCardWithCard(at: TouchedCardIndex, for: user)
-                        undoCardSelections()
+                if let action = playedAction {
+                    print("playedAction: \(playedAction)")
+                    switch action {
+                    case .inspect:
+                        _ = game.inspectCard(at: TouchedCardIndex, for: user)
+                        game.moveCardBackFromHand(to: TouchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
                         endUserTurn()
-                    } else { // handle selection of the player's cards
-                        handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
-                    }
-                } else { // user.getCardOnHand() != nil, a card was already drawn
-                    switch user.getCardOnHand()?.getType() {
-                    case .value:
-                        game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
-                        endUserTurn()
-                    case .action:
-                        let actionCard = user.getCardOnHand()! as! ActionCard
-                        switch actionCard.getAction() {
-                        case .inspect:
-                            _ = game.inspectCard(at: TouchedCardIndex, for: user)
-                            game.moveCardBackFromHand(to: TouchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
+                    case .swap:
+                        if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex {
+                            // TODO: do the trade, Loran adds this to the game model first
+                            undoCardSelections()
                             endUserTurn()
-                        case .swap:
-                            if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex {
-                                // TODO: do the trade, Loran adds this to the game model first
-                                undoCardSelections()
-                                endUserTurn()
-                            } else { // handle selection of the player's cards
-                                handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
-                            }
-                        case .twice:
-                            // Nothing happend, the player has to discard first, not optional to not play it, I see no case where this would not happen
+                        } else { // handle selection of the player's cards
+                            handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
+                        }
+                    case .twice:
+                        // like regular play
+                        break
+                    }
+                } else { // there was no action card played
+                    if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
+                        if discardPileSelected { // the discarded pile was already selected
+                            game.tradeDiscardedCardWithCard(at: TouchedCardIndex, for: user)
+                            undoCardSelections()
+                            endUserTurn()
+                        } else { // handle selection of the player's cards
+                            handleCardSelectionForUser(forView: touchedCardView, withIndex: TouchedCardIndex)
+                        }
+                    } else { // user.getCardOnHand() != nil, a card was already drawn
+                        switch user.getCardOnHand()?.getType() {
+                        case .value:
+                            game.tradeDrawnCardWithCard(at: TouchedCardIndex, for: user)
+                            endUserTurn()
+                        case .action:
+                            // nothing should happen here, the player first had to discard the action card to play it
+                            break
+                        default:
                             break
                         }
-                    default:
-                        break
                     }
                 }
             }
