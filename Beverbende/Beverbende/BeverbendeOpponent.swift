@@ -14,9 +14,13 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
      */
 
     // Model tuning parameters (Class level)
-    private static let cut_off_low = 6
+    private static let cut_off_low = 8
+    private static let cut_off_low_sd = 3
     
-    private static let cut_off_decide = 10
+    private static let cut_off_decide = 14
+    private static let cut_off_decide_sd = 3
+    
+    private static let memoryRepetitions = 5
     
     // Model identifier and Player implmementation variables
     var id: String
@@ -29,7 +33,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private enum GameState:Equatable {
         case Begin // Begin of a turn, model decides whether to take top card from discarded.
         case Processed_Discarded(remembered: [CardType?],latencies: [Double]) // Model has decided not to take discarded. Draws card from Deck.
-        case Processed_All // Model either looked at deck or discarded, is ready to decide.
+        case Processed_All(remembered: [CardType?]) // Model either looked at deck or discarded, is ready to decide.
         case DecideContinue // turn decision made to continue.
         
         case DecideEnd // turn decision made to end.
@@ -43,7 +47,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             case (.Processed_Discarded(remembered: _, latencies: _),
                   .Processed_Discarded(remembered: _, latencies: _)):
                 return true
-            case (.Processed_All, .Processed_All):
+            case (.Processed_All(remembered: _),
+                  .Processed_All(remembered: _)):
                 return true
             case (.DecideContinue, .DecideContinue):
                 return true
@@ -86,7 +91,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         /**
          Instantiate cut-off for the decision about whether a card is low or not.
          */
-        let sampler = BoxMuller(mu: Double(BeverbendeOpponent.cut_off_low), sd: 1.5)
+        let sampler = BoxMuller(mu: Double(BeverbendeOpponent.cut_off_low), sd: Double(BeverbendeOpponent.cut_off_low_sd))
         let (sample_low,_,_) = sampler.sample(for: 150)
         self.instantiateMemoryValues(for: "low_value_fact", with: sampler.castToInt(for: sample_low))
         
@@ -94,7 +99,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          Instantiate cut-off for the decision about whether the model should end the game.
          */
         sampler.mu = Double(BeverbendeOpponent.cut_off_decide)
-        sampler.sd =  3.0
+        sampler.sd =  Double(BeverbendeOpponent.cut_off_decide_sd)
         let (sample_decide,_,_) = sampler.sample(for: 150)
         self.instantiateMemoryValues(for: "end_value_fact", with: sampler.castToInt(for: sample_decide))
         
@@ -117,10 +122,16 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         
         let leftCard = self.game?.inspectCard(at: 0, for: self)
-        self.memorizeCard(at: 1, with: leftCard!)
+        //self.memorizeCard(at: 1, with: leftCard!)
+        self.memorizeFor(for: BeverbendeOpponent.memoryRepetitions,
+                         at: 1,
+                         with: leftCard!)
         self.game?.moveCardBackFromHand(to: 0, for: self)
         let rightCard = self.game?.inspectCard(at: 3, for: self)
-        self.memorizeCard(at: 4, with: rightCard!)
+        //self.memorizeCard(at: 4, with: rightCard!)
+        self.memorizeFor(for: BeverbendeOpponent.memoryRepetitions,
+                         at: 4,
+                         with: rightCard!)
         self.game?.moveCardBackFromHand(to: 3, for: self)
         
     }
@@ -180,14 +191,18 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             
             let player = info["player"] as! Player
             if player.id == self.id, let game = self.game {
+                self.time += 15.0
+                print(self.time)
+                self.summarizeDM()
                 print("It is Model \(self.id)'s turn.")
                 self.advanceGame(for: game)
                 let _ = game.nextPlayer()
             } else {
-                for card_index in 1...4 {
+                /*for card_index in 1...4 {
                     print("Model \(self.id) is rehearsing since it is not its turn.")
                     _ = self.rehearsal(at: card_index)
-                }
+                }*/
+                ()
             }
             
         default:
@@ -202,20 +217,30 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     func summarizeDM(){
         for chunk in self.dm.chunks {
-            print(chunk.value.slotvals)
+            if chunk.value.slotvals["isa"]!.text()! == "Pos_Fact" {
+                print(chunk.value.slotvals)
+                print(chunk.value.activation())
+                print(chunk.value.fan)
+                print(chunk.value.referenceList)
+            }
+            
         }
     }
     
     func attachGame(with game:Beverbende) {
         self.game = game
     }
+
+    /**
+     PRIVATE
+     */
     
-    
-    func rehearsal(at index:Int) -> (latency: Double,retrieved: Chunk?){
+    private func rehearsal(at index:Int) -> (latency: Double,retrieved: Chunk?){
         /**
          Model rehearses card at a given position.
          */
         let request = Chunk(s: "Retrieval",m: self)
+        request.isRequest = true
         request.slotvals["isa"] = Value.Text("Pos_Fact")
         request.slotvals["pos"] = Value.Number(Double(index))
         let (latency,retrieval) = self.dm.retrieve(chunk: request)
@@ -223,14 +248,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         if let retrievedChunk = retrieval {
             // Strengthen
             self.dm.addToDM(retrievedChunk)
+            self.time += 0.05
             return (latency,retrievedChunk)
         }
         return (latency,nil)
     }
-
-    /**
-     PRIVATE
-     */
+    
     
     private func instantiateMemoryValues(for fact:String, with values:[Int]) {
         /**
@@ -257,11 +280,11 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         let cardType = card.getType()
         switch cardType {
         case .value(let points):
-
-            chunk.slotvals["type"] = Value.Text("regular")
+            chunk.slotvals["type"] = Value.Text("value")
             chunk.slotvals["value"] = Value.Number(Double(points))
+            print("Model \(self.id) memorized \(points) at position \(position)")
         case .action(let action):
-
+            print("Model \(self.id) memorized \(action) at position \(position)")
             chunk.slotvals["type"] = Value.Text("action")
             switch action {
             case .twice:
@@ -276,6 +299,36 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
         self.dm.addToDM(chunk)
         self.time += 0.05
+    }
+    
+    
+    private func memorizeUnknown(at position: Int) {
+        // Allows for adaptive forgetting
+        let chunk = self.generateNewChunk(string: "Pos")
+        chunk.slotvals["isa"] = Value.Text("Pos_Fact")
+        chunk.slotvals["pos"] = Value.Number(Double(position))
+        chunk.slotvals["type"] = Value.Text("unknown")
+        
+        self.dm.addToDM(chunk)
+        self.time += 0.05
+    }
+    
+    
+    private func memorizeFor(for times:Int,
+                             at position: Int,
+                             with possibleCard: Card?) {
+        // Repetetive memorization.
+        if let card = possibleCard {
+            for _ in 0..<times {
+                self.time += 0.3
+                self.memorizeCard(at: position, with: card)
+            }
+        } else {
+            for _ in 0..<times {
+                self.time += 0.3
+                self.memorizeUnknown(at: position)
+            }
+        }
     }
     
     
@@ -346,6 +399,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 if retrievedType == "action"{
                     // Retrieved card is an action card
                     let retrieved_action = String(retrievedChunk.slotvals["value"]!.text()!)
+                    print("Model \(self.id) remembered an action card: \(retrieved_action) at position: \(pos)")
                     // Check possible cases
                     if retrieved_action == "twice" {
                         representationHand.append(.action(.twice))
@@ -355,12 +409,17 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                         representationHand.append(.action(.swap))
                     }
                     
-                } else {
+                } else if retrievedType == "value" {
                     // Retrieved card is a value card
                     let retrieved_value = Int(retrievedChunk.slotvals["value"]!.number()!)
+                    print("Model \(self.id) remembered a value card: \(retrieved_value) at position: \(pos)")
                     representationHand.append(.value(retrieved_value))
+                } else {
+                    // Recalled that this card was adaptively forgotten!.
+                    representationHand.append(nil)
                 }
             } else {
+                // Did not recall anything at all for this position!
                 representationHand.append(nil)
             }
         }
@@ -388,7 +447,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             }
         }
         if unknown.count > 0 {
-            return Int.random(in:1...unknown.count)
+            let choice =  Int.random(in:0..<unknown.count)
+            return unknown[choice]
         }
         return max_uncertain_loc
     }
@@ -399,9 +459,11 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                                in game: Beverbende) {
         game.discardDrawnCard(for: self)
         let least_certain_pos = self.findLeastCertain(for: remembered, with: uncertainty)
-        let hidden_cards = game.inspectCard(at: least_certain_pos - 1, for: self)
-        // ToDo: remove inspected card again
-        self.memorizeCard(at: least_certain_pos, with: hidden_cards)
+        let hidden_card = game.inspectCard(at: least_certain_pos - 1, for: self)
+        // self.memorizeCard(at: least_certain_pos, with: hidden_card)
+        self.memorizeFor(for: BeverbendeOpponent.memoryRepetitions,
+                         at: least_certain_pos,
+                         with: hidden_card)
         game.moveCardBackFromHand(to: least_certain_pos - 1, for: self)
     }
     
@@ -456,7 +518,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             print("Model \(self.id) skips top discarded action card")
             // Cannot take action cards from discarded pile.
             game.discardDrawnCard(for: self)
-            goal = .Processed_Discarded(remembered: remembered, latencies: uncertainty)
+            goal = .Processed_Discarded(remembered: remembered,
+                                        latencies: uncertainty)
         default:
             print("Model \(self.id) matches action card")
             let action = card.getAction()
@@ -479,7 +542,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                                 in: game)
             }
             // No matter the outcome set goal to processed all
-            goal = .Processed_All
+            goal = .Processed_All(remembered: remembered)
         }
         
     }
@@ -492,7 +555,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         let (known_max, unknown) = compareHand(for: card, with: hand)
         if let found_max = known_max {
             print("Model \(self.id) took the value card to replace a known higher one.")
-            memorizeCard(at: found_max, with: card)
+            //memorizeCard(at: found_max, with: card)
+            self.memorizeFor(for: BeverbendeOpponent.memoryRepetitions,
+                             at: found_max,
+                             with: card)
+            self.summarizeDM()
+            print(self.time)
             game.tradeDrawnCardWithCard(at: found_max - 1,
                                         for: self)
             return true // Replace card
@@ -513,8 +581,13 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 if value < retrievedCutoff {
                     let choice = Int.random(in:0..<unknown.count)
                     
-                    memorizeCard(at: unknown[choice], with: card)
-                    game.tradeDrawnCardWithCard(at: unknown[choice],
+                    //memorizeCard(at: unknown[choice], with: card)
+                    self.memorizeFor(for: BeverbendeOpponent.memoryRepetitions,
+                                     at: unknown[choice],
+                                     with: card)
+                    self.summarizeDM()
+                    print(self.time)
+                    game.tradeDrawnCardWithCard(at: unknown[choice] - 1,
                                                 for: self)
                     /**
                      Now model gets feedback whether replacing the card was a good decision. If the card
@@ -531,7 +604,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                         a good idea.
                         */
                         print("Model \(self.id) reinforced the cut-off for low value decision")
-                        self.instantiateMemoryValues(for: "low_value_fact", with: [retrievedCutoff])
+                        self.instantiateMemoryValues(for: "low_value_fact",
+                                                     with: [retrievedCutoff])
                         self.time += 0.05
                     case .value(let previousValue):
                         /**
@@ -542,7 +616,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                         */
                         if previousValue > value {
                             print("Model \(self.id) reinforced the cut-off for low value decision")
-                            self.instantiateMemoryValues(for: "low_value_fact", with: [retrievedCutoff])
+                            self.instantiateMemoryValues(for: "low_value_fact",
+                                                         with: [retrievedCutoff])
                             self.time += 0.05
                         }
                     }
@@ -572,10 +647,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 goal = .Processed_Discarded(remembered: remembered,
                                             latencies: uncertainty)
             } else {
-                goal = .Processed_All
+                goal = .Processed_All(remembered: remembered)
             }
         } else {
-            goal = .Processed_All
+            goal = .Processed_All(remembered: remembered)
         }
     }
     
@@ -635,10 +710,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                                and: latencies,
                                in: game)
 
-            case .Processed_All:
+            case .Processed_All(let remembered):
                 self.time += 0.05
                 print("Model \(self.id) looked at Discarded pile and/or Deck.")
-                let decision = self.decideGame()
+                let decision = self.decideGame(for: remembered)
                 switch decision {
                     case true:
                         print("\(self.id): I knock")
@@ -658,20 +733,19 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func decideGame() -> Bool{
+    private func decideGame(for remembered: [CardType?]) -> Bool{
         /**
          Model decides whether to end game or not.
          */
         var sum = 0
-        for pos in 1...4{
-            let (_,retrieved) = rehearsal(at: pos)
-            if let retrievedChunk = retrieved {
-                let retrievedType = retrievedChunk.slotvals["type"]!.text()
+        for possiblyRetrieved in remembered{
+            if let retrievedType = possiblyRetrieved {
+
                 switch retrievedType {
-                case "action":
+                case .action:
                     return false
-                default:
-                    sum += Int(retrievedChunk.slotvals["value"]!.number()!)
+                case .value(let value):
+                    sum += value
                 }
             } else {
                 return false
@@ -690,6 +764,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         self.time += latency
         if let retrievedChunk = retrieval {
             let retrievedCutoff = Int(retrievedChunk.slotvals["value"]!.number()!)
+            print("Model \(self.id) retrieved end cut-off of \(retrievedCutoff).")
             if sum < retrievedCutoff {
                 // ToDo: Implement reinforcement of this retrieved cut-off,
                 // if the model ends winning the game.
