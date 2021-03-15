@@ -979,15 +979,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     let infoText = InfoText()
     
-//    func hideDrawnCardInfoButton() {
-//        onHandCardInfoButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
-//        onHandCardInfoButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
-//        onHandCardInfoButton.setTitle("", for: UIControl.State.normal)
-//        onHandCardInfoButton.setImage(UIImage(systemName: "info.circle"), for: UIControl.State.normal)
-//        onHandCardInfoButton.isHidden = true
-//        onHandCardInfoButton.buttonType
-//    }
-    
     @IBAction func showCardInfo(_ sender: UIButton) {
         
         let message = infoText.getCardInfo(forCardWithName: getStringMatchingWithCard(forCard: user.getCardOnHand()!))
@@ -1030,6 +1021,5 @@ class ViewController: UIViewController, BeverbendeDelegate {
         present(infoPopUp, animated: true)
         
     }
-    
 }
 
