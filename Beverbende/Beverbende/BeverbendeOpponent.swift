@@ -20,7 +20,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private static let cut_off_decide = 14
     private static let cut_off_decide_sd = 3
     
-    private static let memoryRepetitions = 5
+    private static let memoryRepetitions = 1
     
     // Model identifier and Player implmementation variables
     var id: String
@@ -247,8 +247,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         self.time += latency
         if let retrievedChunk = retrieval {
             // Strengthen
-            self.dm.addToDM(retrievedChunk)
-            self.time += 0.05
+            //self.dm.addToDM(retrievedChunk)
+            //self.time += 0.05
             return (latency,retrievedChunk)
         }
         return (latency,nil)
@@ -423,6 +423,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 representationHand.append(nil)
             }
         }
+        print("Model \(self.id) latencies: \(latencies) ")
         return (representationHand,latencies)
     }
     
