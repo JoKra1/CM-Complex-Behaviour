@@ -19,8 +19,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     var user = User(with: "user")
     lazy var game = Beverbende(with: user, cognitiveIds: ["left", "top", "right"])
-    
-    var eventQueue = Queue<(EventType, [String: Any])>()
             
     var animationViewOne: UIImageView = {
         let theImageView = UIImageView()
@@ -28,7 +26,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
         theImageView.contentMode = .scaleAspectFit
         theImageView.clipsToBounds = true
         theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
-        
         return theImageView
         }()
     
@@ -52,7 +49,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
 //        showEmptyDrawnCardButtons()
 //        showEmptyArea(for: discardPileButton)
 //        showInspectButton()
-        hideDrawnCardInfoButton()
+        onHandCardInfoButton.isHidden = true
         addCardGestures()
         
         self.game.add(delegate: self)
@@ -89,6 +86,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         playedAction = nil
         selectedForUserIndex = nil
         selectedForModelAtIndex = nil
+        onHandCardInfoButton.isHidden = true
     }
     
     @objc func drawCard(_ recognizer: UITapGestureRecognizer) {
@@ -101,6 +99,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 var drawn = user.getCardOnHand()!
                 drawn.isFaceUp = true
                 undoCardSelections()
+                onHandCardInfoButton.isHidden = false
             }
         default:
             break
@@ -111,14 +110,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
         switch recognizer.state {
         case .ended:
             if isUserTurn {
-                if let onHandCard = user.getCardOnHand() { // discard drawn card
-                    switch onHandCard.getType() {
-                    case .value:
-                        playedAction == .twice ? playedAction = nil : endUserTurn() // a discard does not end the turn if the draw twice action card was played
-                    case .action:
-                        let actionCard = onHandCard as! ActionCard
-                        playedAction = actionCard.getAction()
-                    }
+                if user.getCardOnHand() != nil { // discard drawn card
+                    onHandCardInfoButton.isHidden = true
+                    playedAction == .twice ? playedAction = nil : endUserTurn() // a discard does not end the turn if the draw twice action card was played
                     game.discardDrawnCard(for: user)
                 } else { //user.getCardOnHand() == nil, get into the process of trading with the discarded pile
                     if let cardIndex = selectedForUserIndex { // the user already selected one of their own cards
@@ -129,6 +123,25 @@ class ViewController: UIViewController, BeverbendeDelegate {
                         discardPileView.alpha = (discardPileSelected) ? 1 : 0.5
                         discardPileSelected = !discardPileSelected
                     }
+                }
+            }
+        default:
+            break
+        }
+    }
+    
+    @objc func tapOnHandCard(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            if let onHandCard = user.getCardOnHand() { // activate action card
+                onHandCardInfoButton.isHidden = true
+                switch onHandCard.getType() {
+                case .value:
+                    break
+                case .action:
+                    let actionCard = onHandCard as! ActionCard
+                    playedAction = actionCard.getAction()
+                    game.discardDrawnCard(for: user)
                 }
             }
         default:
@@ -299,6 +312,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             for index in [0, 3] {
                 let cardView = userOnTableCardViews[index]
                 flipClosed(hide: cardView, for: .user)
+                isUserTurn = true // the user can now play the rest of the game
             }
             sender.isHidden = true
         }
@@ -332,6 +346,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         deckView.isUserInteractionEnabled = true
         discardPileView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapDiscardPile(_:))))
         discardPileView.isUserInteractionEnabled = true
+        userOnHandCardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapOnHandCard(_:))))
         
         for cardView in userOnTableCardViews {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapUserCard(_:))))
@@ -401,13 +416,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
 
-    func hideDrawnCardInfoButton() {
-        onHandCardInfoButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        onHandCardInfoButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
-        onHandCardInfoButton.setTitle("", for: UIControl.State.normal)
-        onHandCardInfoButton.setImage(UIImage(systemName: "info.circle"), for: UIControl.State.normal)
-        onHandCardInfoButton.isHidden = true
-    }
+
     
     func sizeUpAnimationViews() {
         NSLayoutConstraint.activate([animationViewOne.widthAnchor.constraint(equalTo: deckView.widthAnchor),
@@ -783,7 +792,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
 
     // ############################ EVENT HANDLING ############################
     
-    var isUserTurn = true // user starts the game
+    var isUserTurn = false // user starts the game, but first needs to inspect the cards
+    
+    var eventQueue = Queue<(EventType, [String: Any])>()
     
     func handleEvent(for event: EventType, with info: [String : Any]) {
         print("incoming event: \(event)")
@@ -963,5 +974,60 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
 
+    // ############################ INFORMATION PROVIDANCE ############################
+    
+    let infoText = InfoText()
+    
+//    func hideDrawnCardInfoButton() {
+//        onHandCardInfoButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
+//        onHandCardInfoButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+//        onHandCardInfoButton.setTitle("", for: UIControl.State.normal)
+//        onHandCardInfoButton.setImage(UIImage(systemName: "info.circle"), for: UIControl.State.normal)
+//        onHandCardInfoButton.isHidden = true
+//        onHandCardInfoButton.buttonType
+//    }
+    
+    @IBAction func showCardInfo(_ sender: UIButton) {
+        
+        let message = infoText.getCardInfo(forCardWithName: getStringMatchingWithCard(forCard: user.getCardOnHand()!))
+        
+        let infoPopUp = UIAlertController(title: "Drawn Card", message: message, preferredStyle: .alert)
+        
+        infoPopUp.addAction(UIAlertAction(title: "Got it!", style: .cancel, handler: {_ in
+                    print("info about drawn card popped up")
+                    }))
+        
+        present(infoPopUp, animated: true)
+    }
+    
+    @IBAction func showGameInfo(_ sender: UIButton) {
+        
+        var gameState: String
+
+        if isUserTurn == false { // only during initial inspection, buttons cant be pressed during animations
+            gameState = "initialInspect"
+        } else if user.getCardOnHand() == nil {
+            if playedAction == .swap {
+                gameState = "swap"
+            } else if playedAction == .inspect {
+                gameState = "inspect"
+            }
+            gameState = "start"
+        } else {
+            gameState = "drawn"
+        }
+        
+        let message = infoText.getGameInfo(forGameStateWithName: gameState)
+        
+        let infoPopUp = UIAlertController(title: "What to do?", message: message, preferredStyle: .alert)
+        
+        infoPopUp.addAction(UIAlertAction(title: "Got it!", style: .cancel, handler: {_ in
+                    print("info about drawn card popped up")
+                    }))
+        
+        present(infoPopUp, animated: true)
+        
+    }
+    
 }
 
