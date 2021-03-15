@@ -12,7 +12,7 @@ class InfoText {
     private let cardInfo = [
         "swap":"You have drawn a \"swap\" card, allowing you to swap one of your own cards with a card from one of your opponents. Tap the card to make use of this action, you can then select the cards you wish to swap. If you do not wish to use this action card, tap the discard pile to get rid of it.",
         "inspect":"You have drawn an \"inspect\" card, allowing you to take a peek at one of your cards on the table. Tap the card to make use of this action, you can then select the card you wish to inspect. Pay attention, the card will flip itself shut! If you do not wish to use this action card, tap the discard pile to get rid of it.",
-        "Twice":"You have drawn a \"twice\" card, allowing you to draw two more cards. Tap the card to make use of this action, you can then draw a new card. If you do not wish to use this action card, tap the discard pile to get rid of it.",
+        "twice":"You have drawn a \"twice\" card, allowing you to draw two more cards. Tap the card to make use of this action, you can then draw a new card. If you do not wish to use this action card, tap the discard pile to get rid of it.",
         "value":"You have drawn a value card. You can tap one of your own cards if you wish to trade it with the drawn card. If you do not wish make this trade, tap the discard pile to get rid of your drawn card."
     ]
     
@@ -28,7 +28,7 @@ class InfoText {
         if ["0","1","2","3","4","5","6","7","8","9"].contains(forCardWithName) {
             return cardInfo["value"]!
         }
-        let info = gameInfo[forCardWithName] ?? "There is no information available"
+        let info = cardInfo[forCardWithName] ?? "There is no information available"
         return info
     }
     

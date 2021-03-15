@@ -347,6 +347,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         discardPileView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapDiscardPile(_:))))
         discardPileView.isUserInteractionEnabled = true
         userOnHandCardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapOnHandCard(_:))))
+        userOnHandCardView.isUserInteractionEnabled = true
         
         for cardView in userOnTableCardViews {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapUserCard(_:))))
@@ -1011,8 +1012,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 gameState = "swap"
             } else if playedAction == .inspect {
                 gameState = "inspect"
+            } else {
+                gameState = "start"
             }
-            gameState = "start"
         } else {
             gameState = "drawn"
         }
