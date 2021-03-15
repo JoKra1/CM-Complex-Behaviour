@@ -97,12 +97,6 @@
                                     <action selector="touchInspectButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="guE-U1-II7"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2jY-Ke-cGh">
-                                <rect key="frame" x="393" y="739" width="25" height="24"/>
-                                <connections>
-                                    <action selector="showCardInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="FQe-e7-UU5"/>
-                                </connections>
-                            </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="v5G-ec-era">
                                 <rect key="frame" x="536.5" y="401.5" width="130.5" height="221"/>
                             </imageView>
@@ -132,6 +126,12 @@
                                 <state key="normal" title="What to do?"/>
                                 <connections>
                                     <action selector="showGameInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="XsW-nu-5Ig"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2jY-Ke-cGh">
+                                <rect key="frame" x="393" y="739" width="25" height="24"/>
+                                <connections>
+                                    <action selector="showCardInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="FQe-e7-UU5"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -227,25 +227,38 @@
         <!--Start View Controller-->
         <scene sceneID="f2n-Nn-0gO">
             <objects>
-                <viewController storyboardIdentifier="startVC" id="jhN-70-wKO" customClass="StartViewController" customModule="Beverbende" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="startVC" modalPresentationStyle="fullScreen" id="jhN-70-wKO" customClass="StartViewController" customModule="Beverbende" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="OIB-NG-YY4">
                         <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P3i-1X-Kem">
-                                <rect key="frame" x="490" y="382" width="386" height="260"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="60"/>
-                                <state key="normal" title="START"/>
-                                <connections>
-                                    <segue destination="BYZ-38-t0r" kind="presentation" id="veo-t9-OiD"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="for-6s-OD0">
+                                <rect key="frame" x="530.5" y="424" width="305" height="176"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P3i-1X-Kem">
+                                        <rect key="frame" x="0.0" y="0.0" width="305" height="84"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="60"/>
+                                        <state key="normal" title="Start"/>
+                                        <connections>
+                                            <segue destination="BYZ-38-t0r" kind="presentation" id="veo-t9-OiD"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WFg-Lg-XQE">
+                                        <rect key="frame" x="0.0" y="92" width="305" height="84"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="60"/>
+                                        <state key="normal" title="Game Rules"/>
+                                        <connections>
+                                            <segue destination="pmf-j1-kOc" kind="presentation" id="QHG-hl-M62"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="esj-Zi-WaL"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="P3i-1X-Kem" firstAttribute="centerY" secondItem="esj-Zi-WaL" secondAttribute="centerY" id="im2-yp-cTo"/>
-                            <constraint firstItem="P3i-1X-Kem" firstAttribute="centerX" secondItem="esj-Zi-WaL" secondAttribute="centerX" id="pun-xD-exn"/>
+                            <constraint firstItem="for-6s-OD0" firstAttribute="centerX" secondItem="esj-Zi-WaL" secondAttribute="centerX" id="ZfA-36-Kzs"/>
+                            <constraint firstItem="for-6s-OD0" firstAttribute="centerY" secondItem="esj-Zi-WaL" secondAttribute="centerY" id="lFd-f1-Ved"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -253,8 +266,49 @@
             </objects>
             <point key="canvasLocation" x="-24.158125915080525" y="-672.0703125"/>
         </scene>
+        <!--View Controller-->
+        <scene sceneID="4gN-Fj-9dr">
+            <objects>
+                <viewController modalPresentationStyle="fullScreen" id="pmf-j1-kOc" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="bMx-St-Odu">
+                        <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="leading" contentVerticalAlignment="top" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CTv-Tf-XzI">
+                                <rect key="frame" x="20" y="20" width="305" height="84"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="60"/>
+                                <state key="normal" title="Return"/>
+                                <connections>
+                                    <segue destination="jhN-70-wKO" kind="presentation" id="RoQ-ja-81b"/>
+                                </connections>
+                            </button>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="The goal of the game is to end the game with as few points as possible" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k78-Yb-n8P">
+                                <rect key="frame" x="311" y="142" width="744" height="740"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="pmw-FH-42j"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="CTv-Tf-XzI" firstAttribute="top" secondItem="pmw-FH-42j" secondAttribute="top" constant="20" id="Qnf-nX-syE"/>
+                            <constraint firstItem="CTv-Tf-XzI" firstAttribute="leading" secondItem="pmw-FH-42j" secondAttribute="leading" constant="20" id="f1a-ag-4WW"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="rAV-I7-JYz"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="LE5-py-E9A" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="631.62518301610532" y="-672.0703125"/>
+        </scene>
     </scenes>
     <resources>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
