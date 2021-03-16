@@ -8,9 +8,17 @@
 import Foundation
 
 enum EventType {
-    case nextTurn, cardDrawn, discardedCardDrawn, discardedCardTraded,
-         cardPlayed, cardDiscarded, cardsSwapped, cardTraded, cardInspected,
-         knocked, gameEnded
+    case nextTurn(Player),
+         cardDrawn(Player, Card),
+         discardedCardDrawn(Player, Card, Card),
+         discardedCardTraded(Player, Card, Card, Int, Card),
+         cardPlayed(Player, ActionCard),
+         cardDiscarded(Player, Card, Bool),
+         cardsSwapped(Int, Player, Int, Player),
+         cardTraded(Player, Card, Int, Bool),
+         cardInspected(Player, Card, Int),
+         knocked(Player),
+         gameEnded(Player)
 }
 
 protocol BeverbendeDelegate: AnyObject {

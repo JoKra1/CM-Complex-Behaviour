@@ -52,7 +52,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         onHandCardInfoButton.isHidden = true
         addCardGestures()
         
-        self.game.add(delegate: self)
+        self.game.addSync(delegate: self)
         let discardePileValue = getStringMatchingWithCard(forCard: game.discardPile.peek()!)
         showFrontOfCard(show: discardePileValue, on: discardPileView, for: .game)
     }
@@ -801,12 +801,13 @@ class ViewController: UIViewController, BeverbendeDelegate {
         print("incoming event: \(event)")
         let player = info["player"] as! Player
         if player.getId() == user.getId() {
-            if event == .nextTurn { // start animating once all models done their thing
+            switch event {
+            case .nextTurn:
                 if let (firstEvent, firstInfo) = eventQueue.dequeue() {
                         self.animateEvent(for: firstEvent, with: firstInfo)
                         self.isUserTurn = true
                 } else { print("there should be events in the eventQueueueue") }
-            } else {
+            default:
                 animateEvent(for: event, with: info) // imediatelly animate the user's actions
             }
         } else {
@@ -853,7 +854,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let cardToPlayer = info["card"] as! Card
             let tempTopOfDeckCard = info["topOfDeckCard"] as! Card
             if let (nextEvent, nextInfo) = self.eventQueue.dequeue() {
-                if nextEvent == .cardTraded { // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool]
+                switch nextEvent {
+                case .cardTraded:
                     player = nextInfo["player"] as! Player
                     let cardFromPlayer = nextInfo["cardFromPlayer"] as! Card
                     let cardFromPlayerIndex = nextInfo["cardFromPlayerIndex"] as! Int
@@ -862,6 +864,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
                     let tempDiscardPileValue = getStringMatchingWithCard(forCard: tempTopOfDeckCard)
                     duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
+                default:
+                    break
                 }
             } else { print("I expected another event after a discarded card being drawn by the model") }
         

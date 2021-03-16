@@ -14,9 +14,11 @@ class Beverbende {
     var drawPile: Stack<Card>
     var discardPile: Stack<Card>
     var delegates: [WeakContainer<BeverbendeDelegate>]
+    weak var syncedDelegate: BeverbendeDelegate?
+    var asyncQueue: DispatchQueue
     
     var knocked = false
-    var countdown = 100000
+    var countdown = 0 // This will only start ticking when knocked is true
     
     static func allCards() -> [Card] {
         var values = Array(repeating: 0, count: 4)
@@ -49,6 +51,7 @@ class Beverbende {
         self.players = [humanPlayer]
         
         self.delegates = []
+        self.asyncQueue = DispatchQueue(label: "DelegateQueue", attributes: .concurrent)
         
         self.currentPlayerIndex = 0
         self.discardPile = Stack<Card>()
@@ -81,10 +84,23 @@ class Beverbende {
         self.delegates.append(wd)
     }
     
+    func addSync(delegate: BeverbendeDelegate) {
+        self.syncedDelegate = delegate
+    }
+    
     private func notifyDelegates(for event: EventType, with info: [String: Any]) {
+        // Notify cognitive model delegates
         for wd in self.delegates {
             let delegate = wd.value
-            delegate?.handleEvent(for: event, with: info)
+            
+            self.asyncQueue.async {
+                delegate?.handleEvent(for: event, with: info)
+            }
+        }
+        
+        // Notify ViewController (which cannot be called async)
+        DispatchQueue.main.async {
+            self.syncedDelegate?.handleEvent(for: event, with: info)
         }
     }
 
@@ -92,7 +108,9 @@ class Beverbende {
         self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
         
         let player = self.players[self.currentPlayerIndex]
-        self.notifyDelegates(for: EventType.nextTurn, with: ["player": player])
+        self.notifyDelegates(
+            for: .nextTurn(player),
+            with: ["player": player])
         
         // Check for end of game - if so, notify delegates
         if self.knocked && self.countdown == 0 {
@@ -127,7 +145,9 @@ class Beverbende {
                 }
             }
             
-            self.notifyDelegates(for: EventType.gameEnded, with: ["winner": winner])
+            self.notifyDelegates(
+                for: .gameEnded(winner),
+                with: ["winner": winner])
         }
         self.countdown -= 1
         
@@ -146,7 +166,9 @@ class Beverbende {
         self.knocked = true
         self.countdown = self.players.count - 1
         
-        self.notifyDelegates(for: EventType.knocked, with: ["player": player])
+        self.notifyDelegates(
+            for: .knocked(player),
+            with: ["player": player])
     }
     
     // TODO: make swapCard method
@@ -173,7 +195,9 @@ class Beverbende {
         
         player.setCardOnHand(with: card!)
         
-        self.notifyDelegates(for: EventType.cardDrawn, with: ["player": player, "card": card!])
+        self.notifyDelegates(
+            for: .cardDrawn(player, card!),
+            with: ["player": player, "card": card!])
         
         return card!
     }
@@ -184,7 +208,9 @@ class Beverbende {
         let topOfDeckCard = self.discardPile.peek()!
         player.setCardOnHand(with: card)
         
-        self.notifyDelegates(for: EventType.discardedCardDrawn, with: ["player": player, "card":card, "topOfDeckCard": topOfDeckCard])
+        self.notifyDelegates(
+            for: .discardedCardDrawn(player, card, topOfDeckCard),
+            with: ["player": player, "card":card, "topOfDeckCard": topOfDeckCard])
         
         return card
     }
@@ -194,7 +220,9 @@ class Beverbende {
         player.setCardOnHand(with: nil)
         self.discard(card: card)
         
-        self.notifyDelegates(for: EventType.cardDiscarded, with: ["player": player, "card": card, "isFaceUp":card.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
+        self.notifyDelegates(
+            for: .cardDiscarded(player, card, card.isFaceUp),
+            with: ["player": player, "card": card, "isFaceUp":card.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
         
         card.isFaceUp = false // is it okay to do this here?
     }
@@ -220,7 +248,9 @@ class Beverbende {
         player.setCardOnHand(with: card)
         player.setCardOnTable(with: nil, at: index)
         
-        self.notifyDelegates(for: EventType.cardInspected, with: ["player": player, "card": card, "cardIndex": index])
+        self.notifyDelegates(
+            for: .cardInspected(player, card, index),
+            with: ["player": player, "card": card, "cardIndex": index])
         
         return card
     }
@@ -242,7 +272,9 @@ class Beverbende {
         let replacedCard = self.replaceCard(at: index, with: heldCard, for: player)
         self.discard(card: replacedCard)
         
-        self.notifyDelegates(for: EventType.cardTraded, with: ["player": player, "cardFromPlayer":replacedCard, "cardFromPlayerIndex": index, "toIsFaceUp": heldCard.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
+        self.notifyDelegates(
+            for: .cardTraded(player, replacedCard, index, heldCard.isFaceUp),
+            with: ["player": player, "cardFromPlayer":replacedCard, "cardFromPlayerIndex": index, "toIsFaceUp": heldCard.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
         
         heldCard.isFaceUp = false
     }
@@ -253,7 +285,9 @@ class Beverbende {
         let replacedCard = self.replaceCard(at: index, with: discardedCard, for: player)
         self.discard(card: replacedCard)
         
-        self.notifyDelegates(for: .discardedCardTraded, with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index, "topOfDeckCard": topOfDeckCard])
+        self.notifyDelegates(
+            for: .discardedCardTraded(player, discardedCard, replacedCard, index, topOfDeckCard),
+            with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index, "topOfDeckCard": topOfDeckCard])
         
     }
     
@@ -264,6 +298,8 @@ class Beverbende {
         
         // i think this is the correct way to swap them
         
-        self.notifyDelegates(for: .cardsSwapped, with: ["cardIndex": index1, "player": player1, "cardIndex2": index2, "player2": player2])
+        self.notifyDelegates(
+            for: .cardsSwapped(index1, player1, index2, player2),
+            with: ["cardIndex": index1, "player": player1, "cardIndex2": index2, "player2": player2])
     }
 }
