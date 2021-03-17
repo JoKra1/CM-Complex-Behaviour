@@ -602,14 +602,19 @@ class ViewController: UIViewController, BeverbendeDelegate {
         return duration + 0.01
     }
     
-    func animateTradeFromDiscardPile(withCardAtIndex cardIndex: Int, fromValue: String, toValue: String, tempDiscardPileValue: String, by actor: Actor) -> Double {
+    func animateTradeFromDiscardPile(withCardAtIndex cardIndex: Int, fromValue: String, toValue: String, tempDiscardPileValue: String?, by actor: Actor) -> Double {
 //        from the discard pile to an onHand location
         let onHandCardView = retrieveOnHandCardView(for: actor)
         
         animationViewOne.transform = returnRotationTransform(for: .game)
         _ = setViewToOverlay(set: animationViewOne, to: discardPileView)
         
-        showFrontOfCard(show: tempDiscardPileValue, on: discardPileView, for: .game)
+        if tempDiscardPileValue != nil {
+            showFrontOfCard(show: tempDiscardPileValue!, on: discardPileView, for: .game)
+        } else {
+            discardPileView.image = nil
+        }
+        
 
         let overlayConstraints = retrieveOverlayConstraints(set: animationViewOne, to: onHandCardView)
         NSLayoutConstraint.activate(overlayConstraints)
@@ -837,8 +842,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         var player = info["player"] as! Player
         
         switch event {
-        case .cardDrawn: // info: ["player": Player]
-            let card = info["card"] as! Card
+        case .cardDrawn(let player, let card): // info: ["player": Player]
             let actor = findActorMatchingWithPLayer(withId: player.getId())
             let cardValue = getStringMatchingWithCard(forCard: card)
             duration = animateCardDraw(by: actor, withValue: cardValue)
@@ -850,31 +854,22 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let openOnHand = !(info["isFaceUp"] as! Bool)
             duration = animateDiscardFromHand(by: actor, withValue: value, openOnHand: openOnHand)
             
-        case .discardedCardDrawn: // only ever issued by model, if followed by a trade, then the model chose to trade with discarded
-            let cardToPlayer = info["card"] as! Card
-            let tempTopOfDeckCard = info["topOfDeckCard"] as! Card
-            if let (nextEvent, nextInfo) = self.eventQueue.dequeue() {
+        case let .discardedCardDrawn(player, cardToPlayer, topOfDeckCard): // only ever issued by model, if followed by a trade, then the model chose to trade with discarded
+            if let (nextEvent, _) = self.eventQueue.dequeue() {
                 switch nextEvent {
-                case .cardTraded:
-                    player = nextInfo["player"] as! Player
-                    let cardFromPlayer = nextInfo["cardFromPlayer"] as! Card
-                    let cardFromPlayerIndex = nextInfo["cardFromPlayerIndex"] as! Int
+                case let .cardTraded(_, cardFromPlayer, cardFromPlayerIndex, _):
                     let actor = findActorMatchingWithPLayer(withId: player.getId())
                     let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
                     let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
-                    let tempDiscardPileValue = getStringMatchingWithCard(forCard: tempTopOfDeckCard)
+                    var tempDiscardPileValue: String? = nil
+                    if topOfDeckCard != nil {
+                        tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
+                    }
                     duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
                 default:
                     break
                 }
             } else { print("I expected another event after a discarded card being drawn by the model") }
-        
-//        case .cardPlayed: // info: ["player": Player, "card": ActionCard]
-//            let actionCard = info["card"] as! ActionCard
-//            let actor = findActorMatchingWithPLayer(withId: player.getId())
-//            let value = getStringMatchingWithCard(forCard: actionCard)
-//            flipOpen(show: value, on: retrieveOnHandCardView(for: actor), for: actor)
-//            duration = 0.61
         
         case .cardsSwapped: // ["cardIndex1": Int, "player1": Player, "cardIndex2": Int, "player2" Player]
             let player2 = info["player2"] as! Player
@@ -891,16 +886,16 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let closeOnHand = (info["toIsFaceUp"] as! Bool)
             duration = animateTradeOnHand(withCardAtIndex: cardFromPlayerIndex, by: actor, withValue: getStringMatchingWithCard(forCard: cardFromPlayer), closeOnHand: closeOnHand)
             
-        case .discardedCardTraded: // ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int]
+        case let .discardedCardTraded(player, cardToPlayer, cardFromPlayer, cardFromPlayerIndex, topOfDeckCard): // ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int]
             // only ever issued by model
-            let cardFromPlayer = info["cardFromPlayer"] as! Card
-            let cardFromPlayerIndex = info["cardFromPlayerIndex"] as! Int
-            let cardToPlayer = info["cardToPlayer"] as! Card
-            let tempTopOfDeckCard = info["topOfDeckCard"] as! Card
+            var tempDiscardPileValue: String? = nil
+            if topOfDeckCard != nil {
+                tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
+            }
             let actor = findActorMatchingWithPLayer(withId: player.getId())
             let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
             let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
-            let tempDiscardPileValue = getStringMatchingWithCard(forCard: tempTopOfDeckCard)
+            
             duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
             
         case .cardInspected: // ["player": Player, "card": Card, "cardIndex": Int]
