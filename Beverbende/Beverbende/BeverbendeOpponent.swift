@@ -267,14 +267,16 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
      */
     
     func summarizeDM(){
-        for chunk in self.dm.chunks {
-            if chunk.value.slotvals["isa"]!.text()! == "Pos_Fact" {
-                print(chunk.value.slotvals)
-                print(chunk.value.activation())
-                print(chunk.value.fan)
-                print(chunk.value.referenceList)
+        for pos in 1...4{
+            for chunk in self.dm.chunks {
+                if chunk.value.slotvals["isa"]!.text()! == "Pos_Fact" {
+                    if chunk.value.slotvals["pos"]!.number()! == Double(pos){
+                        print(chunk.value.slotvals)
+                        print(chunk.value.baseLevelActivation())
+                        print(chunk.value.referenceList)
+                    }
+                }
             }
-            
         }
     }
     
@@ -285,6 +287,15 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     /**
      PRIVATE
      */
+    
+    private func formatTime() -> String {
+        // Source: https://www.hackingwithswift.com/example-code/system/how-to-convert-dates-and-times-to-a-string-using-dateformatter
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "H:m:ss.SSSS"
+        return formatter.string(from: date)
+        
+    }
     
     private func rehearsal(at index:Int) -> (latency: Double,retrieved: Chunk?){
         /**
@@ -299,7 +310,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         if let retrievedChunk = retrieval {
             // Create a new chunk (with different id)
             let chunk = self.generateNewChunk(string: "Pos")
-            chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count))
+            chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count) + "_" + self.formatTime())
             chunk.slotvals["isa"] = Value.Text("Pos_Fact")
             chunk.slotvals["pos"] = retrievedChunk.slotvals["pos"]
             chunk.slotvals["type"] = retrievedChunk.slotvals["type"]
@@ -332,7 +343,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          Acts as the interface from cards to ACT-R chunks.
          */
         let chunk = self.generateNewChunk(string: "Pos")
-        chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count))
+        chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count) + "_" + self.formatTime())
         chunk.slotvals["isa"] = Value.Text("Pos_Fact")
         chunk.slotvals["pos"] = Value.Number(Double(position))
         let cardType = card.getType()
@@ -364,29 +375,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         // Allows for adaptive forgetting
         let chunk = self.generateNewChunk(string: "Pos")
         chunk.slotvals["isa"] = Value.Text("Pos_Fact")
+        chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count) + "_" + self.formatTime())
         chunk.slotvals["pos"] = Value.Number(Double(position))
         chunk.slotvals["type"] = Value.Text("unknown")
         
         self.dm.addToDM(chunk)
         self.time += 0.05
-    }
-    
-    
-    private func memorizeFor(for times:Int,
-                             at position: Int,
-                             with possibleCard: Card?) {
-        // Repetetive memorization.
-        if let card = possibleCard {
-            for _ in 0..<times {
-                self.time += 0.3
-                self.memorizeCard(at: position, with: card)
-            }
-        } else {
-            for _ in 0..<times {
-                self.time += 0.3
-                self.memorizeUnknown(at: position)
-            }
-        }
     }
     
     

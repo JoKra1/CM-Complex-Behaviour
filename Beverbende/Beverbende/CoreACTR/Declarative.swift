@@ -10,7 +10,7 @@ import Foundation
 
 class Declarative  {
     /// Baselevel decay parameter, d in the equations, or bll in ACT-R
-    var baseLevelDecay: Double? = 0.25
+    var baseLevelDecay: Double? = 0.5
     /// Is optimized learning on or off (ol in ACT-R)
     var optimizedLearning = false
     /// Maximum associate strength parameter (mas in ACT-R). If this parameter is too low you can get negative Sji's!
@@ -20,7 +20,7 @@ class Declarative  {
     /// Retrieval threshold parameter (rt in ACT-R)
     var retrievalThreshold: Double = -2
     /// Activation noise parameter (ans in ACT-R). Can be nil to switch off noise.
-    var activationNoise: Double? = 0.01
+    var activationNoise: Double? = 0.1
     /// A dictionary with all the chunks in DM, indexed by chunk name
     var chunks = [String:Chunk]()
     /// The mismatch penalty, to be used in partial matching (mp in ACT-R)
