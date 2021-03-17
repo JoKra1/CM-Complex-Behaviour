@@ -18,6 +18,7 @@ enum EventType {
          cardTraded(Player, Card, Int, Bool),
          cardInspected(Player, Card, Int),
          knocked(Player),
+         tradingLeftoverActionCards,
          gameEnded(Player)
 }
 
@@ -39,6 +40,7 @@ protocol BeverbendeDelegate: AnyObject {
  cardInspected      ["player": Player, "card": Card, "cardIndex": Int] added, not yet added to Beverbende.swift
  knocked            ["player": Player]
  gameEnded          ["winner": Player]
+ tradingLeftOverActionCards
  */
 
 // a FROM card goed From the player to the discard pile, a TO card moves from the hand or the discard pile to the player's on table cards

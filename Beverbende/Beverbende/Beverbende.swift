@@ -119,6 +119,8 @@ class Beverbende {
             var lowestScore = 4 * 9
             var winner = self.players[0]
             
+            self.notifyDelegates(for: .tradingLeftoverActionCards, with: [:])
+            
             for player in self.players {
                 scores[player.getId()] = 0
                 
