@@ -148,8 +148,9 @@ class Beverbende {
             self.notifyDelegates(
                 for: .gameEnded(winner),
                 with: ["winner": winner])
+        } else if self.knocked {
+            self.countdown -= 1
         }
-        self.countdown -= 1
         
         return player
     }
