@@ -98,7 +98,7 @@ class Beverbende {
             }
         }
         
-        // Notify ViewController (which cannot be called async)
+        // Notify ViewController (which has to be called from the main thread)
         DispatchQueue.main.async {
             self.syncedDelegate?.handleEvent(for: event, with: info)
         }
@@ -171,7 +171,6 @@ class Beverbende {
             with: ["player": player])
     }
     
-    // TODO: make swapCard method
     
     // Note: Does not set card.isFaceUp to true
     func drawCard(for player: Player) -> Card {
@@ -205,12 +204,12 @@ class Beverbende {
     // Might supersede tradeDiscardedCardWithCard
     func drawDiscardedCard(for player: Player) -> Card {
         let card = self.discardPile.pop()!
-        let topOfDeckCard = self.discardPile.peek()!
+        let topOfDeckCard = self.discardPile.peek()
         player.setCardOnHand(with: card)
         
         self.notifyDelegates(
             for: .discardedCardDrawn(player, card, topOfDeckCard),
-            with: ["player": player, "card":card, "topOfDeckCard": topOfDeckCard])
+            with: ["player": player, "card":card, "topOfDeckCard": topOfDeckCard as Any])
         
         return card
     }
@@ -281,13 +280,13 @@ class Beverbende {
     
     func tradeDiscardedCardWithCard(at index: Int, for player: Player) {
         let discardedCard = self.discardPile.pop()!
-        let topOfDeckCard = self.discardPile.peek()!
+        let topOfDeckCard = self.discardPile.peek()
         let replacedCard = self.replaceCard(at: index, with: discardedCard, for: player)
         self.discard(card: replacedCard)
         
         self.notifyDelegates(
             for: .discardedCardTraded(player, discardedCard, replacedCard, index, topOfDeckCard),
-            with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index, "topOfDeckCard": topOfDeckCard])
+            with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index, "topOfDeckCard": topOfDeckCard as Any])
         
     }
     
