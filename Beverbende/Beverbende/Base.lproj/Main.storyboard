@@ -134,6 +134,34 @@
                                     <action selector="showCardInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="FQe-e7-UU5"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YaM-OQ-KWg">
+                                <rect key="frame" x="964" y="863.5" width="264" height="60"/>
+                                <color key="backgroundColor" systemColor="systemGray2Color"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                <state key="normal" title=" Knock! Knock! "/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="10"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="knockOnTable:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hGL-2T-x1n"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F3c-O0-UVG">
+                                <rect key="frame" x="199" y="863.5" width="203" height="60"/>
+                                <color key="backgroundColor" systemColor="systemGray2Color"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                <state key="normal" title=" End of turn "/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="10"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="endUserTurn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="SPm-OO-SKu"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" red="0.92143100499999997" green="0.92145264149999995" blue="0.92144101860000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -142,8 +170,10 @@
                             <constraint firstItem="v5G-ec-era" firstAttribute="width" secondItem="Lq7-rZ-5Xg" secondAttribute="width" id="3K2-mW-zkR"/>
                             <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerX" secondItem="Vk9-nN-8Av" secondAttribute="centerX" id="3tJ-qf-5hy"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="height" id="4zt-o2-nJw"/>
+                            <constraint firstItem="YaM-OQ-KWg" firstAttribute="centerY" secondItem="Kg6-6n-zjl" secondAttribute="centerY" id="5Ss-Is-Zbp"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="height" secondItem="RKW-yV-bjh" secondAttribute="height" id="5qK-jr-57c"/>
                             <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerY" secondItem="Vk9-nN-8Av" secondAttribute="centerY" id="5zK-5n-kyN"/>
+                            <constraint firstItem="Vk9-nN-8Av" firstAttribute="leading" secondItem="F3c-O0-UVG" secondAttribute="trailing" constant="8" symbolic="YES" id="63U-fF-jhj"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="width" secondItem="RKW-yV-bjh" secondAttribute="width" id="73B-9E-YE9"/>
                             <constraint firstItem="Xzj-N5-4Ha" firstAttribute="width" secondItem="Lq7-rZ-5Xg" secondAttribute="width" id="7Qx-Lq-bd0"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="height" secondItem="Lq7-rZ-5Xg" secondAttribute="height" id="8CF-Pu-OZe"/>
@@ -161,6 +191,7 @@
                             <constraint firstItem="3UE-dg-Ecd" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="height" id="J0X-8c-ezi"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="LCE-vN-mam"/>
                             <constraint firstItem="KD6-5W-jUC" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="40" id="LCZ-oy-3Q6"/>
+                            <constraint firstItem="F3c-O0-UVG" firstAttribute="centerY" secondItem="Vk9-nN-8Av" secondAttribute="centerY" id="MKy-q7-DUX"/>
                             <constraint firstItem="NtA-jW-US5" firstAttribute="width" secondItem="qvZ-Sl-cDd" secondAttribute="width" id="OJR-FM-0ph"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Vk9-nN-8Av" secondAttribute="bottom" constant="20" id="PJn-oP-fUy"/>
                             <constraint firstItem="Xzj-N5-4Ha" firstAttribute="top" secondItem="2jY-Ke-cGh" secondAttribute="bottom" id="Uif-Kn-iUr"/>
@@ -184,6 +215,7 @@
                             <constraint firstItem="KD6-5W-jUC" firstAttribute="height" secondItem="s9Z-k5-SS0" secondAttribute="height" id="vGF-sz-tMU"/>
                             <constraint firstItem="2jY-Ke-cGh" firstAttribute="leading" secondItem="Xzj-N5-4Ha" secondAttribute="trailing" id="vXl-pi-ejl"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Xzj-N5-4Ha" secondAttribute="bottom" constant="40" id="wV3-g3-pr9"/>
+                            <constraint firstItem="YaM-OQ-KWg" firstAttribute="leading" secondItem="Vk9-nN-8Av" secondAttribute="trailing" constant="8" symbolic="YES" id="xJg-Ta-pOz"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="leading" secondItem="y0F-xD-sFd" secondAttribute="trailing" multiplier="1.015" constant="8" symbolic="YES" id="xSx-Kp-Wbt"/>
                         </constraints>
                     </view>
@@ -218,6 +250,8 @@
                         <outletCollection property="rightModelOnTableCardViews" destination="fx8-2t-0Rs" collectionClass="NSMutableArray" id="E0Q-sE-8BS"/>
                         <outletCollection property="rightModelOnTableCardViews" destination="qQZ-4F-JNH" collectionClass="NSMutableArray" id="MDW-Nn-wV7"/>
                         <outletCollection property="rightModelOnTableCardViews" destination="1wA-ai-kyl" collectionClass="NSMutableArray" id="ZtG-ky-OG8"/>
+                        <outletCollection property="afterTurnButtons" destination="F3c-O0-UVG" collectionClass="NSMutableArray" id="Ie7-EP-jjM"/>
+                        <outletCollection property="afterTurnButtons" destination="YaM-OQ-KWg" collectionClass="NSMutableArray" id="4sm-Kb-BiL"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -311,6 +345,9 @@
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray2Color">
+            <color red="0.68235294117647061" green="0.68235294117647061" blue="0.69803921568627447" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemRedColor">
             <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
