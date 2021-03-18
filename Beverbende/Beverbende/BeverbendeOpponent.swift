@@ -27,38 +27,19 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     var cardsOnTable: [Card?]
     
-    // Game state, basically goal buffer (cognitive control)
+    // Game state, for cognitive control
     private enum GameState:Equatable {
         case Begin // Begin of a turn, model decides whether to take top card from discarded.
-        case Processed_Discarded(remembered: [CardType?],latencies: [Double]) // Model has decided not to take discarded. Draws card from Deck.
-        case Processed_All(remembered: [CardType?]) // Model either looked at deck or discarded, is ready to decide.
+        case Processed_Discarded // Model has decided not to take discarded. Draws card from Deck.
+        case Processed_All // Model either looked at deck or discarded, is ready to decide.
         case DecideContinue // turn decision made to continue.
-        
         case DecideEnd // turn decision made to end.
-        
-        static func == (lhs: BeverbendeOpponent.GameState,
-                        rhs: BeverbendeOpponent.GameState) -> Bool {
-            // Source: https://medium.com/flawless-app-stories/equatable-for-enum-with-associated-value-e07d9ab20e8e
-            switch (lhs,rhs) {
-            case (.Begin, .Begin):
-                return true
-            case (.Processed_Discarded(remembered: _, latencies: _),
-                  .Processed_Discarded(remembered: _, latencies: _)):
-                return true
-            case (.Processed_All(remembered: _),
-                  .Processed_All(remembered: _)):
-                return true
-            case (.DecideContinue, .DecideContinue):
-                return true
-            case (.DecideEnd, .DecideEnd):
-                return true
-            default:
-                return false
-            }
-        }
     }
     
-    private var goal:GameState
+    // Quasi goal buffer, but also serves as an imaginal buffer.
+    // Allows to keep track of game state and to maintain a representation of
+    // the hand of cards and their latencies. (The latter is not ACT-R typical)
+    private var goal:(state:GameState,remembered:[CardType?]?,latencies:[Double]?)
     
     private var didKnock = false
     private var endCutoff:Int?
@@ -68,7 +49,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     required init(with ID: String) {
         //setup(with: ID)
         self.id = ID
-        self.goal = .Begin
+        self.goal.state = .Begin
+        self.goal.remembered = nil
+        self.goal.latencies = nil
         self.cardsOnTable = []
         super.init()
         self.setup()
@@ -77,7 +60,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     init(with ID: String, with Cards: [Card?], for Game: Beverbende) {
         
         self.id = ID
-        self.goal = .Begin
+        self.goal.state = .Begin
+        self.goal.remembered = nil
+        self.goal.latencies = nil
         self.cardsOnTable = Cards
         self.game = Game
         
@@ -104,20 +89,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         let (sample_decide,_,_) = sampler.sample(for: 150)
         self.instantiateMemoryValues(for: "end_value_fact", with: sampler.castToInt(for: sample_decide))
         
-        /**
-         Instantiate decision for swapping.
-         */
-        let categories = ["swapRecent":["lower":0.0,"upper":0.6],
-                          "swapRandom":["lower":0.6,"upper":0.8],
-                          "discard":["lower":0.8,"upper":1.0]]
-        let categoricalSampler = CategoricalSampler(with:categories)
-        let sampleCategories = categoricalSampler.sample(for: 150)
-        /**
-         ToDo:
-         Implement chunks for category facts.
-         */
-        
-        
+
         /**
          Peak first two cards.
          */
@@ -189,7 +161,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 self.time += 15.0
                 self.summarizeDM()
                 print("It is Model \(self.id)'s turn.")
-                self.advanceGame(for: game)
+                self.advanceGame()
                 let _ = game.nextPlayer()
             } else {
                 /*for card_index in 1...4 {
@@ -217,7 +189,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             
             }
             // Put all models in restricted game ended mode.
-            self.goal = .DecideEnd
+            self.goal.state = .DecideEnd
             
         default:
             // Do nothing.
@@ -251,7 +223,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         // Reset any game ending decisions
         self.didKnock = false
         self.endCutoff = nil
-        self.goal = .Begin
+        self.goal.state = .Begin
+        self.goal.remembered = nil
+        self.goal.latencies = nil
         // Clear all positional facts and reset time for decision facts
         self.resetPosfacts()
         self.resetTimeFacts(for: "end_value_fact")
@@ -485,7 +459,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func findLeastCertain(for remembered: [CardType?], with uncertainty: [Double]) -> Int{
+    private func findLeastCertain(for remembered: [CardType?], with latencies: [Double]) -> Int{
         /**
          Uses latency as a measure of certainty. If one or more cards could not be remembered at all
          one of their positions (at random if there are multiple) will be returned. Otherwise it returns the
@@ -496,8 +470,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         var max_uncertain_loc = 1
         for pos in 1...4{
             if let _ = remembered[pos - 1] {
-                if uncertainty[pos - 1] > max_uncertainty {
-                    max_uncertainty = uncertainty[pos - 1]
+                if latencies[pos - 1] > max_uncertainty {
+                    max_uncertainty = latencies[pos - 1]
                     max_uncertain_loc = pos
                 }
             } else {
@@ -512,67 +486,61 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func decideInspect(with remembered: [CardType?],
-                               and uncertainty: [Double],
-                               in game: Beverbende) {
-        game.discardDrawnCard(for: self)
-        let least_certain_pos = self.findLeastCertain(for: remembered, with: uncertainty)
-        let hidden_card = game.inspectCard(at: least_certain_pos - 1, for: self)
+    private func decideInspect() {
+        
+        game!.discardDrawnCard(for: self)
+        
+        let remembered = goal.remembered!
+        let latencies = goal.latencies!
+        
+        let least_certain_pos = self.findLeastCertain(for: remembered, with: latencies)
+        let hidden_card = game!.inspectCard(at: least_certain_pos - 1, for: self)
         self.memorizeCard(at: least_certain_pos, with: hidden_card)
-        game.moveCardBackFromHand(to: least_certain_pos - 1, for: self)
+        game!.moveCardBackFromHand(to: least_certain_pos - 1, for: self)
     }
     
     
-    private func decideTwice(with remembered: [CardType?],
-                             in game: Beverbende) {
-        game.discardDrawnCard(for: self)
+    private func decideTwice() {
+        game!.discardDrawnCard(for: self)
         for iteration in 0..<2 {
             print("Model \(self.id) draws \(iteration+1) card of take twice action.")
-            let newCard = game.drawCard(for: self)
+            let newCard = game!.drawCard(for: self)
             switch newCard.getType() {
             case .action:
                 // Model wants value cards, discards new .action cards.
                 print("Model \(self.id) got a new action card.. discards it.")
-                game.discardDrawnCard(for: self)
+                game!.discardDrawnCard(for: self)
             case .value:
                 print("Model \(self.id) got a new value card! Will decide now.")
-                let decision = self.decideValue(for: newCard as! ValueCard,
-                                                with: remembered,
-                                                in: game)
+                let decision = self.decideValue(for: newCard as! ValueCard)
                 switch decision {
                 case true:
                     print("Model \(self.id) takes the value card in iteration \(iteration+1)")
                     return 
                 case false:
-                    game.discardDrawnCard(for: self)
+                    game!.discardDrawnCard(for: self)
                 }
             }
         }
     }
     
     
-    private func decideSwap(with remembered: [CardType?],
-                            and uncertainty: [Double],
-                            in game: Beverbende) {
-        game.discardDrawnCard(for: self)
+    private func decideSwap() {
+        game!.discardDrawnCard(for: self)
         // Too: Implement strategy
     }
         
     
-    private func matchAction(for card:ActionCard,
-                              with remembered: [CardType?],
-                              and uncertainty: [Double],
-                              in game: Beverbende) {
+    private func matchAction(for card:ActionCard) {
         /**
          Decides how to deal with an action card
          */
-        switch self.goal {
+        switch self.goal.state {
         case .Begin:
             print("Model \(self.id) skips top discarded action card")
             // Cannot take action cards from discarded pile.
-            game.discardDrawnCard(for: self)
-            goal = .Processed_Discarded(remembered: remembered,
-                                        latencies: uncertainty)
+            game!.discardDrawnCard(for: self)
+            goal.state = .Processed_Discarded
         default:
             print("Model \(self.id) matches action card")
             let action = card.getAction()
@@ -580,39 +548,77 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             case .inspect:
                 // Always plays this card.
                 print("Model \(self.id) will decide inspect.")
-                self.decideInspect(with: remembered,
-                                   and: uncertainty,
-                                   in: game)
+                self.decideInspect()
             case .twice:
                 // Always play this card.
                 print("Model \(self.id) will decide twice.")
-                self.decideTwice(with: remembered,
-                                 in: game)
+                self.decideTwice()
             case .swap:
                 print("Model \(self.id) will decide swap.")
-                self.decideSwap(with: remembered,
-                                and: uncertainty,
-                                in: game)
+                self.decideSwap()
             }
             // No matter the outcome set goal to processed all
-            goal = .Processed_All(remembered: remembered)
+            goal.state = .Processed_All
         }
         
     }
     
     
-    private func decideValue(for card:ValueCard,
-                             with hand: [CardType?],
-                             in game: Beverbende) -> Bool{
+    private func reinforceLowDecision(for value:Int,
+                                      and retrievedCutoff: Int) {
+        
+        let previousCard = game!.drawDiscardedCard(for: self)
+        switch previousCard.getType() {
+        case .action(_):
+            /**
+            Action cards can be beneficial or detrimental at the end
+            of a game. Thus, their usefulness is hard (if not impossible)
+            to predict, which is why replacing them is always considered
+            a good idea.
+            */
+            print("Model \(self.id) reinforced the cut-off for low value decision")
+            self.instantiateMemoryValues(for: "low_value_fact",
+                                         with: [retrievedCutoff])
+            self.time += 0.05
+        case .value(let previousValue):
+            /**
+            The retrieved cut-off should be reinforced only if the previousValue (the
+             value of the previously unknown card) was higher or equal to the value of the
+             card with which this unknown was replaced. Equal cards are still considered an
+             improvement since knowing the value of the card is beneficial in any case.
+            */
+            if previousValue > value {
+                print("Model \(self.id) reinforced the cut-off for low value decision")
+                self.instantiateMemoryValues(for: "low_value_fact",
+                                             with: [retrievedCutoff])
+                self.time += 0.05
+            }
+        }
+    }
+    
+    
+    private func decideValue(for card:ValueCard) -> Bool{
+        // Create constants for representation of hand
+        // and a variable for the hand/latencies
         let value = card.value
+        var hand = goal.remembered!
+        var latencies = goal.latencies!
+        
+        // Compare the value of the current card to the representation of the hand.
         let (known_max, unknown) = compareHand(for: card, with: hand)
         if let found_max = known_max {
             print("Model \(self.id) took the value card to replace a known higher one.")
             memorizeCard(at: found_max, with: card)
             self.summarizeDM()
             print(self.time)
-            game.tradeDrawnCardWithCard(at: found_max - 1,
+            game!.tradeDrawnCardWithCard(at: found_max - 1,
                                         for: self)
+            // Update the representation of the hand and latencies
+            hand[found_max - 1] = CardType.value(value)
+            latencies[found_max - 1] = 0.0
+            goal.remembered = hand
+            goal.latencies = latencies
+
             return true // Replace card
         } else if unknown.count > 0 {
             /**
@@ -634,41 +640,23 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     
                     self.summarizeDM()
                     print(self.time)
-                    game.tradeDrawnCardWithCard(at: unknown[choice] - 1,
+                    game!.tradeDrawnCardWithCard(at: unknown[choice] - 1,
                                                 for: self)
+                    
+                    // Update the representation of the hand and latencies
+                    hand[unknown[choice] - 1] = CardType.value(value)
+                    latencies[unknown[choice] - 1] = 0.0
+                    goal.remembered = hand
+                    goal.latencies = latencies
+                    
                     /**
-                     Now model gets feedback whether replacing the card was a good decision. If the card
+                     Now model gets feedback whether replacing the card was a good decision. Only If the card
                      picked at random was higher in value (or an action card) the selected cutoff should be
                      reinforced.
                      */
-                    let previousCard = game.drawDiscardedCard(for: self)
-                    switch previousCard.getType() {
-                    case .action(_):
-                        /**
-                        Action cards can be beneficial or detrimental at the end
-                        of a game. Thus, their usefulness is hard (if not impossible)
-                        to predict, which is why replacing them is always considered
-                        a good idea.
-                        */
-                        print("Model \(self.id) reinforced the cut-off for low value decision")
-                        self.instantiateMemoryValues(for: "low_value_fact",
-                                                     with: [retrievedCutoff])
-                        self.time += 0.05
-                    case .value(let previousValue):
-                        /**
-                        The retrieved cut-off should be reinforced only if the previousValue (the
-                         value of the previously unknown card) was higher or equal to the value of the
-                         card with which this unknown was replaced. Equal cards are still considered an
-                         improvement since knowing the value of the card is beneficial in any case.
-                        */
-                        if previousValue > value {
-                            print("Model \(self.id) reinforced the cut-off for low value decision")
-                            self.instantiateMemoryValues(for: "low_value_fact",
-                                                         with: [retrievedCutoff])
-                            self.time += 0.05
-                        }
-                    }
-                    game.discardDrawnCard(for: self)
+                    self.reinforceLowDecision(for: value, and: retrievedCutoff)
+                    
+                    game!.discardDrawnCard(for: self)
                     return true // Replace card
                 }
             }
@@ -678,109 +666,97 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func matchValue(for card: ValueCard,
-                            with remembered: [CardType?],
-                            and uncertainty: [Double],
-                            in game: Beverbende) {
+    private func matchValue(for card: ValueCard) {
         
-        let didReplace = self.decideValue(for: card,
-                                          with: remembered,
-                                          in: game)
+        let didReplace = self.decideValue(for: card)
         if !didReplace {
             // Discard the card on hand.
-            game.discardDrawnCard(for: self)
+            game!.discardDrawnCard(for: self)
             // Update Goal based on current game state
-            if goal == .Begin {
-                goal = .Processed_Discarded(remembered: remembered,
-                                            latencies: uncertainty)
+            if goal.state == .Begin {
+                goal.state = .Processed_Discarded
             } else {
-                goal = .Processed_All(remembered: remembered)
+                goal.state = .Processed_All
             }
         } else {
-            goal = .Processed_All(remembered: remembered)
+            goal.state = .Processed_All
         }
     }
     
     
-    private func matchCard(for card: Card,
-                           with remembered: [CardType?],
-                           and uncertainty: [Double],
-                           in game: Beverbende) {
+    private func matchCard(for card: Card) {
         /**
          Match card type.
          */
         switch card.getType(){
             case .value:
-                self.matchValue(for: card as! ValueCard,
-                                with: remembered,
-                                and: uncertainty,
-                                in: game)
+                self.matchValue(for: card as! ValueCard)
             case .action:
-                self.matchAction(for: card as! ActionCard,
-                                  with: remembered,
-                                  and: uncertainty,
-                                  in: game)
+                self.matchAction(for: card as! ActionCard)
         }
     }
     
     
-    private func matchTurnDecision(with game:Beverbende) {
+    private func matchTurnDecision() {
         /**
          Advances model game by one step and returns
          */
         
-        switch goal {
+        switch goal.state {
             case .Begin:
+                print("Model \(self.id) representation \(goal.remembered)")
+                print("Model \(self.id) latencies \(goal.latencies)")
                 self.time += 0.05
                 print("Model \(self.id) will look at discarded pile now:")
                 // Place card in hand
-                let card = game.drawDiscardedCard(for: self)
+                let card = game!.drawDiscardedCard(for: self)
             
                 // Attempt to remember the deck
                 print("Model \(self.id) will try to remember its cards now.")
                 let (remembered,latencies) = self.rememberHand()
                 
-                // Make decision based on card type.
-                self.matchCard(for: card,
-                               with: remembered,
-                               and: latencies,
-                               in: game)
+                // Update Goal (Imaginal) slots
+                goal.remembered = remembered
+                goal.latencies = latencies
                 
-            case .Processed_Discarded(let remembered, let latencies):
+                // Make decision based on card type.
+                self.matchCard(for: card)
+                
+            case .Processed_Discarded:
                 self.time += 0.05
                 print("Model \(self.id) looked at discarded, will look at Deck as well.")
                 // Place card in hand
-                let card = game.drawCard(for: self)
+                let card = game!.drawCard(for: self)
                 // Make decision based on card type.
-                self.matchCard(for: card,
-                               with: remembered,
-                               and: latencies,
-                               in: game)
+                self.matchCard(for: card)
 
-            case .Processed_All(let remembered):
+            case .Processed_All:
                 self.time += 0.05
                 print("Model \(self.id) looked at Discarded pile and/or Deck.")
                 
-                if !game.knocked {
-                    let decision = self.decideGame(for: remembered)
+                if !game!.knocked {
+                    let decision = self.decideGame()
                     switch decision {
                         case true:
                             print("\(self.id): I knock")
-                            game.knock(from: self)
-                            goal = .DecideEnd
+                            game!.knock(from: self)
+                            goal.state = .DecideEnd
                         case false:
-                            goal = .DecideContinue
+                            goal.state = .DecideContinue
                     }
                 } else {
                     print("Someone already knocked so I will continue.")
-                    goal = .DecideContinue
+                    goal.state = .DecideContinue
                 }
                 
                 
             case .DecideContinue:
                 self.time += 0.05
                 print("Model has decided to continue.")
-                goal = .Begin
+                // Clear all slots
+                goal.state = .Begin
+                goal.remembered = nil
+                goal.latencies = nil
             
             case .DecideEnd:
                 print("I am out of the game.")
@@ -788,10 +764,13 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func decideGame(for remembered: [CardType?]) -> Bool{
+    private func decideGame() -> Bool{
         /**
          Model decides whether to end game or not.
          */
+        let remembered = goal.remembered!
+        print("Model \(self.id) representation \(remembered)")
+        print("Model \(self.id) latencies \(goal.latencies)")
         var sum = 0
         for possiblyRetrieved in remembered{
             if let retrievedType = possiblyRetrieved {
@@ -832,12 +811,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func advanceGame(for game: Beverbende) {
+    private func advanceGame() {
         /**
          Model will perform a turn and signals whether it wants to end or not
          */
         repeat {
-            self.matchTurnDecision(with: game)
-        } while (self.goal != .Begin) && (self.goal != .DecideEnd)
+            self.matchTurnDecision()
+        } while (self.goal.state != .Begin) && (self.goal.state != .DecideEnd)
     }
 }
