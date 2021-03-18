@@ -216,10 +216,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 ()
             
             }
-            // Reset again
-            self.didKnock = false
-            self.endCutoff = nil
-            self.goal = .Begin
+            // Put all models in restricted game ended mode.
+            self.goal = .DecideEnd
             
         default:
             // Do nothing.
@@ -248,11 +246,18 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     func resetOpponent(){
+        // Reset time
         self.time = 0.0
+        // Reset any game ending decisions
+        self.didKnock = false
+        self.endCutoff = nil
+        self.goal = .Begin
+        // Clear all positional facts and reset time for decision facts
         self.resetPosfacts()
         self.resetTimeFacts(for: "end_value_fact")
         self.resetTimeFacts(for: "low_value_fact")
-
+        
+        // Inspect first two cards.
         let leftCard = self.game?.inspectCard(at: 0, for: self)
         self.memorizeCard(at: 1, with: leftCard!)
         self.game?.moveCardBackFromHand(to: 0, for: self)
@@ -529,7 +534,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 // Model wants value cards, discards new .action cards.
                 print("Model \(self.id) got a new action card.. discards it.")
                 game.discardDrawnCard(for: self)
-                continue
             case .value:
                 print("Model \(self.id) got a new value card! Will decide now.")
                 let decision = self.decideValue(for: newCard as! ValueCard,
@@ -537,11 +541,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                                                 in: game)
                 switch decision {
                 case true:
-                    print("Model \(self.id) takes the value card in iter \(iteration+1)")
+                    print("Model \(self.id) takes the value card in iteration \(iteration+1)")
                     return 
                 case false:
                     game.discardDrawnCard(for: self)
-                    continue
                 }
             }
         }
@@ -757,15 +760,22 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             case .Processed_All(let remembered):
                 self.time += 0.05
                 print("Model \(self.id) looked at Discarded pile and/or Deck.")
-                let decision = self.decideGame(for: remembered)
-                switch decision {
-                    case true:
-                        print("\(self.id): I knock")
-                        game.knock(from: self)
-                        goal = .DecideEnd
-                    case false:
-                        goal = .DecideContinue
+                
+                if !game.knocked {
+                    let decision = self.decideGame(for: remembered)
+                    switch decision {
+                        case true:
+                            print("\(self.id): I knock")
+                            game.knock(from: self)
+                            goal = .DecideEnd
+                        case false:
+                            goal = .DecideContinue
+                    }
+                } else {
+                    print("Someone already knocked so I will continue.")
+                    goal = .DecideContinue
                 }
+                
                 
             case .DecideContinue:
                 self.time += 0.05
@@ -828,9 +838,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         repeat {
             self.matchTurnDecision(with: game)
-            if self.goal == .DecideContinue {
-                self.goal = .Begin
-            }
         } while (self.goal != .Begin) && (self.goal != .DecideEnd)
     }
 }
