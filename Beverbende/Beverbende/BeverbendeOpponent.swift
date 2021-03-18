@@ -20,6 +20,21 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private static let cut_off_decide = 14
     private static let cut_off_decide_sd = 3
     
+    private static let learning_rate = 0.1
+    
+    private var explorationScheduleDecision = 1.0
+    
+    // Utilities for swap production rules
+    private var utilities = [1.0,1.0,1.0] // Discard, swapRandom, swapRecent
+    
+    // swap action fire enumeration
+    private enum productionFired {
+        case discard, swapRandom, swapRecent
+    }
+    
+    // swap history for rewarding
+    private var swapHistory = [(production:productionFired,atTime:Double)]()
+    
     // Model identifier and Player implmementation variables
     var id: String
     
@@ -154,9 +169,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     func handleEvent(for event: EventType, with info: [String : Any]) {
         switch event {
-        case .nextTurn:
-            
-            let player = info["player"] as! Player
+        case .nextTurn(let player):
             if player.id == self.id, let game = self.game {
                 self.time += 15.0
                 self.summarizeDM()
@@ -164,16 +177,15 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 self.advanceGame()
                 let _ = game.nextPlayer()
             } else {
-                /*for card_index in 1...4 {
+                // Rehearse
+                for card_index in 1...4 {
                     print("Model \(self.id) is rehearsing since it is not its turn.")
                     _ = self.rehearsal(at: card_index)
-                }*/
-                ()
+                }
             }
         
-        case .gameEnded:
+        case .gameEnded(let winner):
             print("\(self.id) received game ended signal.")
-            let winner = info["winner"] as! Player
             if winner.id == self.id {
                 print("Hooray")
                 if self.didKnock {
@@ -181,20 +193,50 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     
                     self.instantiateMemoryValues(for: "end_value_fact",
                                                  with: [cutoff])
+                    self.reinforceSwap(with: 1.0)
                                         
                 }
             } else {
                 // Maybe instantiate DM with cut-off of winner?
-                ()
+                self.reinforceSwap(with: 0.0)
             
             }
             // Put all models in restricted game ended mode.
             self.goal.state = .DecideEnd
+        
+        case .cardsSwapped(let pos1, let player1,
+                           let pos2, let player2):
+            if player1.id != self.id {
+                // Someone other than me swapped recently
+                print("\(self.id) stores a recent swapper.")
+                self.memorizeSwapper(who: player1.id, at: pos1 + 1)
+            }
+            
+            if player2.id == self.id {
+                // Someone swapped with me, I should forget the card in that position
+                print("\(self.id) adaptively forgets all knowledge about a swapped card.")
+                self.memorizeUnknown(isa: "Pos_Fact",
+                                     for: "type",
+                                     at: pos2 + 1)
+            }
+            
+            // ToDo: implement adaptive positional forgetting of person that was swapped.
+            // This requires changing the storage of the swapper facts!
             
         default:
             // Do nothing.
             ()
         }
+    }
+    
+    
+    func IDToPlayer (for id:String) -> Player? {
+        for player in game!.players {
+            if player.getId() == id {
+                return player
+            }
+        }
+        return nil
     }
     
     
@@ -350,13 +392,31 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func memorizeUnknown(at position: Int) {
-        // Allows for adaptive forgetting
-        let chunk = self.generateNewChunk(string: "Pos")
-        chunk.slotvals["isa"] = Value.Text("Pos_Fact")
+    private func memorizeSwapper(who swapped: String,
+                                 at position: Int) {
+        // Allows for adaptive forgetting for position facts and
+        // recent swapper facts.
+        let chunk = self.generateNewChunk(string: "Swapper")
+        chunk.slotvals["isa"] = Value.Text("swapped_recently_fact")
         chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count) + "_" + self.formatTime())
         chunk.slotvals["pos"] = Value.Number(Double(position))
-        chunk.slotvals["type"] = Value.Text("unknown")
+        chunk.slotvals["who"] = Value.Text(swapped)
+        
+        self.dm.addToDM(chunk)
+        self.time += 0.05
+    }
+    
+    
+    private func memorizeUnknown(isa: String,
+                                 for type: String,
+                                 at position: Int) {
+        // Allows for adaptive forgetting for position facts and
+        // recent swapper facts.
+        let chunk = self.generateNewChunk(string: "Forget")
+        chunk.slotvals["isa"] = Value.Text(isa)
+        chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count) + "_" + self.formatTime())
+        chunk.slotvals["pos"] = Value.Number(Double(position))
+        chunk.slotvals[type] = Value.Text("unknown")
         
         self.dm.addToDM(chunk)
         self.time += 0.05
@@ -525,9 +585,141 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
+    private func swapDiscard() {
+        // Nothing more than adding an
+        // entry to the swap history.
+        swapHistory.append((production: .discard, atTime: self.time))
+    }
+    
+    
+    private func swapRecent() {
+        // Attempt to retrieve who swapped for the
+        // last time. If that is possible swap
+        // with that person and forget the person!!
+        // Else swapRandom.
+        let remembered = goal.remembered!
+        let request = Chunk(s: "Retrieval",m: self)
+        request.slotvals["isa"] = Value.Text("swapped_recently_fact")
+        let (latency,retrieval) = self.dm.retrieve(chunk: request)
+        self.time += latency
+        
+        if let retrievedFact = retrieval {
+            let retrievedRecentSwapper = retrievedFact.slotvals["who"]!.text()!
+            
+            if retrievedRecentSwapper == "unknown" {
+                // Adaptively forgotten.
+                self.swapRandom()
+            } else {
+                let retrievedReplacedCard = Int(retrievedFact.slotvals["pos"]!.number()!) - 1
+                // Check whether there is an unknown card still.
+                var unknown = [Int]()
+                for (index,possiblyRemembered) in remembered.enumerated() {
+                    
+                    if possiblyRemembered == nil {
+                        unknown.append(index)
+                    }
+                }
+                // If there is an unknown card, swap that one.
+                if unknown.count > 0 {
+                    let choice = Int.random(in:0..<unknown.count)
+                    let player = self.IDToPlayer(for: retrievedRecentSwapper)!
+                    game!.swapCards(cardAt: unknown[choice],
+                                    for: self,
+                                    withCardAt: retrievedReplacedCard,
+                                    for: player)
+                    
+                    // Forget the recent swapper so that you do not swap your own card if you swap again.
+                    self.memorizeUnknown(isa: "swapped_recently_fact",
+                                         for: "who",
+                                         at: -1)
+                }
+                swapHistory.append((production: .swapRecent, atTime: self.time))
+            }
+        } else {
+            // Fall back to random swap if no recent swapper
+            // can be retrieved.
+            self.swapRandom()
+        }
+    }
+    
+    
+    private func swapRandom() {
+        let players = game!.players
+        let remembered = goal.remembered!
+        var choicePLAY = Int.random(in:0..<players.count)
+        
+        while players[choicePLAY].id == self.id {
+            choicePLAY = Int.random(in:0..<players.count)
+        }
+        var unknown = [Int]()
+        for (index,possiblyRemembered) in remembered.enumerated() {
+            
+            if possiblyRemembered == nil {
+                unknown.append(index)
+            }
+        }
+        // If there is an unknown card, swap that one.
+        if unknown.count > 0 {
+            let choiceUNK = Int.random(in:0..<unknown.count)
+            game!.swapCards(cardAt: unknown[choiceUNK],
+                            for: self,
+                            withCardAt: Int.random(in:0..<4),
+                            for: players[choicePLAY])
+        }
+        swapHistory.append((production: .swapRecent, atTime: self.time))
+        
+    }
+    
+    
+    
     private func decideSwap() {
+        // Discard the action card and match rule
+        // with highest utility.
         game!.discardDrawnCard(for: self)
-        // Too: Implement strategy
+        let utilityDiscard = utilities[0] + actrNoise(noise: self.procedural.utilityNoise)
+        let utilitySwapRandom = utilities[1] + actrNoise(noise: self.procedural.utilityNoise)
+        let utilitySwapRecent = utilities[2] + actrNoise(noise: self.procedural.utilityNoise)
+        
+        // Select action with highest utlity.
+        if utilityDiscard > utilitySwapRandom,
+           utilityDiscard > utilitySwapRecent {
+            swapDiscard()
+        } else if utilitySwapRandom > utilityDiscard,
+                  utilitySwapRandom > utilitySwapRecent {
+            swapRandom()
+        } else {
+            swapRecent()
+        }
+    }
+    
+    
+    private func reinforceSwap(with reward:Double) {
+        
+        let timeDist = self.time
+        print("Model \(self.id) timeDist \(timeDist)")
+        for (production,timeMatched) in swapHistory {
+            print("Model \(self.id) production \(production) at time: \(timeMatched)")
+            let timeDiff = (timeDist - timeMatched) / timeDist // Ratio of time diff
+            print("Model \(self.id) time-diff: \(timeDiff)")
+            let actual_reward = reward - timeDiff
+            print("Model \(self.id) actual-reward: \(actual_reward)")
+            
+            switch production {
+                case .discard:
+                    let q_update = actual_reward - utilities[0]
+                    utilities[0] = utilities[0] + BeverbendeOpponent.learning_rate * q_update
+                    print("Model \(self.id) utility for discard: \(utilities[0])")
+                case .swapRandom:
+                    let q_update = actual_reward - utilities[1]
+                    utilities[1] = utilities[1] + BeverbendeOpponent.learning_rate * q_update
+                    print("Model \(self.id) utility for random: \(utilities[1])")
+                case .swapRecent:
+                    let q_update = actual_reward - utilities[2]
+                    utilities[2] = utilities[2] + BeverbendeOpponent.learning_rate * q_update
+                    print("Model \(self.id) utility for recent: \(utilities[2])")
+            }
+            
+        }
     }
         
     
