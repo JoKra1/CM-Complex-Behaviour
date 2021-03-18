@@ -48,8 +48,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
         view.bringSubviewToFront(animationViewOne)
         afterTurnButtons.forEach { $0.isHidden = true}
         onHandCardInfoButton.isHidden = true
+        leftKnockLabel.alpha = 0
+        rightKnockLabel.alpha = 0
+        topKnockLabel.alpha = 0
         addCardGestures()
-        
         self.game.addSync(delegate: self)
         let discardePileValue = getStringMatchingWithCard(forCard: game.discardPile.peek()!)
         showFrontOfCard(show: discardePileValue, on: discardPileView, for: .game)
@@ -813,6 +815,37 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
         return 0.61
     }
+    
+    
+    @IBOutlet weak var leftKnockLabel: UILabel!
+    @IBOutlet weak var topKnockLabel: UILabel!
+    @IBOutlet weak var rightKnockLabel: UILabel!
+    
+    func animateKnock(by actor: Actor) -> Double {
+        if actor != .user {
+            
+            var knockLabel: UILabel {
+                switch actor {
+                case .leftModel:
+                    return leftKnockLabel
+                case .rightModel:
+                    return rightKnockLabel
+                default: // .rightModel
+                    return topKnockLabel
+                }
+            }
+            
+            UIView.animate(withDuration: 0.2, delay: 0,
+                           options: [],
+                           animations:
+                            {knockLabel.alpha = 1},
+                           completion: nil
+            )
+            
+            return 0.41
+        }
+        return 0.0
+    }
 
     // ############################ EVENT HANDLING ############################
     
@@ -829,30 +862,36 @@ class ViewController: UIViewController, BeverbendeDelegate {
         } else { print("there should be events in the eventQueueueue") }
     }
     
+    var knockedBy: Player? = nil
+    
     func handleEvent(for event: EventType, with info: [String : Any]) {
         print("incoming event: \(event)")
 
-        switch event { // this needs separate management due to user related animations being added to the queueueueue
-        case .tradingLeftoverActionCards:
+        switch event {
+        case .tradingLeftoverActionCards: // this needs separate management due to user related animations being added to the queueueueue
             gameWrapUp = true
+        case let .knocked(player): // used for triggering the final animations
+            knockedBy = player
         default:
             break
         }
         
         if gameWrapUp { // finishing of the game, trading all action cards for value cards from the pile
-            eventQueue.enqueue(element: (event, info))
-//            switch event {
-//            case .gameEnded:
-//                animateEventQueue()
-//            default:
-//                break
-//            }
+            eventQueue.enqueue(element: (event, info)) // these come in during the animation of the model's actions, fast enough not to be an issue i assume
+            switch event {
+            case .gameEnded:
+                if knockedBy != nil, knockedBy!.getId() != user.getId() { // activate the animations in case the game does not end at the user
+                    animateEventQueue()
+                }
+            default:
+                break
+            }
             
         } else { // normal gameplay
             if let player = info["player"] as? Player {
                 if player.getId() == user.getId() { // event relating to the user require the start of animation(s)
                     switch event {
-                    case .nextTurn: // the models have made all there moves and signaled that it is the users turn, time to animate the model actions
+                    case .nextTurn: // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
                         animateEventQueue()
                     case .knocked:
                         print("Knock by you, the user")
@@ -862,10 +901,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 } else {
                     eventQueue.enqueue(element: (event, info)) // add the model actions to the queue, wait with animation till the user's turn
                 }
-            } else { // only happens at game ended
-                eventQueue.enqueue(element: (event, info)) // should not be reached
-                print("SHOULD NOT BE REACHED")
             }
+//           else { // only happens at game ended
+//                eventQueue.enqueue(element: (event, info)) // should not be reached
+//                print("SHOULD NOT BE REACHED")
+//            }
         }
         
     }
@@ -959,11 +999,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case let .knocked(player):
             playerPlaceholder = player
             print("knock by \(player.getId())")
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            duration = animateKnock(by: actor)
             
         case let .gameEnded(player):
             playerPlaceholder = player
             showWinner(for: player)
-            
         default:
             playerPlaceholder = game.players[1]
             duration = 0.01
