@@ -18,6 +18,7 @@ class Beverbende {
     var asyncQueue: DispatchQueue
     
     var knocked = false
+    var gameEnded = false
     var countdown = 0 // This will only start ticking when knocked is true
     
     static func allCards() -> [Card] {
@@ -105,6 +106,10 @@ class Beverbende {
     }
 
     func nextPlayer() -> Player {
+        if self.gameEnded {
+            return self.players[self.currentPlayerIndex]
+        }
+        
         self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
         
         let player = self.players[self.currentPlayerIndex]
@@ -147,6 +152,7 @@ class Beverbende {
                 }
             }
             
+            self.gameEnded = true
             self.notifyDelegates(
                 for: .gameEnded(winner),
                 with: ["winner": winner])
