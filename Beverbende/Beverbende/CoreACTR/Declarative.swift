@@ -169,7 +169,7 @@ class Declarative  {
                     }
                 } else { continue chunkloop }
             }
-//            println("Candidate: \(ch1) with activation \(ch1.activation() + mismatch)")
+            print("Candidate: \(ch1) with activation \(ch1.activation() + mismatch)")
             if ch1.activation()  + mismatch > bestActivation {
                 bestActivation = ch1.activation() + mismatch
                 bestMatch = ch1
