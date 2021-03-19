@@ -835,16 +835,27 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 }
             }
             
-            UIView.animate(withDuration: 0.2, delay: 0,
-                           options: [],
-                           animations:
-                            {knockLabel.alpha = 1},
-                           completion: nil
-            )
+            let nKnocks = 3
             
-            return 0.41
+            flashKnockLabel(flashesToMake: nKnocks*2, forLabel: knockLabel)
+
+            
+            return Double(nKnocks) * 0.3 * 2 + 0.01
         }
         return 0.0
+    }
+    
+    func flashKnockLabel(flashesToMake count: Int, forLabel label: UILabel) {
+        print("knock count: \(count)")
+        if count != 0 {
+            UIView.animate(withDuration: 0.4, delay: 0.1,
+                           options: [],
+                           animations: {
+                            label.alpha = (label.alpha == 1) ? 0 : 1},
+                           completion: { _ in
+                            self.flashKnockLabel(flashesToMake: count-1, forLabel: label)
+                           })
+        }
     }
 
     // ############################ EVENT HANDLING ############################
@@ -916,7 +927,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
          */
         if player.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the player performs his last gesture/action
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
-                self.afterTurnButtons.forEach{ $0.isHidden = false }
+                self.afterTurnButtons[0].isHidden = false //always show next turn button
+                if self.knockedBy == nil {
+                    self.afterTurnButtons[1].isHidden = false // only show when no one knocked already
+                }
             }
         }
     }
