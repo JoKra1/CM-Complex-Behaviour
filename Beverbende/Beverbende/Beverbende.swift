@@ -166,12 +166,14 @@ class Beverbende {
     }
     
     func knock(from player: Player) {
-        self.knocked = true
-        self.countdown = self.players.count - 1
+        if !self.knocked {
+            self.knocked = true
+            self.countdown = self.players.count - 1
         
-        self.notifyDelegates(
-            for: .knocked(player),
-            with: ["player": player])
+            self.notifyDelegates(
+                for: .knocked(player),
+                with: ["player": player])
+        }
     }
     
     
