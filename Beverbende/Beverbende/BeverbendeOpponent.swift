@@ -331,7 +331,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         print("Summarizing DM")
         for pos in 1...4{
             for chunk in self.dm.chunks {
-                if chunk.value.slotvals["isa"]!.text()! == "low_value_fact" {
+                if chunk.value.slotvals["isa"]!.text()! == "low_value_fact__" {
                     if chunk.value.slotvals["pos"]!.number()! == Double(pos){
                         print(chunk.value.slotvals)
                         print(chunk.value.baseLevelActivation())
