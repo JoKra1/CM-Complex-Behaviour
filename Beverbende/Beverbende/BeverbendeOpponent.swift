@@ -220,6 +220,30 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             
             // ToDo: implement adaptive positional forgetting of person that was swapped.
             // This requires changing the storage of the swapper facts!
+        
+        case .discardedCardTraded(let player, let discardedCard, let replacedCard, _, _):
+            // Whenever any other player decided to replace a card on the hand with the
+            // top discarded card, the model can use this as an opportunity to learn more
+            // about the low value cut-off, by going to the same steps when having to make
+            // the same decision.
+            
+            if player.id != self.id {
+                // Only handle this case if it wasn't the model itself.
+                switch discardedCard.getType() {
+                case .action:
+                    // This should never happen, because it is objectively speaking
+                    // not a good move. However, human opponenst not always act rational so...
+                    ()
+                case .value(let points):
+                    // Judge (and memorize) whether the move by the opponent was "good" or "bad"
+                    print("\(self.id) judges the discarded card trade made by an opponent.")
+                    self.memorizeLowDecision(for: points,
+                                             compare_against: replacedCard,
+                                             and: points)
+                }
+            }
+            
+        
             
         default:
             // Do nothing.
@@ -799,9 +823,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     
     private func memorizeLowDecision(for value:Int,
-                                      and retrievedCutoff: Int) {
+                                     compare_against previousCard: Card,
+                                     and retrievedCutoff: Int) {
         
-        let previousCard = game!.drawDiscardedCard(for: self)
+        
         switch previousCard.getType() {
         case .action(_):
             /**
@@ -900,7 +925,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                      picked at random was higher in value (or an action card) the replacement should be remembered as
                      a good decision.
                      */
-                    self.memorizeLowDecision(for: value, and: value)
+                    let previousCard = game!.drawDiscardedCard(for: self)
+                    self.memorizeLowDecision(for: value,
+                                             compare_against: previousCard,
+                                             and: value)
                     
                     game!.discardDrawnCard(for: self)
                     return true // Replace card
@@ -929,7 +957,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                      however, a new memory for this value will be created (depending on outcome this value will be marked
                      as good or bad)
                      */
-                    self.memorizeLowDecision(for: value, and: value)
+                    let previousCard = game!.drawDiscardedCard(for: self)
+                    self.memorizeLowDecision(for: value,
+                                             compare_against: previousCard,
+                                             and: value)
                     
                     game!.discardDrawnCard(for: self)
                     return true // Replace card
