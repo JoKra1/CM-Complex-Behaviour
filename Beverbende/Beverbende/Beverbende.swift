@@ -281,11 +281,6 @@ class Beverbende {
         player.setCardOnHand(with: nil)
         let replacedCard = self.replaceCard(at: index, with: heldCard, for: player)
         self.discard(card: replacedCard)
-        if heldCard.isFaceUp == true {
-            for _ in 0..<15{
-                print("IS TRUE!!")
-            }
-        }
         self.notifyDelegates(
             for: .cardTraded(player, replacedCard, index, heldCard.isFaceUp),
             with: ["player": player, "cardFromPlayer":replacedCard, "cardFromPlayerIndex": index, "toIsFaceUp": heldCard.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
