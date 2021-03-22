@@ -7,15 +7,20 @@
 
 import Foundation
 
+struct Delegate {
+    let id: String
+    let weakContainer: WeakContainer<BeverbendeDelegate>
+}
+
 class Beverbende {
     var playerIds: [String]
     var players: [Player]
     var currentPlayerIndex: Int
     var drawPile: Stack<Card>
     var discardPile: Stack<Card>
-    var delegates: [WeakContainer<BeverbendeDelegate>]
-    weak var syncedDelegate: BeverbendeDelegate?
-    var asyncQueue: DispatchQueue
+    var delegates: [Delegate]
+    weak var controllerDelegate: BeverbendeDelegate?
+    var eventQueue = Queue<Event>()
     
     var knocked = false
     var gameEnded = false
@@ -52,7 +57,6 @@ class Beverbende {
         self.players = [humanPlayer]
         
         self.delegates = []
-        self.asyncQueue = DispatchQueue(label: "DelegateQueue", attributes: .concurrent)
         
         self.currentPlayerIndex = 0
         self.discardPile = Stack<Card>()
@@ -79,88 +83,159 @@ class Beverbende {
         
     }
     
+    /**
+     Adds a BeverbendeDelegate as a delegate. The delegate should also be a Player.
+     
+     - Parameter delegate: An object implementing both the BeverbendeDelegate and Player protocols, to be added as a delegate to the Beverbende instance.
+     */
     func add(delegate: BeverbendeDelegate) {
+        // This should simply be a player, because we need the ID
+        let player = delegate as! Player
+        
         var wd = WeakContainer<BeverbendeDelegate>()
         wd.value = delegate
-        self.delegates.append(wd)
+        
+        self.delegates.append(Delegate(id: player.getId(), weakContainer: wd))
     }
     
     func addSync(delegate: BeverbendeDelegate) {
-        self.syncedDelegate = delegate
+        self.controllerDelegate = delegate
     }
     
-    private func notifyDelegates(for event: EventType, with info: [String: Any]) {
-        // Notify cognitive model delegates
-        for wd in self.delegates {
-            let delegate = wd.value
+    private func notifyDelegates(for event: EventType, with info: [String: Any], to delegates: [Delegate]) {
+        for delegate in delegates {
+            let d = delegate.weakContainer.value
             
-            self.asyncQueue.async {
-                delegate?.handleEvent(for: event, with: info)
-            }
-        }
-        
-        // Notify ViewController (which has to be called from the main thread)
-        DispatchQueue.main.async {
-            self.syncedDelegate?.handleEvent(for: event, with: info)
+            d?.handleEvent(for: event, with: info)
         }
     }
+    
+    private func notifyDelegates(for event: Event, to delegates: [Delegate]) {
+        self.notifyDelegates(for: event.type, with: event.info, to: delegates)
+    }
+    
+    /**
+     Places an event on the event queue
+     */
+    private func queueEvent(for event: EventType, with info: [String: Any]) {
+        self.queueEvent(for: Event(type: event, info: info))
+    }
+    
+    /**
+     Places an event on the event queue
+     */
+    private func queueEvent(for event: Event) {
+        self.eventQueue.enqueue(element: event)
+    }
+    
+    /**
+     Emits an event to the controller and also places it on the event queue
+     
+     Both emits the specified event to the controller, which is allowed to know all events as soon as they become available, and places the event on the event queue for the cognitive models. This dichotomy is there to allow for synchronous processing, which requires careful control of event handling.
+     */
+    private func emitAndQueue(for event: EventType, with info: [String: Any]) {
+        self.controllerDelegate?.handleEvent(for: event, with: info)
+        self.queueEvent(for: event, with: info)
+    }
 
+    /**
+     Emits the event queue to all inactive models
+     */
+    private func emitEventQueue() {
+        let currentId = self.players[self.currentPlayerIndex].getId()
+        let inactiveModels = self.delegates.filter{$0.id != currentId}
+        
+        var event: Event
+        
+        while !self.eventQueue.isEmpty() {
+            event = self.eventQueue.dequeue()!
+            self.notifyDelegates(for: event.type, with: event.info, to: inactiveModels)
+        }
+    }
+    
+    /**
+     Signals to all models that the next player (either model or user) can start its turn
+     
+     Comes in several steps:
+     1. Clear queue from potential human user interaction
+     2. Advance currentPlayerIndex
+     3. Let inactive models do their rehearsals
+     4. Let active player execute its turn - if it is a model
+     5. Check for and possibly handle end of game
+     6. Clear queue again to allow all inactive models to process the active model's turn
+     */
     func nextPlayer() -> Player {
         if self.gameEnded {
             return self.players[self.currentPlayerIndex]
         }
         
+        // Clear queue from potential human user interaction
+        self.emitEventQueue()
+        
+        // Advance currentPlayerIndex
         self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
+        let currentPlayer = self.players[self.currentPlayerIndex]
         
-        let player = self.players[self.currentPlayerIndex]
-        self.notifyDelegates(
-            for: .nextTurn(player),
-            with: ["player": player])
+        let nextTurnEvent = Event(type: .nextTurn(currentPlayer), info: ["player": currentPlayer])
         
-        // Check for end of game - if so, notify delegates
+        // Let inactive models do their rehearsals
+        // ...with a bit of trickery with the event queue
+        self.queueEvent(for: nextTurnEvent)
+        self.emitEventQueue() // Only emitted to inactive models
+        
+        // Let active player execute its turn - if it is a model
+        if currentPlayer is BeverbendeOpponent {
+            let currentDelegate = self.delegates.filter{$0.id == currentPlayer.getId()}.first!
+            self.notifyDelegates(for: nextTurnEvent, to: [currentDelegate]) // Fills up the event queue
+        }
+        
+        // Check for and possibly handle end of game
         if self.knocked && self.countdown == 0 {
             // Game has ended, determine winner
             var scores: [String: Int] = [:]
             var lowestScore = 4 * 9
             var winner = self.players[0]
             
-            self.notifyDelegates(for: .tradingLeftoverActionCards, with: [:])
+            self.emitAndQueue(for: .tradingLeftoverActionCards, with: [:])
             
-            for player in self.players {
-                scores[player.getId()] = 0
+            for currentPlayer in self.players {
+                scores[currentPlayer.getId()] = 0
                 
                 // Sum all values
-                for (index, card) in player.getCardsOnTable().enumerated() {
+                for (index, card) in currentPlayer.getCardsOnTable().enumerated() {
                     let c = card!
                     var drawnCard: Card
                     switch c.getType() {
                     case .action:
                         // Keep drawing until receiving a value card
                         repeat {
-                            drawnCard = self.drawCard(for: player)
-                            self.tradeDrawnCardWithCard(at: index, for: player)
+                            drawnCard = self.drawCard(for: currentPlayer)
+                            self.tradeDrawnCardWithCard(at: index, for: currentPlayer)
                         } while !isValueCard(card: drawnCard)
-                        scores[player.getId()]! += drawnCard.getValue()
+                        scores[currentPlayer.getId()]! += drawnCard.getValue()
                     case .value:
-                        scores[player.getId()]! += c.getValue()
+                        scores[currentPlayer.getId()]! += c.getValue()
                     }
                 }
                 
-                if scores[player.getId()]! < lowestScore {
-                    lowestScore = scores[player.getId()]!
-                    winner = player
+                if scores[currentPlayer.getId()]! < lowestScore {
+                    lowestScore = scores[currentPlayer.getId()]!
+                    winner = currentPlayer
                 }
             }
             
             self.gameEnded = true
-            self.notifyDelegates(
+            self.emitAndQueue(
                 for: .gameEnded(winner),
                 with: ["winner": winner])
         } else if self.knocked {
             self.countdown -= 1
         }
         
-        return player
+        // Clear queue again to allow all inactive models to process the active model's turn
+        self.emitEventQueue()
+        
+        return currentPlayer
     }
     
     func isValueCard(card: Card) -> Bool {
@@ -176,7 +251,7 @@ class Beverbende {
             self.knocked = true
             self.countdown = self.players.count - 1
         
-            self.notifyDelegates(
+            self.emitAndQueue(
                 for: .knocked(player),
                 with: ["player": player])
         }
@@ -205,7 +280,7 @@ class Beverbende {
         
         player.setCardOnHand(with: card!)
         
-        self.notifyDelegates(
+        self.emitAndQueue(
             for: .cardDrawn(player, card!),
             with: ["player": player, "card": card!])
         
@@ -218,7 +293,7 @@ class Beverbende {
         let topOfDeckCard = self.discardPile.peek()
         player.setCardOnHand(with: card)
         
-        self.notifyDelegates(
+        self.emitAndQueue(
             for: .discardedCardDrawn(player, card, topOfDeckCard),
             with: ["player": player, "card":card, "topOfDeckCard": topOfDeckCard as Any])
         
@@ -230,7 +305,7 @@ class Beverbende {
         player.setCardOnHand(with: nil)
         self.discard(card: card)
         
-        self.notifyDelegates(
+        self.emitAndQueue(
             for: .cardDiscarded(player, card, card.isFaceUp),
             with: ["player": player, "card": card, "isFaceUp":card.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
         
@@ -258,7 +333,7 @@ class Beverbende {
         player.setCardOnHand(with: card)
         player.setCardOnTable(with: nil, at: index)
         
-        self.notifyDelegates(
+        self.emitAndQueue(
             for: .cardInspected(player, card, index),
             with: ["player": player, "card": card, "cardIndex": index])
         
@@ -286,7 +361,7 @@ class Beverbende {
                 print("IS TRUE!!")
             }
         }
-        self.notifyDelegates(
+        self.emitAndQueue(
             for: .cardTraded(player, replacedCard, index, heldCard.isFaceUp),
             with: ["player": player, "cardFromPlayer":replacedCard, "cardFromPlayerIndex": index, "toIsFaceUp": heldCard.isFaceUp]) // TODO: THIS isFaceUp VALUE IS NOT CORRECT, FOR TESTING
         
@@ -299,7 +374,7 @@ class Beverbende {
         let replacedCard = self.replaceCard(at: index, with: discardedCard, for: player)
         self.discard(card: replacedCard)
         
-        self.notifyDelegates(
+        self.emitAndQueue(
             for: .discardedCardTraded(player, discardedCard, replacedCard, index, topOfDeckCard),
             with: ["player": player, "cardToPlayer": discardedCard, "cardFromPlayer": replacedCard, "cardFromPlayerIndex": index, "topOfDeckCard": topOfDeckCard as Any])
         
@@ -312,7 +387,7 @@ class Beverbende {
         
         // i think this is the correct way to swap them
         
-        self.notifyDelegates(
+        self.emitAndQueue(
             for: .cardsSwapped(index1, player1, index2, player2),
             with: ["cardIndex": index1, "player": player1, "cardIndex2": index2, "player2": player2])
     }
