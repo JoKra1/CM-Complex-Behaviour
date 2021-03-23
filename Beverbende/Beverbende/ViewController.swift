@@ -23,7 +23,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var animationViewOne: UIImageView = {
         let theImageView = UIImageView()
         theImageView.image = nil
-        theImageView.contentMode = .scaleAspectFit
+        theImageView.contentMode = .scaleToFill
         theImageView.clipsToBounds = true
         theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
         return theImageView
@@ -32,7 +32,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var animationViewTwo: UIImageView = {
         let theImageView = UIImageView()
         theImageView.image = nil
-        theImageView.contentMode = .scaleAspectFit
+        theImageView.contentMode = .scaleToFill
         theImageView.clipsToBounds = true
         theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
         return theImageView
