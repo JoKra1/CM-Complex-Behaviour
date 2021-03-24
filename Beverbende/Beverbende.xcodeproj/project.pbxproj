@@ -29,6 +29,7 @@
 		80786DB625E65A3100707799 /* Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DB525E65A3100707799 /* Support.swift */; };
 		80786DBC25E65A7000707799 /* BeverbendeOpponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80786DBB25E65A7000707799 /* BeverbendeOpponent.swift */; };
 		80AC09BE25ED798C0054B68D /* box_muller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AC09BD25ED798C0054B68D /* box_muller.swift */; };
+		96E39F73260B525000A1468D /* rulesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E39F72260B525000A1468D /* rulesViewController.swift */; };
 		F909C39B25E6621200848876 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = F909C39A25E6621200848876 /* Player.swift */; };
 		F94B991F25EF95AA002FFEE3 /* BufferCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94B991425EF95AA002FFEE3 /* BufferCondition.swift */; };
 		F94B992025EF95AA002FFEE3 /* Instantiation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94B991525EF95AA002FFEE3 /* Instantiation.swift */; };
@@ -94,6 +95,7 @@
 		80786DB525E65A3100707799 /* Support.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Support.swift; sourceTree = "<group>"; };
 		80786DBB25E65A7000707799 /* BeverbendeOpponent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeverbendeOpponent.swift; sourceTree = "<group>"; };
 		80AC09BD25ED798C0054B68D /* box_muller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = box_muller.swift; sourceTree = "<group>"; };
+		96E39F72260B525000A1468D /* rulesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = rulesViewController.swift; sourceTree = "<group>"; };
 		F909C39A25E6621200848876 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		F94B991425EF95AA002FFEE3 /* BufferCondition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferCondition.swift; sourceTree = "<group>"; };
 		F94B991525EF95AA002FFEE3 /* Instantiation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Instantiation.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 				F94B993025EFA485002FFEE3 /* BeverbendeDelegate.swift */,
 				04EA848825DC243E00B68C48 /* Supporting Files */,
 				04EA845925DC237F00B68C48 /* ViewController.swift */,
+				96E39F72260B525000A1468D /* rulesViewController.swift */,
 				04B5CD4025FF9A4600709961 /* StartViewController.swift */,
 				04EA845B25DC237F00B68C48 /* Main.storyboard */,
 				04EA846025DC238000B68C48 /* LaunchScreen.storyboard */,
@@ -388,6 +391,7 @@
 				F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */,
 				F94B993125EFA485002FFEE3 /* BeverbendeDelegate.swift in Sources */,
 				04BB714C25F782070060DC73 /* Queue.swift in Sources */,
+				96E39F73260B525000A1468D /* rulesViewController.swift in Sources */,
 				80786DB625E65A3100707799 /* Support.swift in Sources */,
 				8077F0EC25F7A8D300A7A34D /* categorical_sampler.swift in Sources */,
 				F94B992325EF95AA002FFEE3 /* Parser.swift in Sources */,

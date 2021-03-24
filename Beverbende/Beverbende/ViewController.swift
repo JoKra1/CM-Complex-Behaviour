@@ -39,6 +39,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }()
     
     override func viewDidLoad() {
+        print("ViewDidLoad()")
         super.viewDidLoad()
         showBackOfAllCards()
         view.addSubview(animationViewOne)
@@ -292,13 +293,31 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBAction func endUserTurn(_ sender: UIButton) {
         afterTurnButtons.forEach { $0.isHidden = true }
-        _ = game.nextPlayer()
+        letModelsPlay()
+        
     }
     
     @IBAction func knockOnTable(_ sender: Any) {
         afterTurnButtons.forEach { $0.isHidden = true }
         game.knock(from: user)
+        letModelsPlay()
+    }
+    
+    
+    func letModelsPlay() {
+        disableUserInteraction()
+        userEndTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
+        let userElapsedTime = userEndTime - userStartTime - userAnimationsDuration
+        print("USER ELAPSED TIME: \(userElapsedTime)")
+        userStartTime = 0.0
+        userEndTime = 0.0
+        userAnimationsDuration = 0.0
         _ = game.nextPlayer()
+        _ = game.nextPlayer()
+        _ = game.nextPlayer()
+        _ = game.nextPlayer()
+        // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
+        animateEventQueue()
     }
     
     func showInspectButton() {
@@ -326,6 +345,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 flipClosed(hide: cardView, for: .user)
                 isUserTurn = true // the user can now play the rest of the game
             }
+            userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
             sender.isHidden = true
         }
     }
@@ -438,7 +458,235 @@ class ViewController: UIViewController, BeverbendeDelegate {
                                      animationViewTwo.heightAnchor.constraint(equalTo: deckView.heightAnchor),
                                      ])
     }
+
+    // ############################ EVENT HANDLING ############################
     
+    var isUserTurn = false // user starts the game, but first needs to inspect the cards, only then is it really its turn
+    
+    var eventQueue = Queue<(EventType, [String: Any])>()
+    
+    var gameWrapUp = false
+    
+    func animateEventQueue() {
+        if let (firstEvent, firstInfo) = eventQueue.dequeue() {
+                _ = self.animateEvent(for: firstEvent, with: firstInfo)
+                self.isUserTurn = true
+        } else { print("there should be events in the eventQueueueue") }
+    }
+    
+    var knockedBy: Player? = nil
+    
+    var userAnimationsDuration = 0.0
+    var userStartTime = 0.0
+    var userEndTime = 0.0
+    
+    func handleEvent(for event: EventType, with info: [String : Any]) {
+        print("incoming event: \(event)")
+
+        switch event {
+        case .tradingLeftoverActionCards: // this needs separate management due to user related animations being added to the queueueueue
+            gameWrapUp = true
+        case let .knocked(player): // used for triggering the final animations
+            knockedBy = player
+        default:
+            break
+        }
+        
+        if gameWrapUp { // finishing of the game, trading all action cards for value cards from the pile
+            eventQueue.enqueue(element: (event, info)) // these come in during the animation of the model's actions, fast enough not to be an issue i assume
+        } else { // normal gameplay
+            if let player = info["player"] as? Player {
+                if player.getId() == user.getId() { // event relating to the user require the start of animation(s)
+                        let duration = animateEvent(for: event, with: info) // imediatelly animate the user's actions
+                        userAnimationsDuration += duration
+                } else {
+                    eventQueue.enqueue(element: (event, info)) // add the model actions to the queue, wait with animation till the user's turn
+                }
+            }
+        }
+    }
+    
+    func tryProgressGameFromUser(forAnimationWithDuration duration: Double) {
+        /*
+         This function determines when not only the players actions, but also the acompanying animations, are done, the player then chooses to progress to the next player (e.i. the model to the left) or to knock and then progress)
+         */
+        if playerPlaceholder.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the player performs his last gesture/action
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
+                self.afterTurnButtons[0].isHidden = false //always show next turn button
+                if self.knockedBy == nil {
+                    self.afterTurnButtons[1].isHidden = false // only show when no one knocked already
+                }
+            }
+        }
+    }
+    
+    lazy var playerPlaceholder: Player = self.user
+    
+    func animateEvent(for event: EventType, with info: [String : Any]) -> Double {
+//        Actor is the UI complement to the Player class, will be discarded at some time
+        disableUserInteraction()
+        var duration = 0.0
+        
+        print("ANIMATION START")
+        print("WITH EVENT: \(event)")
+        
+        switch event {
+        case let .cardDrawn(player, card): // ["player": Player, "card": Card]
+            playerPlaceholder = player
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let cardValue = getStringMatchingWithCard(forCard: card)
+            duration = animateCardDraw(by: actor, withValue: cardValue)
+    
+        case let .cardDiscarded(player, card, isFaceUp): // ["player": Player, "card": Card, "isFaceUp":Bool]
+            playerPlaceholder = player
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let value = getStringMatchingWithCard(forCard: card)
+            duration = animateDiscardFromHand(by: actor, withValue: value, openOnHand: !isFaceUp)
+            
+        case let .discardedCardDrawn(player, cardToPlayer, topOfDeckCard): // only ever issued by model, if followed by a trade, then the model chose to trade with discarded
+            playerPlaceholder = player
+            if let (nextEvent, _) = self.eventQueue.dequeue() {
+                switch nextEvent {
+                case let .cardTraded(_, cardFromPlayer, cardFromPlayerIndex, _):
+                    let actor = findActorMatchingWithPLayer(withId: player.getId())
+                    let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
+                    let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
+                    var tempDiscardPileValue: String? = nil
+                    if topOfDeckCard != nil {
+                        tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
+                    }
+                    duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
+                default:
+                    break
+                }
+            } else { print("I expected another event after a discarded card being drawn by the model") }
+        
+        case let .cardsSwapped(cardIndex1, player, cardIndex2, player2): // ["cardIndex1": Int, "player": Player, "cardIndex": Int, "player2" Player]
+            playerPlaceholder = player
+            let actor1 = findActorMatchingWithPLayer(withId: player.getId())
+            let actor2 = findActorMatchingWithPLayer(withId: player2.getId())
+            duration = animateCardTrade(ofCardAtIndex: cardIndex1, by: actor1, withCardAtIndex: cardIndex2, from: actor2)
+        
+        case let .cardTraded(player, cardFromPlayer, cardFromPlayerIndex, toIsFaceUp): // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool]
+            playerPlaceholder = player
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            duration = animateTradeOnHand(withCardAtIndex: cardFromPlayerIndex, by: actor, withValue: getStringMatchingWithCard(forCard: cardFromPlayer), closeOnHand: toIsFaceUp)
+            
+        case let .discardedCardTraded(player, cardToPlayer, cardFromPlayer, cardFromPlayerIndex, topOfDeckCard): // ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int]
+            // only ever issued by model
+            playerPlaceholder = player
+            var tempDiscardPileValue: String? = nil
+            if topOfDeckCard != nil {
+                tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
+            }
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
+            let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
+            
+            duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
+            
+        case let .cardInspected(player, card, cardIndex): // ["player": Player, "card": Card, "cardIndex": Int]
+            playerPlaceholder = player
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            let value = getStringMatchingWithCard(forCard: card)
+            duration = animateCardInspection(for: actor, withCardAtIndex: cardIndex, withValue: value)
+            
+        case let .nextTurn(player):
+            playerPlaceholder = player
+            duration = 1
+            
+        case let .knocked(player):
+            playerPlaceholder = player
+            print("knock by \(player.getId())")
+            let actor = findActorMatchingWithPLayer(withId: player.getId())
+            duration = animateKnock(by: actor)
+            
+        case let .gameEnded(player):
+            playerPlaceholder = player
+            showWinner(for: player)
+        default:
+            playerPlaceholder = game.players[1]
+            duration = 0.01
+        }
+        
+        tryProgressGameFromUser(forAnimationWithDuration: duration)
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
+            print("ANIMATION END")
+            if let (nextEvent, nextInfo) = self.eventQueue.dequeue() { // there is a next event in the queue
+                _ = self.animateEvent(for: nextEvent, with: nextInfo)
+            } else { // the eventQueue is empty (during player turn, or at the end of all animations for the models)
+                if self.playerPlaceholder.getId() == self.game.players[3].getId() { // end of model animations signify the start of the models turn
+                    self.userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
+                }
+                self.enableUserInteractionAfterDelay(lasting: 0)
+                print("USER INTERACTION ENABLED")
+            }
+        }
+        
+        return duration
+    }
+    
+    func showWinner(for player: Player) {
+        let winnerPopUp = UIAlertController(title: "End of the Game", message: "\(player.getId()) is the winner!", preferredStyle: .alert)
+        
+        winnerPopUp.addAction(UIAlertAction(title: "Exit to Menu", style: .cancel, handler: {_ in
+                    print("winner was shown")
+                    }))
+        
+        _ = flipOpenAllCards()
+        
+        present(winnerPopUp, animated: true)
+    }
+    
+    func findActorMatchingWithPLayer(withId playerId: String) -> Actor {
+        switch playerId {
+        case "user":
+            return .user
+        case "left":
+            return .leftModel
+        case "right":
+            return .rightModel
+        case "top":
+            return .topModel
+        default:
+            print("this ID does not belong to a user as specified")
+            return .game
+        }
+    }
+    
+    func findPlayerMatchingWithActor(for actor: Actor) -> Player {
+        switch actor {
+        case .user:
+            return user
+        case .leftModel:
+            return game.players[1]
+        case .topModel:
+            return game.players[2]
+        case .rightModel:
+            return game.players[3]
+        default:
+            return user
+        }
+    }
+    
+    func getStringMatchingWithCard(forCard card: Card) -> String {
+        switch card.getType() {
+        case .value:
+            let valueCard = card as! ValueCard
+            return String(valueCard.getValue())
+        case .action:
+            let actionCard = card as! ActionCard
+            switch actionCard.getAction() {
+            case .inspect:
+                return "inspect"
+            case .swap:
+                return "swap"
+            case .twice:
+                return "twice"
+            }
+        }
+    }
     
     // ############################ ANIMATIONS ############################
     
@@ -857,245 +1105,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                            })
         }
     }
-
-    // ############################ EVENT HANDLING ############################
     
-    var isUserTurn = false // user starts the game, but first needs to inspect the cards, only then is it really its turn
-    
-    var eventQueue = Queue<(EventType, [String: Any])>()
-    
-    var gameWrapUp = false
-    
-    func animateEventQueue() {
-        if let (firstEvent, firstInfo) = eventQueue.dequeue() {
-                self.animateEvent(for: firstEvent, with: firstInfo)
-                self.isUserTurn = true
-        } else { print("there should be events in the eventQueueueue") }
-    }
-    
-    var knockedBy: Player? = nil
-    
-    func handleEvent(for event: EventType, with info: [String : Any]) {
-        print("incoming event: \(event)")
-
-        switch event {
-        case .tradingLeftoverActionCards: // this needs separate management due to user related animations being added to the queueueueue
-            gameWrapUp = true
-        case let .knocked(player): // used for triggering the final animations
-            knockedBy = player
-        default:
-            break
-        }
-        
-        if gameWrapUp { // finishing of the game, trading all action cards for value cards from the pile
-            eventQueue.enqueue(element: (event, info)) // these come in during the animation of the model's actions, fast enough not to be an issue i assume
-            switch event {
-            case .gameEnded:
-                if knockedBy != nil, knockedBy!.getId() != user.getId() { // activate the animations in case the game does not end at the user
-                    animateEventQueue()
-                }
-            default:
-                break
-            }
-            
-        } else { // normal gameplay
-            if let player = info["player"] as? Player {
-                if player.getId() == user.getId() { // event relating to the user require the start of animation(s)
-                    switch event {
-                    case .nextTurn: // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
-                        animateEventQueue()
-                    case .knocked:
-                        print("Knock by you, the user")
-                    default:
-                        animateEvent(for: event, with: info) // imediatelly animate the user's actions
-                    }
-                } else {
-                    eventQueue.enqueue(element: (event, info)) // add the model actions to the queue, wait with animation till the user's turn
-                }
-            }
-//           else { // only happens at game ended
-//                eventQueue.enqueue(element: (event, info)) // should not be reached
-//                print("SHOULD NOT BE REACHED")
-//            }
-        }
-        
-    }
-    
-    func tryProgressGameFromUser(forAnimationWithDuration duration: Double, testFor player: Player) {
-        /*
-         This function determines when not only the players actions, but also the acompanying animations, are done, the player then chooses to progress to the next player (e.i. the model to the left) or to knock and then progress)
-         */
-        if player.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the player performs his last gesture/action
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
-                self.afterTurnButtons[0].isHidden = false //always show next turn button
-                if self.knockedBy == nil {
-                    self.afterTurnButtons[1].isHidden = false // only show when no one knocked already
-                }
-            }
-        }
-    }
-    
-    func animateEvent(for event: EventType, with info: [String : Any]) {
-//        Actor is the UI complement to the Player class, will be discarded at some time
-        disableUserInteraction()
-        var duration = 0.0
-        
-        print("ANIMATION START")
-        print("WITH EVENT: \(event)")
-        
-        var playerPlaceholder: Player
-        
-        switch event {
-        case let .cardDrawn(player, card): // ["player": Player, "card": Card]
-            playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            let cardValue = getStringMatchingWithCard(forCard: card)
-            duration = animateCardDraw(by: actor, withValue: cardValue)
-    
-        case let .cardDiscarded(player, card, isFaceUp): // ["player": Player, "card": Card, "isFaceUp":Bool]
-            playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            let value = getStringMatchingWithCard(forCard: card)
-            duration = animateDiscardFromHand(by: actor, withValue: value, openOnHand: !isFaceUp)
-            
-        case let .discardedCardDrawn(player, cardToPlayer, topOfDeckCard): // only ever issued by model, if followed by a trade, then the model chose to trade with discarded
-            playerPlaceholder = player
-            if let (nextEvent, _) = self.eventQueue.dequeue() {
-                switch nextEvent {
-                case let .cardTraded(_, cardFromPlayer, cardFromPlayerIndex, _):
-                    let actor = findActorMatchingWithPLayer(withId: player.getId())
-                    let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
-                    let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
-                    var tempDiscardPileValue: String? = nil
-                    if topOfDeckCard != nil {
-                        tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
-                    }
-                    duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
-                default:
-                    break
-                }
-            } else { print("I expected another event after a discarded card being drawn by the model") }
-        
-        case let .cardsSwapped(cardIndex1, player, cardIndex2, player2): // ["cardIndex1": Int, "player": Player, "cardIndex": Int, "player2" Player]
-            playerPlaceholder = player
-            let actor1 = findActorMatchingWithPLayer(withId: player.getId())
-            let actor2 = findActorMatchingWithPLayer(withId: player2.getId())
-            duration = animateCardTrade(ofCardAtIndex: cardIndex1, by: actor1, withCardAtIndex: cardIndex2, from: actor2)
-        
-        case let .cardTraded(player, cardFromPlayer, cardFromPlayerIndex, toIsFaceUp): // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool]
-            playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            duration = animateTradeOnHand(withCardAtIndex: cardFromPlayerIndex, by: actor, withValue: getStringMatchingWithCard(forCard: cardFromPlayer), closeOnHand: toIsFaceUp)
-            
-        case let .discardedCardTraded(player, cardToPlayer, cardFromPlayer, cardFromPlayerIndex, topOfDeckCard): // ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int]
-            // only ever issued by model
-            playerPlaceholder = player
-            var tempDiscardPileValue: String? = nil
-            if topOfDeckCard != nil {
-                tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
-            }
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
-            let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
-            
-            duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
-            
-        case let .cardInspected(player, card, cardIndex): // ["player": Player, "card": Card, "cardIndex": Int]
-            playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            let value = getStringMatchingWithCard(forCard: card)
-            duration = animateCardInspection(for: actor, withCardAtIndex: cardIndex, withValue: value)
-            
-        case let .nextTurn(player):
-            playerPlaceholder = player
-            duration = 1
-            
-        case let .knocked(player):
-            playerPlaceholder = player
-            print("knock by \(player.getId())")
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            duration = animateKnock(by: actor)
-            
-        case let .gameEnded(player):
-            playerPlaceholder = player
-            showWinner(for: player)
-        default:
-            playerPlaceholder = game.players[1]
-            duration = 0.01
-        }
-        
-        tryProgressGameFromUser(forAnimationWithDuration: duration, testFor: playerPlaceholder)
-        
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
-            print("ANIMATION END")
-            if let (nextEvent, nextInfo) = self.eventQueue.dequeue() { // there is a next event in the queue
-                self.animateEvent(for: nextEvent, with: nextInfo)
-            } else { // the eventQueue is empty (during player turn, or at the end of all animations for the models)
-                self.enableUserInteractionAfterDelay(lasting: 0)
-            }
-        }
-    }
-    
-    func showWinner(for player: Player) {
-        let winnerPopUp = UIAlertController(title: "End of the Game", message: "\(player.getId()) is the winner!", preferredStyle: .alert)
-        
-        winnerPopUp.addAction(UIAlertAction(title: "Exit to Menu", style: .cancel, handler: {_ in
-                    print("winner was shown")
-                    }))
-        
-        _ = flipOpenAllCards()
-        
-        present(winnerPopUp, animated: true)
-    }
-    
-    func findActorMatchingWithPLayer(withId playerId: String) -> Actor {
-        switch playerId {
-        case "user":
-            return .user
-        case "left":
-            return .leftModel
-        case "right":
-            return .rightModel
-        case "top":
-            return .topModel
-        default:
-            print("this ID does not belong to a user as specified")
-            return .game
-        }
-    }
-    
-    func findPlayerMatchingWithActor(for actor: Actor) -> Player {
-        switch actor {
-        case .user:
-            return user
-        case .leftModel:
-            return game.players[1]
-        case .topModel:
-            return game.players[2]
-        case .rightModel:
-            return game.players[3]
-        default:
-            return user
-        }
-    }
-    
-    func getStringMatchingWithCard(forCard card: Card) -> String {
-        switch card.getType() {
-        case .value:
-            let valueCard = card as! ValueCard
-            return String(valueCard.getValue())
-        case .action:
-            let actionCard = card as! ActionCard
-            switch actionCard.getAction() {
-            case .inspect:
-                return "inspect"
-            case .swap:
-                return "swap"
-            case .twice:
-                return "twice"
-            }
-        }
-    }
 
     // ############################ INFORMATION PROVIDANCE ############################
     
