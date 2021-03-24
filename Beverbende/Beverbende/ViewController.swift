@@ -7,14 +7,6 @@
 
 import UIKit
 
-enum Actor {
-    case user
-    case leftModel
-    case topModel
-    case rightModel
-    case game
-}
-
 class ViewController: UIViewController, BeverbendeDelegate {
     
     var user = User(with: "user")
@@ -55,7 +47,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         addCardGestures()
         self.game.addSync(delegate: self)
         let discardePileValue = getStringMatchingWithCard(forCard: game.discardPile.peek()!)
-        showFrontOfCard(show: discardePileValue, on: discardPileView, for: .game)
+        showFrontOfCard(show: discardePileValue, on: discardPileView, for: user)
     }
 
     @IBOutlet weak var deckView: UIImageView!
@@ -77,7 +69,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     var discardPileSelected: Bool = false
     var selectedForUserIndex: Int? = nil
-    var selectedForModelAtIndex: (Actor, Int)? = nil
+    var selectedForModelAtIndex: (Player, Int)? = nil
     
     var playedAction: Action?
     
@@ -162,7 +154,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
-    func handleCardSelectionForModel(forModel actor: Actor, forView cardView: UIImageView, withIndex cardIndex: Int) {
+    func handleCardSelectionForModel(forModel player: Player, forView cardView: UIImageView, withIndex cardIndex: Int) {
         if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
             cardView.alpha = 1
             selectedForUserIndex = nil
@@ -171,7 +163,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             rightModelOnTableCardViews.forEach { $0.alpha = 1 }
             topModelOnTableCardViews.forEach { $0.alpha = 1 }
             cardView.alpha = 0.5
-            selectedForModelAtIndex = (actor, cardIndex)
+            selectedForModelAtIndex = (player, cardIndex)
         }
     }
     
@@ -199,8 +191,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                         if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex {
                             undoCardSelections()
                             endUserTurn()
-                            let otherPlayer = findPlayerMatchingWithActor(for: selectedModel)
-                            game.swapCards(cardAt: touchedCardIndex, for: user, withCardAt: selectedForModelIndex, for: otherPlayer)
+                            game.swapCards(cardAt: touchedCardIndex, for: user, withCardAt: selectedForModelIndex, for: selectedModel)
                         } else { // handle selection of the player's cards
                             handleCardSelectionForUser(forView: touchedCardView, withIndex: touchedCardIndex)
                         }
@@ -258,14 +249,13 @@ class ViewController: UIViewController, BeverbendeDelegate {
         switch recognizer.state {
         case .ended:
             if let touchedCardView = recognizer.view as? UIImageView {
-                let (touchedModel, touchedCardIndex) = findActorAndIndexForView(for: touchedCardView)
+                let (touchedModel, touchedCardIndex) = findPlayerAndIndexForView(for: touchedCardView)
                 if playedAction == .swap { // the action card had to be played for this to work
                     if let selectedUserIndex = selectedForUserIndex {
                         // TODO: do the trade, Loran adds this to the game model first
                         undoCardSelections()
                         endUserTurn()
-                        let otherPlayer = findPlayerMatchingWithActor(for: touchedModel)
-                        game.swapCards(cardAt: selectedUserIndex, for: user, withCardAt: touchedCardIndex, for: otherPlayer)
+                        game.swapCards(cardAt: selectedUserIndex, for: user, withCardAt: touchedCardIndex, for: touchedModel)
                     } else { // handle selection of the model's cards
                         handleCardSelectionForModel(forModel: touchedModel, forView: touchedCardView, withIndex: touchedCardIndex)
                     }
@@ -273,19 +263,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
             }
         default:
             break
-        }
-    }
-    
-    func findActorAndIndexForView(for cardView: UIImageView) -> (Actor, Int) {
-        if let cardIndex = leftModelOnTableCardViews.firstIndex(of: cardView){
-            return (.leftModel, cardIndex)
-        } else if let cardIndex = rightModelOnTableCardViews.firstIndex(of: cardView){
-            return (.rightModel, cardIndex)
-        } else if let cardIndex = topModelOnTableCardViews.firstIndex(of: cardView) {
-            return (.topModel, cardIndex)
-        } else {
-            print("the selected UIImageView does not belong to any of the models. return (Actor.game, 0)")
-            return (.game, 0)
         }
     }
     
@@ -337,12 +314,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
             for index in [0, 3] { // the outer cards
                 let cardView = userOnTableCardViews[index]
                 let value = getStringMatchingWithCard(forCard: user.getCardsOnTable()[index]!)
-                flipOpen(show: value, on: cardView, for: .user)
+                flipOpen(show: value, on: cardView, for: user)
             }
         } else {
             for index in [0, 3] {
                 let cardView = userOnTableCardViews[index]
-                flipClosed(hide: cardView, for: .user)
+                flipClosed(hide: cardView, for: user)
                 isUserTurn = true // the user can now play the rest of the game
             }
             userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
@@ -356,19 +333,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
     @IBOutlet weak var rightCardStack: UIStackView!
     
     func showBackOfAllCards() {
-        showBackOfCard(on: deckView, for: .game)
+        showBackOfCard(on: deckView, for: user)
         // Rotate the figures on the back of the cards
-        for cardView in userOnTableCardViews {
-            showBackOfCard(on: cardView, for: .user)
-        }
-        for cardView in leftModelOnTableCardViews {
-            showBackOfCard(on: cardView, for: .leftModel)
-        }
-        for cardView in topModelOnTableCardViews {
-            showBackOfCard(on: cardView, for: .topModel)
-        }
-        for cardView in rightModelOnTableCardViews {
-            showBackOfCard(on: cardView, for: .rightModel)
+        for (playerIndex, cardViewCollection) in [userOnTableCardViews, leftModelOnTableCardViews, topModelOnTableCardViews, rightModelOnTableCardViews].enumerated() {
+            for cardView in cardViewCollection! {
+                showBackOfCard(on: cardView, for: game.players[playerIndex])
+            }
         }
     }
     
@@ -385,72 +355,66 @@ class ViewController: UIViewController, BeverbendeDelegate {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapUserCard(_:))))
             cardView.isUserInteractionEnabled = true
         }
-        for cardView in leftModelOnTableCardViews {
-            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
-            cardView.isUserInteractionEnabled = true
+        for cardViewCollection in [leftModelOnTableCardViews, topModelOnTableCardViews, rightModelOnTableCardViews] {
+            for cardView in cardViewCollection! {
+                cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
+                cardView.isUserInteractionEnabled = true
+            }
         }
-        for cardView in topModelOnTableCardViews {
-            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
-            cardView.isUserInteractionEnabled = true
-        }
-        for cardView in rightModelOnTableCardViews {
-            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
-            cardView.isUserInteractionEnabled = true
-        }
+//        for cardView in topModelOnTableCardViews {
+//            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
+//            cardView.isUserInteractionEnabled = true
+//        }
+//        for cardView in rightModelOnTableCardViews {
+//            cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
+//            cardView.isUserInteractionEnabled = true
+//        }
     }
 
-    func showFrontOfCard(show value: String, on cardView: UIImageView, for actor: Actor) {
+    func showFrontOfCard(show value: String, on cardView: UIImageView, for player: Player) {
         let frontImage = UIImage(named: value) ?? UIImage(named: "empty")
         
         let orientedImage = UIImage(cgImage: frontImage!.cgImage!,
                                     scale: frontImage!.scale,
-                                    orientation: returnImageOrientation(for: actor))
+                                    orientation: returnImageOrientation(for: player))
         
         cardView.image = orientedImage
     }
 
-    func showBackOfCard(on cardView: UIImageView, for actor: Actor){
+    func showBackOfCard(on cardView: UIImageView, for player: Player){
         let backImage = UIImage(named: "back") ?? UIImage(named: "empty")
         
         let orientedImage = UIImage(cgImage: backImage!.cgImage!,
                                     scale: backImage!.scale,
-                                    orientation: returnImageOrientation(for: actor))
+                                    orientation: returnImageOrientation(for: player))
         
         cardView.image = orientedImage
     }
 
-    func returnImageOrientation(for actor: Actor) -> UIImage.Orientation {
-        switch actor {
-        case .leftModel:
+    func returnImageOrientation(for player: Player) -> UIImage.Orientation {
+        switch player.getId() {
+        case game.players[1].getId():
             return .right
-        case .rightModel:
+        case game.players[3].getId():
             return .left
-        case .topModel:
-            return .down
-        case .user:
-            return .up
-        case .game:
+        default:
+            // for the decks in the center, the user, and the top model
             return .up
         }
     }
     
-    func returnRotationTransform(for actor: Actor) -> CGAffineTransform {
-        switch actor {
-        case .leftModel:
+    func returnRotationTransform(for player: Player) -> CGAffineTransform {
+        switch player.getId() {
+        case game.players[1].getId():
             return CGAffineTransform(rotationAngle: CGFloat.pi/2)
-        case .rightModel:
+        case game.players[3].getId():
             return CGAffineTransform(rotationAngle: -CGFloat.pi/2)
-        case .topModel:
-            return CGAffineTransform(rotationAngle: CGFloat.pi)
-        case .user:
-            return CGAffineTransform(rotationAngle: 0)
-        case .game:
+        default:
+            // for the decks in the center, the user, and the top model
             return CGAffineTransform(rotationAngle: 0)
         }
     }
 
-
-    
     func sizeUpAnimationViews() {
         NSLayoutConstraint.activate([animationViewOne.widthAnchor.constraint(equalTo: deckView.widthAnchor),
                                      animationViewOne.heightAnchor.constraint(equalTo: deckView.heightAnchor),
@@ -533,44 +497,38 @@ class ViewController: UIViewController, BeverbendeDelegate {
         switch event {
         case let .cardDrawn(player, card): // ["player": Player, "card": Card]
             playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
             let cardValue = getStringMatchingWithCard(forCard: card)
-            duration = animateCardDraw(by: actor, withValue: cardValue)
+            duration = animateCardDraw(by: player, withValue: cardValue)
     
         case let .cardDiscarded(player, card, isFaceUp): // ["player": Player, "card": Card, "isFaceUp":Bool]
             playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
             let value = getStringMatchingWithCard(forCard: card)
-            duration = animateDiscardFromHand(by: actor, withValue: value, openOnHand: !isFaceUp)
+            duration = animateDiscardFromHand(by: player, withValue: value, openOnHand: !isFaceUp)
             
         case let .discardedCardDrawn(player, cardToPlayer, topOfDeckCard): // only ever issued by model, if followed by a trade, then the model chose to trade with discarded
             playerPlaceholder = player
             if let (nextEvent, _) = self.eventQueue.dequeue() {
                 switch nextEvent {
                 case let .cardTraded(_, cardFromPlayer, cardFromPlayerIndex, _):
-                    let actor = findActorMatchingWithPLayer(withId: player.getId())
                     let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
                     let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
                     var tempDiscardPileValue: String? = nil
                     if topOfDeckCard != nil {
                         tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
                     }
-                    duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
+                    duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: player)
                 default:
                     break
                 }
             } else { print("I expected another event after a discarded card being drawn by the model") }
         
-        case let .cardsSwapped(cardIndex1, player, cardIndex2, player2): // ["cardIndex1": Int, "player": Player, "cardIndex": Int, "player2" Player]
-            playerPlaceholder = player
-            let actor1 = findActorMatchingWithPLayer(withId: player.getId())
-            let actor2 = findActorMatchingWithPLayer(withId: player2.getId())
-            duration = animateCardTrade(ofCardAtIndex: cardIndex1, by: actor1, withCardAtIndex: cardIndex2, from: actor2)
+        case let .cardsSwapped(cardIndex1, player1, cardIndex2, player2): // ["cardIndex1": Int, "player": Player, "cardIndex": Int, "player2" Player]
+            playerPlaceholder = player1
+            duration = animateCardTrade(ofCardAtIndex: cardIndex1, by: player1, withCardAtIndex: cardIndex2, from: player2)
         
         case let .cardTraded(player, cardFromPlayer, cardFromPlayerIndex, toIsFaceUp): // ["player": Player, "cardFromPlayer":Card, "cardFromPlayerIndex": Int, "toIsFaceUp":Bool]
             playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            duration = animateTradeOnHand(withCardAtIndex: cardFromPlayerIndex, by: actor, withValue: getStringMatchingWithCard(forCard: cardFromPlayer), closeOnHand: toIsFaceUp)
+            duration = animateTradeOnHand(withCardAtIndex: cardFromPlayerIndex, by: player, withValue: getStringMatchingWithCard(forCard: cardFromPlayer), closeOnHand: toIsFaceUp)
             
         case let .discardedCardTraded(player, cardToPlayer, cardFromPlayer, cardFromPlayerIndex, topOfDeckCard): // ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int]
             // only ever issued by model
@@ -579,17 +537,15 @@ class ViewController: UIViewController, BeverbendeDelegate {
             if topOfDeckCard != nil {
                 tempDiscardPileValue = getStringMatchingWithCard(forCard: topOfDeckCard!)
             }
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
             let fromValue = getStringMatchingWithCard(forCard: cardFromPlayer)
             let toValue = getStringMatchingWithCard(forCard: cardToPlayer)
             
-            duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: actor)
+            duration = animateTradeFromDiscardPile(withCardAtIndex: cardFromPlayerIndex, fromValue: fromValue, toValue: toValue, tempDiscardPileValue: tempDiscardPileValue, by: player)
             
         case let .cardInspected(player, card, cardIndex): // ["player": Player, "card": Card, "cardIndex": Int]
             playerPlaceholder = player
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
             let value = getStringMatchingWithCard(forCard: card)
-            duration = animateCardInspection(for: actor, withCardAtIndex: cardIndex, withValue: value)
+            duration = animateCardInspection(by: player, withCardAtIndex: cardIndex, withValue: value)
             
         case let .nextTurn(player):
             playerPlaceholder = player
@@ -598,8 +554,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case let .knocked(player):
             playerPlaceholder = player
             print("knock by \(player.getId())")
-            let actor = findActorMatchingWithPLayer(withId: player.getId())
-            duration = animateKnock(by: actor)
+            duration = animateKnock(by: player)
             
         case let .gameEnded(player):
             playerPlaceholder = player
@@ -639,34 +594,50 @@ class ViewController: UIViewController, BeverbendeDelegate {
         present(winnerPopUp, animated: true)
     }
     
-    func findActorMatchingWithPLayer(withId playerId: String) -> Actor {
-        switch playerId {
-        case "user":
-            return .user
-        case "left":
-            return .leftModel
-        case "right":
-            return .rightModel
-        case "top":
-            return .topModel
+    // ############################ AUXILAIRIES ############################
+    
+    func retrieveOnHandCardView(for player: Player) -> UIImageView {
+        switch player.getId() {
+        case user.getId():
+            return userOnHandCardView
+        case game.players[1].getId():
+            return leftModelOnHandCardView
+        case game.players[2].getId():
+            return topModelOnHandCardView
+        case game.players[3].getId():
+            return rightModelOnHandCardView
         default:
-            print("this ID does not belong to a user as specified")
-            return .game
+            print("There is no onHandCardView for this player")
+            exit(0)
         }
     }
     
-    func findPlayerMatchingWithActor(for actor: Actor) -> Player {
-        switch actor {
-        case .user:
-            return user
-        case .leftModel:
-            return game.players[1]
-        case .topModel:
-            return game.players[2]
-        case .rightModel:
-            return game.players[3]
+    func retrieveOnTableCardViews(for player: Player) -> [UIImageView] {
+        switch player.getId() {
+        case user.getId():
+            return userOnTableCardViews
+        case game.players[1].getId():
+            return leftModelOnTableCardViews
+        case game.players[2].getId():
+            return topModelOnTableCardViews
+        case game.players[3].getId():
+            return rightModelOnTableCardViews
         default:
-            return user
+            print("There is no onTableCardView for this player")
+            exit(0)
+        }
+    }
+    
+    func findPlayerAndIndexForView(for cardView: UIImageView) -> (Player, Int) {
+        if let cardIndex = leftModelOnTableCardViews.firstIndex(of: cardView){
+            return (game.players[1], cardIndex)
+        } else if let cardIndex = topModelOnTableCardViews.firstIndex(of: cardView) {
+            return (game.players[2], cardIndex)
+        } else if let cardIndex = rightModelOnTableCardViews.firstIndex(of: cardView){
+            return (game.players[3], cardIndex)
+        } else {
+            print("the selected UIImageView does not belong to any of the models. return (Actor.game, 0)")
+            return (user, 0)
         }
     }
     
@@ -723,18 +694,16 @@ class ViewController: UIViewController, BeverbendeDelegate {
         NSLayoutConstraint.deactivate(startOverlayConstraints2)
     }
     
-    func flipOpen(show value: String, on cardView: UIImageView, for actor: Actor) {
+    func flipOpen(show value: String, on cardView: UIImageView, for player: Player) {
         var flipFrom: UIView.AnimationOptions {
-            switch actor {
-            case .leftModel:
+            switch player.getId() {
+            case game.players[1].getId():
                 return .transitionFlipFromLeft
-            case .rightModel:
-                return .transitionFlipFromRight
-            case .user:
-                return .transitionFlipFromTop
-            case .topModel:
+            case game.players[2].getId():
                 return .transitionFlipFromBottom
-            case .game:
+            case game.players[3].getId():
+                return .transitionFlipFromRight
+            default: //user.getId()
                 return .transitionFlipFromTop
             }
         }
@@ -743,24 +712,22 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           duration: 0.6,
                           options: flipFrom,
                           animations: {
-                            self.showFrontOfCard(show: value, on: cardView, for: actor)
+                            self.showFrontOfCard(show: value, on: cardView, for: player)
                           },
                           completion: nil
         )
     }
     
-    func flipClosed(hide cardView: UIImageView, for actor: Actor) {
+    func flipClosed(hide cardView: UIImageView, for player: Player) {
         var flipFrom: UIView.AnimationOptions {
-            switch actor {
-            case .leftModel:
+            switch player.getId() {
+            case game.players[1].getId():
                 return .transitionFlipFromRight
-            case .rightModel:
-                return .transitionFlipFromLeft
-            case .user:
-                return .transitionFlipFromBottom
-            case .topModel:
+            case game.players[2].getId():
                 return .transitionFlipFromTop
-            case .game:
+            case game.players[3].getId():
+                return .transitionFlipFromLeft
+            default: // user.getId()
                 return .transitionFlipFromBottom
             }
         }
@@ -769,61 +736,35 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           duration: 0.6,
                           options: flipFrom,
                           animations: {
-                            self.showBackOfCard(on: cardView, for: actor)
+                            self.showBackOfCard(on: cardView, for: player)
                           },
                           completion: nil
         )
     }
-
-    func retrieveOnHandCardView(for actor: Actor) -> UIImageView {
-        switch actor {
-        case .user:
-            return userOnHandCardView
-        case .leftModel:
-            return leftModelOnHandCardView
-        case .rightModel:
-            return rightModelOnHandCardView
-        case .topModel:
-            return topModelOnHandCardView
-        case .game:
-            exit(0)
-        }
-    }
     
-    func animateCardInspection(for actor: Actor, withCardAtIndex cardIndex: Int, withValue value: String) -> Double {
-        let cardView = retrieveOnTableCardViews(for: actor)[cardIndex]
+    func animateCardInspection(by player: Player, withCardAtIndex cardIndex: Int, withValue value: String) -> Double {
+        let cardView = retrieveOnTableCardViews(for: player)[cardIndex]
         
         var duration: Double
         
-        if actor == .user {
+        if player.getId() == user.getId() {
             duration = 0.61 * 2 + 1 // time to: flip open, flip closed, inspect
-            flipOpen(show: value, on: cardView, for: actor)
+            flipOpen(show: value, on: cardView, for: player)
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.61 + 1) {
-                self.flipClosed(hide: cardView, for: actor)
+                self.flipClosed(hide: cardView, for: player)
             }
         } else { // model
             duration = 1.01
             
-            animationViewOne.transform = returnRotationTransform(for: actor)
+            animationViewOne.transform = returnRotationTransform(for: player)
             _ = setViewToOverlay(set: animationViewOne, to: cardView)
-            
-            var preventRotation: CGAffineTransform {
-                switch actor {
-                case .leftModel:
-                    return returnRotationTransform(for: .leftModel)
-                case .rightModel:
-                    return returnRotationTransform(for: .rightModel)
-                default: //case .topModel:
-                    return CGAffineTransform(rotationAngle: CGFloat.pi) // needs work
-                }
-            }
             
             UIView.transition(with: animationViewOne,
                               duration: 1.0,
                               options: [.curveEaseInOut],
                               animations: {
                                 self.animationViewOne.transform = CGAffineTransform(scaleX: 4, y: 4)
-                                self.animationViewOne.transform = preventRotation // apparantly needed?
+                                self.animationViewOne.transform = self.returnRotationTransform(for: player)
                               }, completion: {_ in
                                 self.animationViewOne.image = nil
                               }
@@ -832,14 +773,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
         return duration
     }
     
-    func animateCardDraw(by actor: Actor, withValue value: String) -> Double {
+    func animateCardDraw(by player: Player, withValue value: String) -> Double {
 //        from the deck to an onHand location
         
         var duration = 1.0
 
-        let onHandCardView = retrieveOnHandCardView(for: actor)
+        let onHandCardView = retrieveOnHandCardView(for: player)
         
-        animationViewOne.transform = returnRotationTransform(for: .game)
+        animationViewOne.transform = returnRotationTransform(for: user)
         _ = setViewToOverlay(set: animationViewOne, to: deckView)
 
         let overlayConstraints = retrieveOverlayConstraints(set: animationViewOne, to: onHandCardView)
@@ -849,18 +790,18 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           duration: 1,
                           options: [.curveEaseInOut],
                           animations: {
-                            self.animationViewOne.transform = self.returnRotationTransform(for: actor)
+                            self.animationViewOne.transform = self.returnRotationTransform(for: player)
                             self.animationViewOne.superview?.layoutIfNeeded()
                           }, completion: {_ in
                             self.animationViewOne.image = nil
-                            self.showBackOfCard(on: onHandCardView, for: actor)
+                            self.showBackOfCard(on: onHandCardView, for: player)
                           } )
         NSLayoutConstraint.deactivate(overlayConstraints)
         
-        if actor == .user, !gameWrapUp {
+        if player.getId() == user.getId(), !gameWrapUp {
             duration += 0.01 + 0.61
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
-                self.flipOpen(show: value, on: onHandCardView, for: actor)
+                self.flipOpen(show: value, on: onHandCardView, for: player)
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.6) {
                     self.onHandCardInfoButton.isHidden = false
                 }
@@ -869,19 +810,18 @@ class ViewController: UIViewController, BeverbendeDelegate {
         return duration + 0.01
     }
     
-    func animateTradeFromDiscardPile(withCardAtIndex cardIndex: Int, fromValue: String, toValue: String, tempDiscardPileValue: String?, by actor: Actor) -> Double {
+    func animateTradeFromDiscardPile(withCardAtIndex cardIndex: Int, fromValue: String, toValue: String, tempDiscardPileValue: String?, by player: Player) -> Double {
 //        from the discard pile to an onHand location
-        let onHandCardView = retrieveOnHandCardView(for: actor)
+        let onHandCardView = retrieveOnHandCardView(for: player)
         
-        animationViewOne.transform = returnRotationTransform(for: .game)
+        animationViewOne.transform = returnRotationTransform(for: user)
         _ = setViewToOverlay(set: animationViewOne, to: discardPileView)
         
         if tempDiscardPileValue != nil {
-            showFrontOfCard(show: tempDiscardPileValue!, on: discardPileView, for: .game)
+            showFrontOfCard(show: tempDiscardPileValue!, on: discardPileView, for: user)
         } else {
             discardPileView.image = nil
         }
-        
 
         let overlayConstraints = retrieveOverlayConstraints(set: animationViewOne, to: onHandCardView)
         NSLayoutConstraint.activate(overlayConstraints)
@@ -890,34 +830,34 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           duration: 1,
                           options: [.curveEaseInOut],
                           animations: {
-                            self.animationViewOne.transform = self.returnRotationTransform(for: actor)
+                            self.animationViewOne.transform = self.returnRotationTransform(for: player)
                             self.animationViewOne.superview?.layoutIfNeeded()
                           }, completion: {_ in
                             self.animationViewOne.image = nil
-                            self.showFrontOfCard(show: toValue, on: onHandCardView, for: actor)
+                            self.showFrontOfCard(show: toValue, on: onHandCardView, for: player)
                           } )
         NSLayoutConstraint.deactivate(overlayConstraints)
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
-            _ = self.animateTradeOnHand(withCardAtIndex: cardIndex, by: actor, withValue: fromValue, closeOnHand: true)
+            _ = self.animateTradeOnHand(withCardAtIndex: cardIndex, by: player, withValue: fromValue, closeOnHand: true)
         }
         return 1 + 0.01 + 0.61 + 1.0 + 0.01 //time to move from pile, then to flip, then to move again
     }
 
-    func animateDiscardFromHand(by actor: Actor, withValue value: String, openOnHand: Bool) -> Double {
+    func animateDiscardFromHand(by player: Player, withValue value: String, openOnHand: Bool) -> Double {
         var duration = 1.0
         var delay = 0.0
         
-        let onHandView = retrieveOnHandCardView(for: actor)
+        let onHandView = retrieveOnHandCardView(for: player)
         
         if openOnHand {
-            flipOpen(show: value, on: onHandView, for: actor)
+            flipOpen(show: value, on: onHandView, for: player)
             delay = 0.61
             duration += delay
         }
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
-            self.animationViewOne.transform = self.returnRotationTransform(for: actor)
+            self.animationViewOne.transform = self.returnRotationTransform(for: player)
             _ = self.setViewToOverlay(set: self.animationViewOne, to: onHandView)
             onHandView.image = nil
 
@@ -928,11 +868,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
                               duration: 1,
                               options: [.curveEaseInOut],
                               animations: {
-                                self.animationViewOne.transform = self.returnRotationTransform(for: .game)
+                                self.animationViewOne.transform = self.returnRotationTransform(for: self.user)
                                 self.animationViewOne.superview?.layoutIfNeeded()
                               }, completion: {_ in
                                 self.animationViewOne.image = nil
-                                self.showFrontOfCard(show: value, on: self.discardPileView, for: .game)
+                                self.showFrontOfCard(show: value, on: self.discardPileView, for: self.user)
                               }
             )
             NSLayoutConstraint.deactivate(overlayConstraints)
@@ -940,38 +880,23 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         return duration + 0.01
     }
-    
-    func retrieveOnTableCardViews(for actor: Actor) -> [UIImageView] {
-        switch actor {
-        case .user:
-            return userOnTableCardViews
-        case .leftModel:
-            return leftModelOnTableCardViews
-        case .rightModel:
-            return rightModelOnTableCardViews
-        case .topModel:
-            return topModelOnTableCardViews
-        case .game:
-            exit(0)
-        }
-    }
 
-    func animateTradeOnHand(withCardAtIndex cardIndex: Int, by actor: Actor, withValue value: String, closeOnHand: Bool) -> Double {
+    func animateTradeOnHand(withCardAtIndex cardIndex: Int, by player: Player, withValue value: String, closeOnHand: Bool) -> Double {
 //        trade the drawn card with one of your own (for either model or player)
         
-        let onHandCardView = retrieveOnHandCardView(for: actor)
+        let onHandCardView = retrieveOnHandCardView(for: player)
         
         if closeOnHand {
-            flipClosed(hide: onHandCardView, for: actor)
+            flipClosed(hide: onHandCardView, for: player)
         }
         
-        let onTableCardView = retrieveOnTableCardViews(for: actor)[cardIndex]
-        flipOpen(show: value, on: onTableCardView, for: actor)
+        let onTableCardView = retrieveOnTableCardViews(for: player)[cardIndex]
+        flipOpen(show: value, on: onTableCardView, for: player)
         
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.61) { // delay due to card flip(s)
             
-            self.animationViewOne.transform = self.returnRotationTransform(for: actor)
-            self.animationViewTwo.transform = self.returnRotationTransform(for: actor)
+            self.animationViewOne.transform = self.returnRotationTransform(for: player)
+            self.animationViewTwo.transform = self.returnRotationTransform(for: player)
             self.setViewToOverlayDouble(set: self.animationViewOne, to: onHandCardView, andSet: self.animationViewTwo, to: onTableCardView)
             
             onHandCardView.image = nil
@@ -987,15 +912,15 @@ class ViewController: UIViewController, BeverbendeDelegate {
                            delay: 0,
                            options: [.curveEaseInOut],
                            animations: {
-                            self.animationViewOne.transform = self.returnRotationTransform(for: actor)
-                            self.animationViewTwo.transform = self.returnRotationTransform(for: .game)
+                            self.animationViewOne.transform = self.returnRotationTransform(for: player)
+                            self.animationViewTwo.transform = self.returnRotationTransform(for: self.user)
                             self.animationViewOne.superview?.layoutIfNeeded()
                            },
                            completion: {_ in
                             self.animationViewOne.image = nil
                             self.animationViewTwo.image = nil
-                            self.showBackOfCard(on: onTableCardView, for: actor)
-                            self.showFrontOfCard(show: value, on: self.discardPileView, for: .game)
+                            self.showBackOfCard(on: onTableCardView, for: player)
+                            self.showFrontOfCard(show: value, on: self.discardPileView, for: self.user)
                            })
 
             NSLayoutConstraint.deactivate(OverlayConstraints1)
@@ -1005,13 +930,13 @@ class ViewController: UIViewController, BeverbendeDelegate {
         return 1.61 + 0.01
     }
     
-    func animateCardTrade(ofCardAtIndex cardIndex1: Int, by actor1: Actor, withCardAtIndex cardIndex2: Int, from actor2: Actor) -> Double {
+    func animateCardTrade(ofCardAtIndex cardIndex1: Int, by player1: Player, withCardAtIndex cardIndex2: Int, from player2: Player) -> Double {
         // Trade cars between Actors
-        let cardView1 = retrieveOnTableCardViews(for: actor1)[cardIndex1]
-        let cardView2 = retrieveOnTableCardViews(for: actor2)[cardIndex2]
+        let cardView1 = retrieveOnTableCardViews(for: player1)[cardIndex1]
+        let cardView2 = retrieveOnTableCardViews(for: player2)[cardIndex2]
         
-        self.animationViewOne.transform = self.returnRotationTransform(for: actor1)
-        self.animationViewTwo.transform = self.returnRotationTransform(for: actor2)
+        self.animationViewOne.transform = self.returnRotationTransform(for: player1)
+        self.animationViewTwo.transform = self.returnRotationTransform(for: player2)
         setViewToOverlayDouble(set: animationViewOne, to: cardView1, andSet: animationViewTwo, to: cardView2)
         
         cardView1.image = nil//.isHidden does not work as these are in a stackView
@@ -1027,12 +952,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           duration: 1,
                           options: [.curveEaseInOut],
                           animations: {
-                            self.animationViewOne.transform = self.returnRotationTransform(for: actor2)
-                            self.animationViewTwo.transform = self.returnRotationTransform(for: actor1)
+                            self.animationViewOne.transform = self.returnRotationTransform(for: player2)
+                            self.animationViewTwo.transform = self.returnRotationTransform(for: player1)
                             self.animationViewOne.superview?.layoutIfNeeded()
                           }, completion: {_ in
-                            self.showBackOfCard(on: cardView1, for: actor1)
-                            self.showBackOfCard(on: cardView2, for: actor2)
+                            self.showBackOfCard(on: cardView1, for: player1)
+                            self.showBackOfCard(on: cardView2, for: player2)
                             self.animationViewOne.image = nil
                             self.animationViewTwo.image = nil
                           }
@@ -1047,39 +972,38 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         for index in userOnTableCardViews.indices {
             let value = getStringMatchingWithCard(forCard: game.players[0].getCardsOnTable()[index]!)
-            flipOpen(show: value, on: userOnTableCardViews[index], for: .user)
+            flipOpen(show: value, on: userOnTableCardViews[index], for: user)
         }
         for index in leftModelOnTableCardViews.indices {
             let value = getStringMatchingWithCard(forCard: game.players[1].getCardsOnTable()[index]!)
-            flipOpen(show: String(value), on: leftModelOnTableCardViews[index], for: .leftModel)
+            flipOpen(show: String(value), on: leftModelOnTableCardViews[index], for: game.players[1])
         }
         for index in topModelOnTableCardViews.indices {
             let value = getStringMatchingWithCard(forCard: game.players[2].getCardsOnTable()[index]!)
-            flipOpen(show: String(value), on: topModelOnTableCardViews[index], for: .topModel)
+            flipOpen(show: String(value), on: topModelOnTableCardViews[index], for: game.players[2])
         }
         for index in rightModelOnTableCardViews.indices {
             let value = getStringMatchingWithCard(forCard: game.players[3].getCardsOnTable()[index]!)
-            flipOpen(show: String(value), on: rightModelOnTableCardViews[index], for: .rightModel)
+            flipOpen(show: String(value), on: rightModelOnTableCardViews[index], for: game.players[3])
         }
         return 0.61
     }
-    
     
     @IBOutlet weak var leftKnockLabel: UILabel!
     @IBOutlet weak var topKnockLabel: UILabel!
     @IBOutlet weak var rightKnockLabel: UILabel!
     
-    func animateKnock(by actor: Actor) -> Double {
-        if actor != .user {
+    func animateKnock(by player: Player) -> Double {
+        if player.getId() != user.getId() {
             
             var knockLabel: UILabel {
-                switch actor {
-                case .leftModel:
+                switch player.getId() {
+                case game.players[1].getId():
                     return leftKnockLabel
-                case .rightModel:
-                    return rightKnockLabel
-                default: // .rightModel
+                case game.players[2].getId():
                     return topKnockLabel
+                default: // game.players[3].getId():
+                    return rightKnockLabel
                 }
             }
             
@@ -1153,4 +1077,3 @@ class ViewController: UIViewController, BeverbendeDelegate {
         present(infoPopUp, animated: true)
     }
 }
-
