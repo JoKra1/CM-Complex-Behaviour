@@ -180,7 +180,7 @@ class Beverbende {
         
         // Let inactive models do their rehearsals
         // ...with a bit of trickery with the event queue
-        self.queueEvent(for: nextTurnEvent)
+        self.emitAndQueue(for: .nextTurn(currentPlayer), with: ["player": currentPlayer])
         self.emitEventQueue() // Only emitted to inactive models
         
         // Let active player execute its turn - if it is a model
