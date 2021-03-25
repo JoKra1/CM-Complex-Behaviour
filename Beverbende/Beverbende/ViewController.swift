@@ -440,22 +440,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
-    func letModelsPlay() {
-        disableUserInteraction()
-        userEndTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
-        let userElapsedTime = userEndTime - userStartTime - userAnimationsDuration
-        print("USER ELAPSED TIME: \(userElapsedTime)")
-        userStartTime = 0.0
-        userEndTime = 0.0
-        userAnimationsDuration = 0.0
-        _ = game.nextPlayer()
-        _ = game.nextPlayer()
-        _ = game.nextPlayer()
-        _ = game.nextPlayer()
-        // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
-        animateEventQueue()
-    }
-    
     lazy var playerPlaceholder: Player = self.user
     
     func animateEvent(for event: Event) -> Double {
