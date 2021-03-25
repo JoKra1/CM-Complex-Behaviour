@@ -14,7 +14,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
      */
 
     // Model tuning parameters (Class level)
-    private static let cut_off_low = 8
+    private static let cut_off_low = 9
     
     private static let cut_off_decide = 16
 
@@ -50,6 +50,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private var endCutoff:Int?
     
     weak var game:Beverbende?
+    var turnTime = 0.0
     
     required init(with ID: String) {
         //setup(with: ID)
@@ -168,19 +169,28 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          
          In case it is not the models turn, the model will rehearse its cards.
          */
-        case .nextTurn(let player):
+        case .nextTurn(let player, let previousDuration):
+            
             if player.id == self.id, let game = self.game {
-                self.time += 15.0
+                //self.time += 15.0
+                let startTime = self.time
                 self.summarizeDM()
                 print("It is Model \(self.id)'s turn.")
                 self.advanceGame()
-                let _ = game.nextPlayer()
+                self.turnTime = self.time - startTime
+                //let _ = game.nextPlayer()
             } else {
-                // Rehearse
+                // Rehearse at beginning of turn
+                // so subtract rehearsal time from time
+                // it takes opponent to finish
+                let startTime = self.time
                 for card_index in 1...4 {
                     print("Model \(self.id) is rehearsing since it is not its turn.")
                     _ = self.rehearsal(at: card_index)
                 }
+                let rehearsalDuration = self.time - startTime
+                self.time += (previousDuration - rehearsalDuration)
+                print("Model \(self.id) received previous time of \(previousDuration)")
             }
         /**
          If the game ended the model will memorize its own and the winner's sum of cards on the hands.
@@ -225,17 +235,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             }
             // Put all models in restricted game ended mode.
             self.goal.state = .DecideEnd
+            
         /**
-         If someone swapped with another player, the model will memorize this recent swapping action. If someone
-         swapped with the model, it will try to adaptively forget the card in the swapped position.
+         If someone swapped with the model, it will try to adaptively forget the card in the swapped position.
          */
         case .cardsSwapped(let pos1, let player1,
                            let pos2, let player2):
-            if player1.id != self.id {
-                // Someone other than me swapped recently
-                print("\(self.id) stores a recent swapper.")
-                self.memorizeSwapper(who: player1.id, at: pos1 + 1)
-            }
             
             if player2.id == self.id {
                 // Someone swapped with me, I should forget the card in that position
@@ -245,31 +250,24 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                                      at: pos2 + 1)
             }
             
-            // ToDo: implement adaptive positional forgetting of person that was swapped.
-            // This requires changing the storage of the swapper facts!
-        
         /**
-         Whenever any other player decided to replace a card on the hand with the
-         top discarded card, the model can use this as an opportunity to learn more
-         about the low value cut-off, by going to the same steps when having to make
-         the same decision.
+         Whenever someone replaces a card, the model memorizes this, so that
+         it can swap with that player (in the position) in the future.
          */
-        case .discardedCardTraded(let player, let discardedCard, let replacedCard, _, _):
+        case .discardedCardTraded(let player, _, _, let pos, _):
             
             if player.id != self.id {
-                // Only handle this case if it wasn't the model itself.
-                switch discardedCard.getType() {
-                case .action:
-                    // This should never happen, because it is objectively speaking
-                    // not a good move. However, human opponenst not always act rational so...
-                    ()
-                case .value(let points):
-                    // Judge (and memorize) whether the move by the opponent was "good" or "bad"
-                    print("\(self.id) judges the discarded card trade made by an opponent.")
-                    self.memorizeLowDecision(for: points,
-                                             compare_against: replacedCard,
-                                             and: points)
-                }
+                // Someone other than me replaced a card, I should memorize this.
+                print("\(self.id) stores a recent swapper: \(player.id) at \(pos + 1)")
+                self.memorizeSwapper(who: player.id, at: pos + 1)
+            }
+        
+        case .cardTraded(let player, _, let pos, _):
+            
+            if player.id != self.id {
+                // Someone other than me replaced a card, I should memorize this.
+                print("\(self.id) stores a recent swapper: \(player.id) at \(pos + 1)")
+                self.memorizeSwapper(who: player.id, at: pos + 1)
             }
             
         default:
@@ -312,8 +310,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         self.goal.remembered = nil
         self.goal.latencies = nil
         
-        // Clear all positional facts and reset time for decision facts
-        self.resetPosfacts()
+        // Clear all positional and swapper facts and reset time for decision facts
+        self.resetfacts(for: "Pos_Fact")
+        self.resetfacts(for: "swapped_recently_fact")
         self.resetTimeFacts(for: "end_value_fact")
         self.resetTimeFacts(for: "low_value_fact")
         
@@ -396,13 +395,16 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    private func resetPosfacts() {
+    private func resetfacts(for fact: String) {
         /**
          - Description:
-         Clears the models DM from all positional facts.
+         Clears the models DM from all facts of a specified type.
+         
+         - Parameters:
+            - fact: Fact type as string.
          */
         for chunk in self.dm.chunks {
-            if chunk.value.slotvals["isa"]!.text()! == "Pos_Fact" {
+            if chunk.value.slotvals["isa"]!.text()! == fact {
                 self.dm.chunks.removeValue(forKey: chunk.key)
             }
             
@@ -537,7 +539,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                                  at position: Int) {
         /**
          - Description:
-         Memorize the position on the table for a recent swapper.
+         Memorize the position on the table and the position of the card replaced by
+         a recent swapper.
          
          - Parameters:
             - swapped: The id belonging to the player who swapped.
@@ -807,12 +810,19 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         game!.discardDrawnCard(for: self)
         
-        let remembered = goal.remembered!
-        let latencies = goal.latencies!
+        var hand = goal.remembered!
+        var latencies = goal.latencies!
         
-        let least_certain_pos = self.findLeastCertain(for: remembered, with: latencies)
+        let least_certain_pos = self.findLeastCertain(for: hand, with: latencies)
         let hidden_card = game!.inspectCard(at: least_certain_pos - 1, for: self)
         self.memorizeCard(at: least_certain_pos, with: hidden_card)
+        
+        // Update the representation of the hand and latencies
+        hand[least_certain_pos - 1] = hidden_card.getType()
+        latencies[least_certain_pos - 1] = 0.0
+        goal.remembered = hand
+        goal.latencies = latencies
+        
         game!.moveCardBackFromHand(to: least_certain_pos - 1, for: self)
     }
     
@@ -1098,6 +1108,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             memorizeCard(at: found_max, with: card)
             self.summarizeDM()
             print(self.time)
+            
             game!.tradeDrawnCardWithCard(at: found_max - 1,
                                         for: self)
             
@@ -1132,7 +1143,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 let retrievedValue = Int(retrievedChunk.slotvals["value"]!.number()!)
                 print("Model \(self.id) retrieved an outcome of \(retrievedOutcome) based on retrieved value: \(retrievedValue)")
                 
-                // In the part this (or a similar value) was goo enough
+                // In the part this (or a similar value) was good enough
                 // to replace an unknown card.
                 if retrievedOutcome == "good" {
                     let choice = Int.random(in:0..<unknown.count)
@@ -1172,6 +1183,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     
                     self.summarizeDM()
                     print(self.time)
+                    
                     game!.tradeDrawnCardWithCard(at: unknown[choice] - 1,
                                                 for: self)
                     
@@ -1187,6 +1199,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                      as good or bad)
                      */
                     let previousCard = game!.drawDiscardedCard(for: self)
+                    
                     self.memorizeLowDecision(for: value,
                                              compare_against: previousCard,
                                              and: value)
