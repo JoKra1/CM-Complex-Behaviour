@@ -40,11 +40,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
         sizeUpAnimationViews()
         view.bringSubviewToFront(animationViewTwo)
         view.bringSubviewToFront(animationViewOne)
-        afterTurnButtons.forEach { $0.isHidden = true}
+        
         onHandCardInfoButton.isHidden = true
-        leftKnockLabel.alpha = 0
-        rightKnockLabel.alpha = 0
-        topKnockLabel.alpha = 0
+        leftKnockView.alpha = 0
+        rightKnockView.alpha = 0
+        topKnockView.alpha = 0
         addCardGestures()
         self.game.addSync(delegate: self)
         let discardePileValue = returnStringMatchingWithCard(forCard: game.discardPile.peek()!)
@@ -268,20 +268,31 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
-    @IBOutlet var afterTurnButtons: [UIButton]!
-    
-    @IBAction func endUserTurn(_ sender: UIButton) {
-        afterTurnButtons.forEach { $0.isHidden = true }
-        letModelsPlay()
-        
+    @IBOutlet weak var endTurnView: UIImageView!
+    @IBOutlet weak var userKnockView: UIImageView!
+
+    @objc func endUserTurn(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            endTurnView.isHidden = true
+            userKnockView.isHidden = true
+            letModelsPlay()
+        default:
+            break
+        }
     }
     
-    @IBAction func knockOnTable(_ sender: Any) {
-        afterTurnButtons.forEach { $0.isHidden = true }
-        game.knock(from: user)
-        letModelsPlay()
+    @objc func knockOnTable(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            endTurnView.isHidden = true
+            userKnockView.isHidden = true
+            game.knock(from: user)
+            letModelsPlay()
+        default:
+            break
+        }
     }
-    
     
     func letModelsPlay() {
         disableUserInteraction()
@@ -312,7 +323,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     @IBAction func touchInspectButton(_ sender: UIButton) {
         if initialInspection == false {
             initialInspection = true
-            sender.setTitle("Hide", for: UIControl.State.normal)
+            sender.setTitle(" Hide ", for: UIControl.State.normal)
             for index in [0, 3] { // the outer cards
                 let cardView = userOnTableCardViews[index]
                 let value = returnStringMatchingWithCard(forCard: user.getCardsOnTable()[index]!)
@@ -362,6 +373,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 cardView.isUserInteractionEnabled = true
             }
         }
+        
+        userKnockView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(knockOnTable(_:))))
+        userKnockView.isUserInteractionEnabled = true
+        
+        endTurnView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(endUserTurn(_:))))
+        endTurnView.isUserInteractionEnabled = true
     }
 
     func sizeUpAnimationViews() {
@@ -434,9 +451,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
          */
         if playerPlaceholder.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the player performs his last gesture/action
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
-                self.afterTurnButtons[0].isHidden = false //always show next turn button
+                self.endTurnView.isHidden = false //always show next turn button
                 if self.knockedBy == nil {
-                    self.afterTurnButtons[1].isHidden = false // only show when no one knocked already
+                    self.userKnockView.isHidden = false // only show when no one knocked already
                 }
             }
         }
@@ -980,27 +997,28 @@ class ViewController: UIViewController, BeverbendeDelegate {
         return 0.61
     }
     
-    @IBOutlet weak var leftKnockLabel: UILabel!
-    @IBOutlet weak var topKnockLabel: UILabel!
-    @IBOutlet weak var rightKnockLabel: UILabel!
+    @IBOutlet weak var leftKnockView: UIImageView!
+    @IBOutlet weak var topKnockView: UIImageView!
+    @IBOutlet weak var rightKnockView: UIImageView!
+    
     
     func animateKnock(by player: Player) -> Double {
         if player.getId() != user.getId() {
             
-            var knockLabel: UILabel {
+            var knockView: UIImageView {
                 switch player.getId() {
                 case game.players[1].getId():
-                    return leftKnockLabel
+                    return leftKnockView
                 case game.players[2].getId():
-                    return topKnockLabel
+                    return topKnockView
                 default: // game.players[3].getId():
-                    return rightKnockLabel
+                    return rightKnockView
                 }
             }
             
             let nKnocks = 3
             
-            flashKnockLabel(flashesToMake: nKnocks*2, forLabel: knockLabel)
+            flashKnockLabel(flashesToMake: nKnocks*2, forView: knockView)
 
             
             return Double(nKnocks) * (0.4 + 0.1) * 2 + 0.01
@@ -1008,15 +1026,15 @@ class ViewController: UIViewController, BeverbendeDelegate {
         return 0.0
     }
     
-    func flashKnockLabel(flashesToMake count: Int, forLabel label: UILabel) {
+    func flashKnockLabel(flashesToMake count: Int, forView view: UIImageView) {
         print("knock count: \(count)")
         if count != 0 {
             UIView.animate(withDuration: 0.4, delay: 0.1,
                            options: [],
                            animations: {
-                            label.alpha = (label.alpha == 1) ? 0 : 1},
+                            view.alpha = (view.alpha == 1) ? 0 : 1},
                            completion: { _ in
-                            self.flashKnockLabel(flashesToMake: count-1, forLabel: label)
+                            self.flashKnockLabel(flashesToMake: count-1, forView: view)
                            })
         }
     }
