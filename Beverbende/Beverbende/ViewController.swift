@@ -9,7 +9,7 @@ import UIKit
 
 class ViewController: UIViewController, BeverbendeDelegate {
     
-    var user = User(with: "user")
+    var user = User(with: "You")
     lazy var game = Beverbende(with: user, cognitiveIds: ["left", "top", "right"])
             
     var animationViewOne: UIImageView = {
@@ -40,7 +40,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
         sizeUpAnimationViews()
         view.bringSubviewToFront(animationViewTwo)
         view.bringSubviewToFront(animationViewOne)
-        
         onHandCardInfoButton.isHidden = true
         leftKnockView.alpha = 0
         rightKnockView.alpha = 0
@@ -310,13 +309,13 @@ class ViewController: UIViewController, BeverbendeDelegate {
         animateEventQueue()
     }
     
-    func showInspectButton() {
-        initialInspection = false
-        inspectButton.isHidden = false
-        inspectButton.setTitle("Inspect", for: UIControl.State.normal)
-        inspectButton.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
-        inspectButton.layer.cornerRadius = 10
-    }
+//    func showInspectButton() {
+//        initialInspection = false
+//        inspectButton.isHidden = false
+//        inspectButton.setTitle("Inspect", for: UIControl.State.normal)
+//        inspectButton.backgroundColor =
+//        inspectButton.layer.cornerRadius = 15
+//    }
     
     var initialInspection = false
     
@@ -556,11 +555,20 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func showWinner(for player: Player) {
-        let winnerPopUp = UIAlertController(title: "End of the Game", message: "\(player.getId()) is the winner!", preferredStyle: .alert)
+        
+        var message: String {
+            if player.getId() == user.getId() {
+                return "You are the winner, congratulations!"
+            } else {
+                return "The \(player.getId()) model is the winner. Better luck next time!"
+            }
+        }
+        
+        let winnerPopUp = UIAlertController(title: "End of the Game", message: message, preferredStyle: .alert)
         
         winnerPopUp.addAction(UIAlertAction(title: "Exit to Menu", style: .cancel, handler: {_ in
-                    print("winner was shown")
-                    }))
+                self.performSegue(withIdentifier: "segueToMain", sender: self)
+                }))
         
         _ = flipOpenAllCards()
         
@@ -1058,23 +1066,31 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBAction func showGameInfo(_ sender: UIButton) {
         
-        var gameState: String
+        var gameState: GameState
 
-        if isUserTurn == false { // only during initial inspection, buttons cant be pressed during animations
-            gameState = "initialInspect"
+        if isUserTurn == false {
+            if endTurnView.isHidden == false {
+                if knockedBy != nil {
+                    gameState = .knocked
+                } else {
+                    gameState = .end
+                }
+            } else {
+                gameState = .initialInspect // only during initial inspection, buttons cant be pressed during animations
+            }
         } else if user.getCardOnHand() == nil {
             if playedAction == .swap {
-                gameState = "swap"
+                gameState = .swap
             } else if playedAction == .inspect {
-                gameState = "inspect"
+                gameState = .inspect
             } else {
-                gameState = "start"
+                gameState = .start
             }
         } else {
-            gameState = "drawn"
+            gameState = .drawn
         }
         
-        let message = infoText.getGameInfo(forGameStateWithName: gameState)
+        let message = infoText.getGameInfo(forGameState: gameState)
         
         let infoPopUp = UIAlertController(title: "What to do?", message: message, preferredStyle: .alert)
         
