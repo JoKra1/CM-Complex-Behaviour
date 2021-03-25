@@ -164,10 +164,7 @@ class Beverbende {
      5. Check for and possibly handle end of game
      6. Clear queue again to allow all inactive models to process the active model's turn
      */
-    func nextPlayer() -> Player {
-        if self.gameEnded {
-            return self.players[self.currentPlayerIndex]
-        }
+    func nextPlayer(previous duration:Double) -> Double {
         
         // Clear queue from potential human user interaction
         self.emitEventQueue()
@@ -176,17 +173,22 @@ class Beverbende {
         self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
         let currentPlayer = self.players[self.currentPlayerIndex]
         
-        let nextTurnEvent = Event(type: .nextTurn(currentPlayer), info: ["player": currentPlayer])
+        let nextTurnEvent = Event(type: .nextTurn(currentPlayer,duration), info: ["player": currentPlayer,
+                                                                                  "duration": duration])
         
         // Let inactive models do their rehearsals
         // ...with a bit of trickery with the event queue
         self.queueEvent(for: nextTurnEvent)
         self.emitEventQueue() // Only emitted to inactive models
         
+        var currentTurnTime = 0.0
+        
         // Let active player execute its turn - if it is a model
         if currentPlayer is BeverbendeOpponent {
             let currentDelegate = self.delegates.filter{$0.id == currentPlayer.getId()}.first!
             self.notifyDelegates(for: nextTurnEvent, to: [currentDelegate]) // Fills up the event queue
+            let currentModel = currentPlayer as! BeverbendeOpponent
+            currentTurnTime = currentModel.turnTime
         }
         
         // Check for and possibly handle end of game
@@ -235,7 +237,7 @@ class Beverbende {
         // Clear queue again to allow all inactive models to process the active model's turn
         self.emitEventQueue()
         
-        return currentPlayer
+        return currentTurnTime
     }
     
     func isValueCard(card: Card) -> Bool {

@@ -289,10 +289,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
         userStartTime = 0.0
         userEndTime = 0.0
         userAnimationsDuration = 0.0
-        _ = game.nextPlayer()
-        _ = game.nextPlayer()
-        _ = game.nextPlayer()
-        _ = game.nextPlayer()
+        let modelLeftTime = game.nextPlayer(previous: userElapsedTime)
+        let modelTopTime = game.nextPlayer(previous: modelLeftTime)
+        let modelRightTime = game.nextPlayer(previous: modelTopTime)
+        _ = game.nextPlayer(previous: modelRightTime)
         // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
         animateEventQueue()
     }
@@ -547,7 +547,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let value = getStringMatchingWithCard(forCard: card)
             duration = animateCardInspection(by: player, withCardAtIndex: cardIndex, withValue: value)
             
-        case let .nextTurn(player):
+        case let .nextTurn(player,_):
             playerPlaceholder = player
             duration = 1
             

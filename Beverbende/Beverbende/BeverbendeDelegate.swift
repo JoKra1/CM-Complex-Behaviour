@@ -8,7 +8,7 @@
 import Foundation
 
 enum EventType {
-    case nextTurn(Player),
+    case nextTurn(Player,Double),
          cardDrawn(Player, Card),
          discardedCardDrawn(Player, Card, Card?),
          discardedCardTraded(Player, Card, Card, Int, Card?),
