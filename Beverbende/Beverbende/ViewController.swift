@@ -33,6 +33,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     override func viewDidLoad() {
         print("ViewDidLoad()")
         super.viewDidLoad()
+        view.sendSubviewToBack(backgroundView)
         showBackOfAllCards()
         view.addSubview(animationViewOne)
         view.addSubview(animationViewTwo)
@@ -49,7 +50,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
         let discardePileValue = returnStringMatchingWithCard(forCard: game.discardPile.peek()!)
         showFrontOfCard(show: discardePileValue, on: discardPileView, for: user)
     }
-
+    @IBOutlet weak var backgroundView: UIImageView!
+    
     @IBOutlet weak var deckView: UIImageView!
     @IBOutlet weak var discardPileView: UIImageView!
     
