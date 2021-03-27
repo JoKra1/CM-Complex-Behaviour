@@ -58,7 +58,7 @@ class Beverbende {
         
         self.delegates = []
         
-        self.currentPlayerIndex = 0
+        self.currentPlayerIndex = 0 // I.e. the human player starts
         self.discardPile = Stack<Card>()
         
         self.drawPile = Stack<Card>(initialArray: Beverbende.allCards().shuffled())
@@ -81,6 +81,10 @@ class Beverbende {
         }
         humanPlayer.setCardsOnTable(with: cards)
         
+        // Transition from nobody's turn to the human's turn
+        let nextTurnEvent = Event(type: .nextTurn(humanPlayer, 0), info: ["player": humanPlayer, "duration": 0])
+        self.queueEvent(for: nextTurnEvent) // Only the models need this
+        self.emitEventQueue()
     }
     
     /**
@@ -139,57 +143,43 @@ class Beverbende {
     }
 
     /**
-     Emits the event queue to all inactive models
+     Emits the event queue to all (active and inactive) models or just all inactive models. Latter is the default.
+     
+     - Parameter toAll: Whether the events should be emitted to all models or just the inactive ones (default).
      */
-    private func emitEventQueue() {
-        let currentId = self.players[self.currentPlayerIndex].getId()
-        let inactiveModels = self.delegates.filter{$0.id != currentId}
+    private func emitEventQueue(toAll: Bool = false) {
+        
+        var notifiableModels: [Delegate]
+        
+        if toAll {
+            notifiableModels = self.delegates
+        } else {
+            let currentId = self.players[self.currentPlayerIndex].getId()
+            notifiableModels = self.delegates.filter{$0.id != currentId}
+        }
         
         var event: Event
         
         while !self.eventQueue.isEmpty() {
             event = self.eventQueue.dequeue()!
-            self.notifyDelegates(for: event.type, with: event.info, to: inactiveModels)
+            self.notifyDelegates(for: event.type, with: event.info, to: notifiableModels)
         }
     }
     
     /**
-     Signals to all models that the next player (either model or user) can start its turn
+     Signals to all models that the next player (either model or user) can start its turn.
      
      Comes in several steps:
-     1. Clear queue from potential human user interaction
-     2. Advance currentPlayerIndex
-     3. Let inactive models do their rehearsals
-     4. Let active player execute its turn - if it is a model
-     5. Check for and possibly handle end of game
-     6. Clear queue again to allow all inactive models to process the active model's turn
+     1. Check for and possibly handle end of game
+     2. Clear queue from potential human user interaction
+     3. Advance currentPlayerIndex
+     4. Let inactive models do their rehearsals
+     5. Let active player execute its turn - if it is a model
+     6. Clear queue to let inactive models process the active model's turn
      */
-    func nextPlayer(previous duration:Double) -> Double {
-        
-        // Clear queue from potential human user interaction
-        self.emitEventQueue()
-        
-        // Advance currentPlayerIndex
-        self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
-        let currentPlayer = self.players[self.currentPlayerIndex]
-        
-        let nextTurnEvent = Event(type: .nextTurn(currentPlayer,duration), info: ["player": currentPlayer,
-                                                                                  "duration": duration])
-        
-        // Let inactive models do their rehearsals
-        // ...with a bit of trickery with the event queue
-        self.emitAndQueue(for: .nextTurn(currentPlayer, duration), with: ["player": currentPlayer,
-                                                                "duration": duration])
-        self.emitEventQueue() // Only emitted to inactive models
-        
-        var currentTurnTime = 0.0
-        
-        // Let active player execute its turn - if it is a model
-        if currentPlayer is BeverbendeOpponent {
-            let currentDelegate = self.delegates.filter{$0.id == currentPlayer.getId()}.first!
-            self.notifyDelegates(for: nextTurnEvent, to: [currentDelegate]) // Fills up the event queue
-            let currentModel = currentPlayer as! BeverbendeOpponent
-            currentTurnTime = currentModel.turnTime
+    func nextPlayer(previous duration: Double) -> Double {
+        if self.knocked && self.countdown > 0 {
+            self.countdown -= 1
         }
         
         // Check for and possibly handle end of game
@@ -231,11 +221,39 @@ class Beverbende {
             self.emitAndQueue(
                 for: .gameEnded(winner),
                 with: ["winner": winner])
-        } else if self.knocked {
-            self.countdown -= 1
+            
+            self.emitEventQueue(toAll: true)
+            
+            return duration
         }
         
-        // Clear queue again to allow all inactive models to process the active model's turn
+        // Clear queue from potential human user interaction
+        self.emitEventQueue()
+        
+        // Advance currentPlayerIndex
+        self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
+        let currentPlayer = self.players[self.currentPlayerIndex]
+        
+        let nextTurnEvent = Event(type: .nextTurn(currentPlayer, duration), info: ["player": currentPlayer,
+                                                                                   "duration": duration])
+        
+        // Let inactive models do their rehearsals
+        // ...with a bit of trickery with the event queue
+        self.emitAndQueue(for: .nextTurn(currentPlayer, duration), with: ["player": currentPlayer,
+                                                                          "duration": duration])
+        self.emitEventQueue() // Only emitted to inactive models
+        
+        var currentTurnTime = 0.0
+        
+        // Let active player execute its turn - if it is a model
+        if currentPlayer is BeverbendeOpponent {
+            let currentDelegate = self.delegates.filter{$0.id == currentPlayer.getId()}.first!
+            self.notifyDelegates(for: nextTurnEvent, to: [currentDelegate]) // Fills up the event queue
+            let currentModel = currentPlayer as! BeverbendeOpponent
+            currentTurnTime = currentModel.turnTime
+        }
+        
+        // Clear queue to let inactive models process the active model's turn
         self.emitEventQueue()
         
         return currentTurnTime
@@ -252,7 +270,7 @@ class Beverbende {
     func knock(from player: Player) {
         if !self.knocked {
             self.knocked = true
-            self.countdown = self.players.count - 1
+            self.countdown = self.players.count
         
             self.emitAndQueue(
                 for: .knocked(player),
