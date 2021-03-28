@@ -169,7 +169,13 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          
          In case it is not the models turn, the model will rehearse its cards.
          */
-        case .nextTurn(let player, let previousDuration):
+        case .nextTurn(let player, let previousDuration, let previousPlayer):
+            print("Model \(self.id) received previous time of \(previousDuration)")
+            if !(previousPlayer.id == self.id) {
+                print("Model \(self.id) updated its time for previous player \(previousPlayer.id)")
+                self.time += previousDuration
+            }
+            
             
             if player.id == self.id, let game = self.game {
                 //self.time += 15.0
@@ -181,16 +187,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 //let _ = game.nextPlayer()
             } else {
                 // Rehearse at beginning of turn
-                // so subtract rehearsal time from time
-                // it takes opponent to finish
-                let startTime = self.time
+                
                 for card_index in 1...4 {
                     print("Model \(self.id) is rehearsing since it is not its turn.")
                     _ = self.rehearsal(at: card_index)
                 }
-                let rehearsalDuration = self.time - startTime
-                self.time += (previousDuration - rehearsalDuration)
-                print("Model \(self.id) received previous time of \(previousDuration)")
+                
             }
         /**
          If the game ended the model will memorize its own and the winner's sum of cards on the hands.

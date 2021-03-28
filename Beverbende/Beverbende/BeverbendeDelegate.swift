@@ -8,7 +8,7 @@
 import Foundation
 
 enum EventType {
-    case nextTurn(Player,Double),
+    case nextTurn(Player,Double,Player),
          cardDrawn(Player, Card),
          discardedCardDrawn(Player, Card, Card?),
          discardedCardTraded(Player, Card, Card, Int, Card?),
@@ -29,7 +29,7 @@ protocol BeverbendeDelegate: AnyObject {
 /*
  EventType          Info object
  ---------          -----------
- nextTurn           ["player": Player]
+ nextTurn           ["player": Player, "duration":Double, "previousPlayer":Player]
  cardDrawn          ["player": Player, "card": Card] changed, also already in Beverbende.swift
  discardedCardDrawn ["player": Player, "card": Card, "topOfDeckCard": Card] changed, also already in Beverbende.swift
  discardedCardTraded ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int, "topOfDeckCard": Card] changed, also already in Beverbende.swift

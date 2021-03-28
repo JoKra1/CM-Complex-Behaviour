@@ -519,7 +519,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let value = returnStringMatchingWithCard(forCard: card)
             duration = animateCardInspection(by: player, withCardAtIndex: cardIndex, withValue: value)
             
-        case let .nextTurn(player,_):
+        case let .nextTurn(player,_,_):
             playerPlaceholder = player
             duration = 0.6
             

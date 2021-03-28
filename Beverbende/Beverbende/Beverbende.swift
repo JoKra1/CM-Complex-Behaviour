@@ -82,7 +82,11 @@ class Beverbende {
         humanPlayer.setCardsOnTable(with: cards)
         
         // Transition from nobody's turn to the human's turn
-        let nextTurnEvent = Event(type: .nextTurn(humanPlayer, 0), info: ["player": humanPlayer, "duration": 0])
+        // ToDo: this third argument should be nil, but the legacy info object expects values
+        // of type any. Nil cannot be cast to Any in swift, so this is the workaround.
+        let nextTurnEvent = Event(type: .nextTurn(humanPlayer, 0, humanPlayer), info: ["player": humanPlayer,
+                                                                               "duration": 0,
+                                                                               "previousPlayer": humanPlayer])
         self.queueEvent(for: nextTurnEvent) // Only the models need this
         self.emitEventQueue()
     }
@@ -231,16 +235,21 @@ class Beverbende {
         self.emitEventQueue()
         
         // Advance currentPlayerIndex
+        let previousPlayer = self.players[self.currentPlayerIndex]
         self.currentPlayerIndex = (self.currentPlayerIndex + 1) % self.players.count
         let currentPlayer = self.players[self.currentPlayerIndex]
         
-        let nextTurnEvent = Event(type: .nextTurn(currentPlayer, duration), info: ["player": currentPlayer,
-                                                                                   "duration": duration])
+        let nextTurnEvent = Event(type: .nextTurn(currentPlayer, duration, previousPlayer),
+                                  info: ["player": currentPlayer,
+                                         "duration": duration,
+                                         "previousPlayer":previousPlayer])
         
         // Let inactive models do their rehearsals
         // ...with a bit of trickery with the event queue
-        self.emitAndQueue(for: .nextTurn(currentPlayer, duration), with: ["player": currentPlayer,
-                                                                          "duration": duration])
+        self.emitAndQueue(for: .nextTurn(currentPlayer, duration, previousPlayer),
+                          with: ["player": currentPlayer,
+                                 "duration": duration,
+                                 "previousPlayer":previousPlayer])
         self.emitEventQueue() // Only emitted to inactive models
         
         var currentTurnTime = 0.0
