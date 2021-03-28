@@ -853,7 +853,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     return
                 case .swap:
                     self.decideSwap()
-                    return
+                    if !(swapHistory.last!.production == .discard) {
+                        return
+                    }
+                    
                 case.twice:
                     // Reset interaction counter.
                     game!.discardDrawnCard(for: self)
@@ -998,7 +1001,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                             withCardAt: Int.random(in:0..<4),
                             for: players[choicePLAY])
         }
-        swapHistory.append((production: .swapRecent, atTime: self.time))
+        swapHistory.append((production: .swapRandom, atTime: self.time))
         
     }
     
