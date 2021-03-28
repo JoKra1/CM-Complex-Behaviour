@@ -11,6 +11,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     /**
      Beverbende opponent, inherits from Model class and implements Player protocol.
+     
+     Sources for time-keeping are the AOI reader from the course at the RUG and Anderson, 2008
      */
 
     // Model tuning parameters (Class level)
@@ -19,6 +21,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private static let cut_off_decide = 16
 
     private static let learning_rate = 0.1
+    
+    var explorationSchedule = 1.0
     
     // Utilities for swap production rules
     private var utilities = [0.0,0.0,0.0] // Discard, swapRandom, swapRecent
@@ -187,9 +191,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 //let _ = game.nextPlayer()
             } else {
                 // Rehearse at beginning of turn
-                
+                self.time += 0.05
+                print("Model \(self.id) is rehearsing since it is not its turn.")
                 for card_index in 1...4 {
-                    print("Model \(self.id) is rehearsing since it is not its turn.")
+                    
                     _ = self.rehearsal(at: card_index)
                 }
                 
@@ -202,6 +207,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          swap actions selected throughout the game.
          */
         case .gameEnded(let winner):
+            self.time += 0.05
             print("\(self.id) received game ended signal.")
             if winner.id == self.id {
                 // Model won
@@ -243,10 +249,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         case .cardsSwapped(let pos1, let player1,
                            let pos2, let player2):
-            
+            self.time += 0.05
             if player2.id == self.id {
                 // Someone swapped with me, I should forget the card in that position
-                print("\(self.id) adaptively forgets all knowledge about a swapped card.")
                 self.memorizeUnknown(isa: "Pos_Fact",
                                      for: "type",
                                      at: pos2 + 1)
@@ -257,18 +262,16 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          it can swap with that player (in the position) in the future.
          */
         case .discardedCardTraded(let player, _, _, let pos, _):
-            
+            self.time += 0.05
             if player.id != self.id {
                 // Someone other than me replaced a card, I should memorize this.
-                print("\(self.id) stores a recent swapper: \(player.id) at \(pos + 1)")
                 self.memorizeSwapper(who: player.id, at: pos + 1)
             }
         
         case .cardTraded(let player, _, let pos, _):
-            
+            self.time += 0.05
             if player.id != self.id {
                 // Someone other than me replaced a card, I should memorize this.
-                print("\(self.id) stores a recent swapper: \(player.id) at \(pos + 1)")
                 self.memorizeSwapper(who: player.id, at: pos + 1)
             }
             
@@ -483,6 +486,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             - position: The position on the hand of the model (between 1 - 4)
             - card: An instance of a Card, value or action.
          */
+        
         let chunk = self.generateNewChunk(string: "Pos")
         chunk.slotvals["__id"] = Value.Text(String(self.dm.chunks.count) + "_" + self.formatTime())
         chunk.slotvals["isa"] = Value.Text("Pos_Fact")
@@ -492,9 +496,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         case .value(let points):
             chunk.slotvals["type"] = Value.Text("value")
             chunk.slotvals["value"] = Value.Number(Double(points))
-            print("Model \(self.id) memorized \(points) at position \(position)")
+            //print("Model \(self.id) memorized \(points) at position \(position)")
         case .action(let action):
-            print("Model \(self.id) memorized \(action) at position \(position)")
+            //print("Model \(self.id) memorized \(action) at position \(position)")
             chunk.slotvals["type"] = Value.Text("action")
             switch action {
             case .twice:
@@ -612,7 +616,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             to predict, which is why replacing them is always considered
             a good idea.
             */
-            print("Model \(self.id) memorizes the cut-off for low value decision as good")
+            //print("Model \(self.id) memorizes the cut-off for low value decision as good")
             self.memorizeDecision(for: "low_value_fact", was: true, for: retrievedCutoff)
             self.time += 0.05
         case .value(let previousValue):
@@ -623,11 +627,11 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
              improvement since knowing the value of the card is beneficial in any case.
             */
             if previousValue > value {
-                print("Model \(self.id) memorizes the cut-off for low value decision as good")
+                //print("Model \(self.id) memorizes the cut-off for low value decision as good")
                 self.memorizeDecision(for: "low_value_fact", was: true, for: retrievedCutoff)
                 self.time += 0.05
             } else {
-                print("Model \(self.id) memorizes the cut-off for low value decision as bad")
+                //print("Model \(self.id) memorizes the cut-off for low value decision as bad")
                 self.memorizeDecision(for: "low_value_fact", was: false, for: retrievedCutoff)
                 self.time += 0.05
             }
@@ -695,7 +699,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 if retrievedType == "action"{
                     // Retrieved card is an action card
                     let retrieved_action = String(retrievedChunk.slotvals["value"]!.text()!)
-                    print("Model \(self.id) remembered an action card: \(retrieved_action) at position: \(pos)")
+                    //print("Model \(self.id) remembered an action card: \(retrieved_action) at position: \(pos)")
                     // Check possible cases
                     if retrieved_action == "twice" {
                         representationHand.append(.action(.twice))
@@ -708,7 +712,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 } else if retrievedType == "value" {
                     // Retrieved card is a value card
                     let retrieved_value = Int(retrievedChunk.slotvals["value"]!.number()!)
-                    print("Model \(self.id) remembered a value card: \(retrieved_value) at position: \(pos)")
+                    //print("Model \(self.id) remembered a value card: \(retrieved_value) at position: \(pos)")
                     representationHand.append(.value(retrieved_value))
                 } else {
                     // Recalled that this card was adaptively forgotten!.
@@ -719,7 +723,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 representationHand.append(nil)
             }
         }
-        print("Model \(self.id) latencies: \(latencies) ")
+        //print("Model \(self.id) latencies: \(latencies) ")
         return (representationHand,latencies)
     }
     
@@ -810,12 +814,15 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          The inspect card is always used. Thus the model discards the inspect card
          and then inspects and memorizes the card at the position returned by the findLeastCertain method.
          */
+        self.time += 0.3 // Motor command to play card
         game!.discardDrawnCard(for: self)
         
         var hand = goal.remembered!
         var latencies = goal.latencies!
         
         let least_certain_pos = self.findLeastCertain(for: hand, with: latencies)
+        self.time += 0.3 // Motor command to flip over card at least certain position
+        self.time += 0.085 // Encoding card value/action at least certain position
         let hidden_card = game!.inspectCard(at: least_certain_pos - 1, for: self)
         self.memorizeCard(at: least_certain_pos, with: hidden_card)
         
@@ -824,6 +831,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         latencies[least_certain_pos - 1] = 0.0
         goal.remembered = hand
         goal.latencies = latencies
+        self.time += 0.2 // cost to update representation
         
         game!.moveCardBackFromHand(to: least_certain_pos - 1, for: self)
     }
@@ -837,15 +845,18 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          played by the model, it can terminate as soon as an action card beside twice was drawn again)
          is not selected, the model draws one additional one.
          */
+        self.time += 0.3 // Motor command to play card
         game!.discardDrawnCard(for: self)
         var iteration = 2
         while iteration > 0 {
-            print("Model \(self.id) draws \(2 - iteration) card of take twice action.")
+            //print("Model \(self.id) draws \(2 - iteration) card of take twice action.")
+            self.time += 0.3 // Motor command to draw new card
+            self.time += 0.085 // Encoding card value/action
             let newCard = game!.drawCard(for: self)
             switch newCard.getType() {
             
             case .action(let action):
-                print("Model \(self.id) got a new action card.")
+                //print("Model \(self.id) got a new action card.")
                 // Swap action cards
                 switch action {
                 case .inspect:
@@ -856,21 +867,22 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     if !(swapHistory.last!.production == .discard) {
                         return
                     }
-                    
                 case.twice:
                     // Reset interaction counter.
+                    self.time += 0.3 // motor command to play card
                     game!.discardDrawnCard(for: self)
                     iteration = 2
                 }
                 
             case .value:
-                print("Model \(self.id) got a new value card! Will decide now.")
+                //print("Model \(self.id) got a new value card! Will decide now.")
                 let decision = self.decideValue(for: newCard as! ValueCard)
                 switch decision {
                 case true:
-                    print("Model \(self.id) takes the value card in iteration \(2 - iteration)")
-                    return 
+                    //print("Model \(self.id) takes the value card in iteration \(2 - iteration)")
+                    return
                 case false:
+                    self.time += 0.3 // motor command to discard card
                     game!.discardDrawnCard(for: self)
                 }
             }
@@ -884,23 +896,48 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          - Description:
          Whether the swap action card is player or not depends on the utility of the
          three core actions available to the model when encountering this card. This method
-         selects the action with the highest (noisy) current utility.
+         selects the action with the highest (noisy) current utility only with a certain probability.
+         Otherwise the model selects an action at random, which is referred to as epsilon-greedy policy
+         to explore the action space in Géron's (2018) book "Hands-on machine learning".
          */
+        self.time += 0.3 // motor command to play/discard action card
         game!.discardDrawnCard(for: self)
         let utilityDiscard = utilities[0] + actrNoise(noise: self.procedural.utilityNoise)
         let utilitySwapRandom = utilities[1] + actrNoise(noise: self.procedural.utilityNoise)
         let utilitySwapRecent = utilities[2] + actrNoise(noise: self.procedural.utilityNoise)
         
-        // Select action with highest utlity.
-        if utilityDiscard > utilitySwapRandom,
-           utilityDiscard > utilitySwapRecent {
-            swapDiscard()
-        } else if utilitySwapRandom > utilityDiscard,
-                  utilitySwapRandom > utilitySwapRecent {
-            swapRandom()
+        let explorationDecision = Double.random(in: 0...1)
+        
+        if explorationDecision.isLess(than: explorationSchedule) {
+
+            let choice = Int.random(in: 0..<3)
+            
+            if choice == 0 {
+                swapDiscard()
+            } else if choice == 1 {
+                swapRandom()
+            } else if choice == 2 {
+                swapRecent()
+            }
         } else {
-            swapRecent()
+
+            // Select action with highest utlity.
+            if utilityDiscard > utilitySwapRandom,
+               utilityDiscard > utilitySwapRecent {
+                swapDiscard()
+            } else if utilitySwapRandom > utilityDiscard,
+                      utilitySwapRandom > utilitySwapRecent {
+                swapRandom()
+            } else {
+                swapRecent()
+            }
         }
+        
+        if !explorationSchedule.isLess(than: 0.1) {
+            explorationSchedule -= 0.05
+        }
+        
+        
     }
     
     /**
@@ -953,6 +990,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 if unknown.count > 0 {
                     let choice = Int.random(in:0..<unknown.count)
                     let player = self.IDToPlayer(for: retrievedRecentSwapper)!
+                    self.time += 0.3 // motor cost to swap cards
                     game!.swapCards(cardAt: unknown[choice],
                                     for: self,
                                     withCardAt: retrievedReplacedCard,
@@ -996,6 +1034,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         // If there is an unknown card, swap that one.
         if unknown.count > 0 {
             let choiceUNK = Int.random(in:0..<unknown.count)
+            self.time += 0.3 // motor action to swap card
             game!.swapCards(cardAt: unknown[choiceUNK],
                             for: self,
                             withCardAt: Int.random(in:0..<4),
@@ -1017,27 +1056,27 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             - reward: The reward received at the end of the game (0 or 1)
          */
         let timeDist = self.time
-        print("Model \(self.id) timeDist \(timeDist)")
+        //print("Model \(self.id) timeDist \(timeDist)")
         for (production,timeMatched) in swapHistory {
-            print("Model \(self.id) production \(production) at time: \(timeMatched)")
+            //print("Model \(self.id) production \(production) at time: \(timeMatched)")
             let timeDiff = (timeDist - timeMatched) / timeDist // Ratio of time diff
-            print("Model \(self.id) time-diff: \(timeDiff)")
+            //print("Model \(self.id) time-diff: \(timeDiff)")
             let actual_reward = reward - timeDiff
-            print("Model \(self.id) actual-reward: \(actual_reward)")
+            //print("Model \(self.id) actual-reward: \(actual_reward)")
             
             switch production {
                 case .discard:
                     let q_update = actual_reward - utilities[0]
                     utilities[0] = utilities[0] + BeverbendeOpponent.learning_rate * q_update
-                    print("Model \(self.id) utility for discard: \(utilities[0])")
+                    //print("Model \(self.id) utility for discard: \(utilities[0])")
                 case .swapRandom:
                     let q_update = actual_reward - utilities[1]
                     utilities[1] = utilities[1] + BeverbendeOpponent.learning_rate * q_update
-                    print("Model \(self.id) utility for random: \(utilities[1])")
+                    //print("Model \(self.id) utility for random: \(utilities[1])")
                 case .swapRecent:
                     let q_update = actual_reward - utilities[2]
                     utilities[2] = utilities[2] + BeverbendeOpponent.learning_rate * q_update
-                    print("Model \(self.id) utility for recent: \(utilities[2])")
+                    //print("Model \(self.id) utility for recent: \(utilities[2])")
             }
             
         }
@@ -1057,24 +1096,25 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         switch self.goal.state {
         case .Begin:
-            print("Model \(self.id) skips top discarded action card")
+            //print("Model \(self.id) skips top discarded action card")
             // Cannot take action cards from discarded pile.
+            // Thus no motor command necessary, since card was just attended.
             game!.discardDrawnCard(for: self)
             goal.state = .Processed_Discarded
         default:
-            print("Model \(self.id) matches action card")
+            //print("Model \(self.id) matches action card")
             let action = card.getAction()
             switch action {
             case .inspect:
                 // Always plays this card.
-                print("Model \(self.id) will decide inspect.")
+                //print("Model \(self.id) will decide inspect.")
                 self.decideInspect()
             case .twice:
                 // Always play this card.
-                print("Model \(self.id) will decide twice.")
+                //print("Model \(self.id) will decide twice.")
                 self.decideTwice()
             case .swap:
-                print("Model \(self.id) will decide swap.")
+                //print("Model \(self.id) will decide swap.")
                 self.decideSwap()
             }
             // No matter the outcome set goal to processed all
@@ -1109,11 +1149,11 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         // Compare the value of the current card to the representation of the hand.
         let (known_max, unknown) = compareHand(for: card, with: hand)
         if let found_max = known_max {
-            print("Model \(self.id) took the value card to replace a known higher one.")
+            //print("Model \(self.id) took the value card to replace a known higher one.")
             memorizeCard(at: found_max, with: card)
-            self.summarizeDM()
-            print(self.time)
-            
+            //self.summarizeDM()
+            //print(self.time)
+            self.time += 0.3 // motor command to replace cards
             game!.tradeDrawnCardWithCard(at: found_max - 1,
                                         for: self)
             
@@ -1122,6 +1162,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             latencies[found_max - 1] = 0.0
             goal.remembered = hand
             goal.latencies = latencies
+            self.time += 0.2 // Cost of forming representation
 
             return true // Replace card
         } else if unknown.count > 0 {
@@ -1146,7 +1187,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 
                 let retrievedOutcome = retrievedChunk.slotvals["outcome"]!.text()!
                 let retrievedValue = Int(retrievedChunk.slotvals["value"]!.number()!)
-                print("Model \(self.id) retrieved an outcome of \(retrievedOutcome) based on retrieved value: \(retrievedValue)")
+                //print("Model \(self.id) retrieved an outcome of \(retrievedOutcome) based on retrieved value: \(retrievedValue)")
                 
                 // In the part this (or a similar value) was good enough
                 // to replace an unknown card.
@@ -1154,8 +1195,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     let choice = Int.random(in:0..<unknown.count)
                     memorizeCard(at: unknown[choice], with: card)
                     
-                    self.summarizeDM()
-                    print(self.time)
+                    //self.summarizeDM()
+                    //print(self.time)
+                    self.time += 0.3 // motor command to replace cards
                     game!.tradeDrawnCardWithCard(at: unknown[choice] - 1,
                                                 for: self)
                     
@@ -1164,12 +1206,14 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     latencies[unknown[choice] - 1] = 0.0
                     goal.remembered = hand
                     goal.latencies = latencies
+                    self.time += 0.2 // Cost of forming representation
                     
                     /**
                      Now model gets feedback whether replacing the card was a good decision. Only If the card
                      picked at random was higher in value (or an action card) the replacement should be remembered as
                      a good decision.
                      */
+                    self.time += 0.085 // cost to attend just replaced card on discarded pile.
                     let previousCard = game!.drawDiscardedCard(for: self)
                     self.memorizeLowDecision(for: value,
                                              compare_against: previousCard,
@@ -1186,9 +1230,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     let choice = Int.random(in:0..<unknown.count)
                     memorizeCard(at: unknown[choice], with: card)
                     
-                    self.summarizeDM()
-                    print(self.time)
-                    
+                    //self.summarizeDM()
+                    //print(self.time)
+                    self.time += 0.3 // motor command to replace cards
                     game!.tradeDrawnCardWithCard(at: unknown[choice] - 1,
                                                 for: self)
                     
@@ -1197,12 +1241,14 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     latencies[unknown[choice] - 1] = 0.0
                     goal.remembered = hand
                     goal.latencies = latencies
+                    self.time += 0.2 // Cost of forming representation
                     
                     /**
                      Now model gets feedback whether replacing the card was a good decision as well. This time
                      however, a new memory for this value will be created (depending on outcome this value will be marked
                      as good or bad)
                      */
+                    self.time += 0.085 // cost to attend just replaced card on discarded pile.
                     let previousCard = game!.drawDiscardedCard(for: self)
                     
                     self.memorizeLowDecision(for: value,
@@ -1234,8 +1280,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             game!.discardDrawnCard(for: self)
             // Update Goal based on current game state
             if goal.state == .Begin {
+                // Top discarded card was just attended, no motor command necessary.
                 goal.state = .Processed_Discarded
             } else {
+                self.time += 0.3 // motor command to move top deck card to discarded pile.
                 goal.state = .Processed_All
             }
         } else {
@@ -1282,55 +1330,61 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
         switch goal.state {
             case .Begin:
-                print("Model \(self.id) representation \(goal.remembered)")
-                print("Model \(self.id) latencies \(goal.latencies)")
+                //print("Model \(self.id) representation \(goal.remembered)")
+                //print("Model \(self.id) latencies \(goal.latencies)")
                 self.time += 0.05
-                print("Model \(self.id) will look at discarded pile now:")
+                //print("Model \(self.id) will look at discarded pile now:")
                 // Place card in hand
+                self.time += 0.085 // Attend top discarded card
                 let card = game!.drawDiscardedCard(for: self)
             
                 // Attempt to remember the deck
-                print("Model \(self.id) will try to remember its cards now.")
+                //print("Model \(self.id) will try to remember its cards now.")
                 let (remembered,latencies) = self.rememberHand()
                 
                 // Update Goal (Imaginal) slots
                 goal.remembered = remembered
                 goal.latencies = latencies
                 
+                self.time += 0.2 // Cost of forming representation
+                
                 // Make decision based on card type.
                 self.matchCard(for: card)
                 
             case .Processed_Discarded:
                 self.time += 0.05
-                print("Model \(self.id) looked at discarded, will look at Deck as well.")
+                //print("Model \(self.id) looked at discarded, will look at Deck as well.")
                 // Place card in hand
+                self.time += 0.3 // Motor command to flip over top deck card
+                self.time += 0.085 // Attend top deck card.
                 let card = game!.drawCard(for: self)
                 // Make decision based on card type.
                 self.matchCard(for: card)
 
             case .Processed_All:
                 self.time += 0.05
-                print("Model \(self.id) looked at Discarded pile and/or Deck.")
+                //print("Model \(self.id) looked at Discarded pile and/or Deck.")
                 
                 if !game!.knocked {
                     let decision = self.decideGame()
                     switch decision {
                         case true:
-                            print("\(self.id): I knock")
+                            //print("\(self.id): I knock")
+                            self.time += 0.3 // Motor action to knock.
                             game!.knock(from: self)
                             goal.state = .DecideEnd
                         case false:
                             goal.state = .DecideContinue
                     }
                 } else {
-                    print("Someone already knocked so I will continue.")
+                    //print("Someone already knocked so I will continue.")
                     goal.state = .DecideContinue
                 }
                 
                 
             case .DecideContinue:
                 self.time += 0.05
-                print("Model has decided to continue.")
+                //print("Model has decided to continue.")
                 // Clear all slots
                 goal.state = .Begin
                 goal.remembered = nil
@@ -1353,8 +1407,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          can later remember whether this decision was good or bad based on the current sum.
          */
         let remembered = goal.remembered!
-        print("Model \(self.id) representation \(remembered)")
-        print("Model \(self.id) latencies \(goal.latencies)")
+        //print("Model \(self.id) representation \(remembered)")
+        //print("Model \(self.id) latencies \(goal.latencies)")
         var sum = 0
         for possiblyRetrieved in remembered{
             if let retrievedType = possiblyRetrieved {
@@ -1390,7 +1444,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             
             let retrievedOutcome = retrievedChunk.slotvals["outcome"]!.text()!
             let retrievedValue = Int(retrievedChunk.slotvals["value"]!.number()!)
-            print("Model \(self.id) retrieved end outcome of \(retrievedOutcome) for \(retrievedValue).")
+            //print("Model \(self.id) retrieved end outcome of \(retrievedOutcome) for \(retrievedValue).")
             if retrievedOutcome == "good" {
                 // Set did knock to true so that retrieved cut-off
                 // can be reinforced.
