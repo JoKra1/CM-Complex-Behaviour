@@ -7,16 +7,11 @@
 
 import UIKit
 
-
-
 class SettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        activationSlider.setValue(Float(activationNoise), animated: true)
-        utilitySlider.setValue(Float(utilityNoise), animated: true)
-        frozenSwitch.setOn(frozen, animated: true)
-        pretrainedSwitch.setOn(pretrained, animated: true)
+        setSlidersAndSwitches()
         // Do any additional setup after loading the view.
     }
     
@@ -44,6 +39,22 @@ class SettingsViewController: UIViewController {
     
     @IBAction func pretrainedSwitchChanged(_ sender: UISwitch) {
         pretrained = sender.isOn
+    }
+    
+    func setSlidersAndSwitches() {
+        activationSlider.setValue(Float(activationNoise), animated: true)
+        utilitySlider.setValue(Float(utilityNoise), animated: true)
+        frozenSwitch.setOn(frozen, animated: true)
+        pretrainedSwitch.setOn(pretrained, animated: true)
+    }
+    
+    
+    @IBAction func setDefaultSettings(_ sender: UIButton) {
+        activationNoise = 0.2 // Default value
+        utilityNoise = 0.2 // Default value
+        frozen = false // Default value
+        pretrained = true // Default value
+        setSlidersAndSwitches()
     }
     
     
