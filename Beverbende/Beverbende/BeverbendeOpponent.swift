@@ -23,10 +23,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private static let learning_rate = 0.1
     
     // Parameters for Settings page
-    static let activationNoise = 0.2 // Default value
-    static let utilityNoise = 0.2 // Default value
-    static let frozen = false // Default value
-    static let pretrained = true // Default value
+    static var activationNoise = 0.2 // Default value
+    static var utilityNoise = 0.2 // Default value
+    static var frozen = false // Default value
+    static var pretrained = true // Default value
     
     var explorationSchedule = 1.0
     
@@ -321,11 +321,20 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         self.goal.remembered = nil
         self.goal.latencies = nil
         
+        // Clear swapping history
+        self.swapHistory = []
+        
         // Clear all positional and swapper facts and reset time for decision facts
         self.resetfacts(for: "Pos_Fact")
         self.resetfacts(for: "swapped_recently_fact")
         self.resetTimeFacts(for: "end_value_fact")
         self.resetTimeFacts(for: "low_value_fact")
+        
+        // If the model is not learning, all value facts can be discarded.
+        if BeverbendeOpponent.frozen {
+            self.resetfacts(for: "end_value_fact")
+            self.resetfacts(for: "low_value_fact")
+        }
         
         // Inspect first two cards.
         let leftCard = self.game?.inspectCard(at: 0, for: self)
@@ -355,6 +364,75 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
             
         
+    }
+    
+    
+    private func exportDMToCSV (from data:[[String:AnyObject]], file name: String) {
+        // Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
+        // Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
+        var csvString = "\("Fact"),\("Outcome"),\("Value"),\("Encounters")\n"
+        for dct in data {
+            csvString = csvString.appending("\(dct["Fact"]! as! String),\(dct["Outcome"]! as! String),\(dct["Value"]! as! Int),\(dct["Encounters"]! as! Int)\n")
+        }
+        
+        let fileManager = FileManager.default
+        do {
+            
+            let path = try fileManager.url(for: .documentDirectory,
+                                           in: .userDomainMask,
+                                           appropriateFor: nil,
+                                           create: false)
+            print(path)
+            let fileURL = path.appendingPathComponent(name + ".csv")
+            try csvString.write(to: fileURL, atomically: true, encoding: .utf8)
+        } catch {
+            print("error writing files.")
+        }
+    }
+    
+    private func loadDMFromCSV(file name:String) {
+        // Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
+        // Source 2: https://developer.apple.com/forums/thread/90293
+        
+        // Set DM to empty dict by default.
+        self.dm.chunks = [String:Chunk]()
+        let fileManager = FileManager.default
+        do {
+            
+            let path = try fileManager.url(for: .documentDirectory,
+                                           in: .userDomainMask,
+                                           appropriateFor: nil,
+                                           create: false)
+            print(path)
+            let fileURL = path.appendingPathComponent(name + ".csv")
+            let loadedString = try? String(contentsOf: fileURL)
+            if loadedString != nil {
+                // file exists
+                let lines = loadedString!.split(separator: "\n")
+                for line in lines {
+                    let columns = line.split(separator: ",")
+                    assert(columns.count == 4)
+                    // Collect data
+                    let fact = String(columns[0])
+                    let outcome = String(columns[1])
+                    let value = Int(columns[2])
+                    let encounters = Int(columns[3])
+                    // Write to DM
+                    let chunk = self.generateNewChunk(string: fact)
+                    chunk.slotvals["isa"] = Value.Text(fact)
+                    chunk.slotvals["value"] = Value.Number(Double(value!))
+                    chunk.slotvals["outcome"] = Value.Text(outcome)
+                    // Add references
+                    for _ in 0..<encounters! {
+                        chunk.referenceList.append(0.0)
+                    }
+                    self.dm.chunks[chunk.name] = chunk
+                }
+            }
+            
+        } catch {
+            print("error accessing files.")
+        }
     }
     
     
@@ -1186,7 +1264,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             self.time += latency
             
             // Successful partial retrieval!
-            if let retrievedChunk = retrieval {
+            if let retrievedChunk = retrieval,
+               !BeverbendeOpponent.frozen {
                 
                 self.dm.addToDM(retrievedChunk)
                 self.time += 0.05
@@ -1444,7 +1523,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         self.time += latency
         
         // Retrieval of outcome in a similar situation in the past.
-        if let retrievedChunk = retrieval {
+        if let retrievedChunk = retrieval,
+           !BeverbendeOpponent.frozen {
             self.dm.addToDM(retrievedChunk)
             self.time += 0.05
             
