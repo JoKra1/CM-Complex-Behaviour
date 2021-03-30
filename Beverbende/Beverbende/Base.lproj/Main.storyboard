@@ -396,13 +396,35 @@
                                     <action selector="sequeToMain:" destination="uBl-oi-ePs" eventType="touchUpInside" id="7NX-fJ-VdB"/>
                                 </connections>
                             </button>
-                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.001" maxValue="2" translatesAutoresizingMaskIntoConstraints="NO" id="NO1-X0-JNv">
-                                <rect key="frame" x="420" y="412" width="527" height="30"/>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.20000000000000001" minValue="0.01" maxValue="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="NO1-X0-JNv">
+                                <rect key="frame" x="420" y="301" width="527" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <connections>
                                     <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="TXd-DY-hoV"/>
                                 </connections>
                             </slider>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.20000000000000001" minValue="0.01" maxValue="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="GPP-Ra-2Ph">
+                                <rect key="frame" x="420" y="470" width="527" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="zfl-jE-mmw"/>
+                                    <action selector="utilitySliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="xrI-PQ-Y0p"/>
+                                </connections>
+                            </slider>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uZG-gd-TQZ">
+                                <rect key="frame" x="660" y="630" width="49" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="frozenSwitchChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="J4W-JX-aAv"/>
+                                </connections>
+                            </switch>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4sn-W5-or5">
+                                <rect key="frame" x="660" y="753" width="49" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="pretrainedSwitchChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="4HE-VM-6Lb"/>
+                                </connections>
+                            </switch>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="wrX-4X-FQl"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -412,17 +434,20 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="noiseSlider" destination="NO1-X0-JNv" id="nfq-Mf-pMC"/>
+                        <outlet property="activationSlider" destination="NO1-X0-JNv" id="nfq-Mf-pMC"/>
+                        <outlet property="frozenSwitch" destination="uZG-gd-TQZ" id="434-le-6sp"/>
+                        <outlet property="pretrainedSwitch" destination="4sn-W5-or5" id="YBo-QG-z0f"/>
+                        <outlet property="utilitySlider" destination="GPP-Ra-2Ph" id="X3z-yX-0Bh"/>
                         <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMainFromSettings" id="lsH-p1-r9y"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="g7V-W6-aF5" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-24" y="-1399"/>
+            <point key="canvasLocation" x="-24.158125915080525" y="-1399.21875"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="lsH-p1-r9y"/>
+        <segue reference="4fs-Zt-LfT"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="knock" width="525" height="260"/>
