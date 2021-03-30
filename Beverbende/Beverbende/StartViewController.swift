@@ -11,8 +11,11 @@ class StartViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("modelNoise: \(modelNoise)")
         startGameView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(segueToGame(_ :))))
         startGameView.isUserInteractionEnabled = true
+        settingsView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(segueToSettings(_:))))
+        settingsView.isUserInteractionEnabled = true
         gameRulesView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(segueToRules(_ :))))
         gameRulesView.isUserInteractionEnabled = true
         // Do any additional setup after loading the view.
@@ -20,12 +23,22 @@ class StartViewController: UIViewController {
     
     
     @IBOutlet weak var startGameView: UIImageView!
+    @IBOutlet weak var settingsView: UIImageView!
     @IBOutlet weak var gameRulesView: UIImageView!
     
     @objc func segueToGame(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
         case .ended:
             performSegue(withIdentifier: "segueToGame", sender: self)
+        default:
+            break
+        }
+    }
+    
+    @objc func segueToSettings(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            performSegue(withIdentifier: "segueToSettings", sender: self)
         default:
             break
         }
@@ -40,14 +53,17 @@ class StartViewController: UIViewController {
         }
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    var modelNoise = 0.01
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "segueToSettings" {
+            guard let settingsViewController = segue.destination as? SettingsViewController else { return }
+            settingsViewController.modelNoise = self.modelNoise
+        } else if segue.identifier == "segueToGame" {
+        guard let gameViewController = segue.destination as? ViewController else { return }
+            gameViewController.modelNoise = self.modelNoise
+        }
     }
-    */
+
 
 }
