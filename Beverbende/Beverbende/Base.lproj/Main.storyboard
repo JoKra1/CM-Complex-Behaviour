@@ -272,7 +272,7 @@
                         <outletCollection property="rightModelOnTableCardViews" destination="fx8-2t-0Rs" collectionClass="NSMutableArray" id="E0Q-sE-8BS"/>
                         <outletCollection property="rightModelOnTableCardViews" destination="qQZ-4F-JNH" collectionClass="NSMutableArray" id="MDW-Nn-wV7"/>
                         <outletCollection property="rightModelOnTableCardViews" destination="1wA-ai-kyl" collectionClass="NSMutableArray" id="ZtG-ky-OG8"/>
-                        <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMain" id="4fs-Zt-LfT"/>
+                        <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMainFromGame" id="4fs-Zt-LfT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -291,13 +291,16 @@
                                 <rect key="frame" x="40" y="50" width="1286" height="410"/>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="gEh-26-rnX">
-                                <rect key="frame" x="12" y="468" width="1342" height="256"/>
+                                <rect key="frame" x="12" y="468" width="1342" height="307"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="start" translatesAutoresizingMaskIntoConstraints="NO" id="nNK-K9-obT">
-                                        <rect key="frame" x="0.0" y="0.0" width="1342" height="128"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="1342" height="102.5"/>
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="settings" translatesAutoresizingMaskIntoConstraints="NO" id="WOf-a7-x29">
+                                        <rect key="frame" x="0.0" y="102.5" width="1342" height="102.5"/>
                                     </imageView>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="rules" translatesAutoresizingMaskIntoConstraints="NO" id="XdA-wT-cRE">
-                                        <rect key="frame" x="0.0" y="128" width="1342" height="128"/>
+                                        <rect key="frame" x="0.0" y="205" width="1342" height="102"/>
                                     </imageView>
                                 </subviews>
                             </stackView>
@@ -306,7 +309,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="Aqf-ag-dKh" firstAttribute="top" secondItem="esj-Zi-WaL" secondAttribute="top" constant="50" id="3fA-6j-KHX"/>
-                            <constraint firstItem="gEh-26-rnX" firstAttribute="height" secondItem="OIB-NG-YY4" secondAttribute="height" multiplier="0.25" id="43C-8r-mQ9"/>
+                            <constraint firstItem="gEh-26-rnX" firstAttribute="height" secondItem="OIB-NG-YY4" secondAttribute="height" multiplier="0.3" id="43C-8r-mQ9"/>
                             <constraint firstItem="Aqf-ag-dKh" firstAttribute="leading" secondItem="esj-Zi-WaL" secondAttribute="leading" constant="40" id="Eht-dW-Eti"/>
                             <constraint firstItem="gEh-26-rnX" firstAttribute="top" secondItem="Aqf-ag-dKh" secondAttribute="bottom" constant="8" symbolic="YES" id="Rbe-Lz-uFb"/>
                             <constraint firstItem="gEh-26-rnX" firstAttribute="centerX" secondItem="esj-Zi-WaL" secondAttribute="centerX" id="u2M-QD-nBi"/>
@@ -316,14 +319,16 @@
                     </view>
                     <connections>
                         <outlet property="gameRulesView" destination="XdA-wT-cRE" id="1k3-BJ-SJo"/>
+                        <outlet property="settingsView" destination="WOf-a7-x29" id="fDq-JG-OQG"/>
                         <outlet property="startGameView" destination="nNK-K9-obT" id="CvX-H9-4R2"/>
                         <segue destination="pmf-j1-kOc" kind="presentation" identifier="segueToRules" id="f5n-8W-emb"/>
                         <segue destination="BYZ-38-t0r" kind="presentation" identifier="segueToGame" id="lYR-9K-phX"/>
+                        <segue destination="uBl-oi-ePs" kind="presentation" identifier="segueToSettings" id="JNL-OY-0Jr"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7Z3-vP-6mj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-24.158125915080525" y="-672.0703125"/>
+            <point key="canvasLocation" x="-24" y="-609"/>
         </scene>
         <!--Rules View Controller-->
         <scene sceneID="4gN-Fj-9dr">
@@ -338,7 +343,7 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="60"/>
                                 <state key="normal" title="Return"/>
                                 <connections>
-                                    <segue destination="jhN-70-wKO" kind="presentation" id="RoQ-ja-81b"/>
+                                    <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMainFromRules" id="RoQ-ja-81b"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="top" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Cju-7c-AMV">
@@ -375,14 +380,55 @@
             </objects>
             <point key="canvasLocation" x="631.62518301610532" y="-672.0703125"/>
         </scene>
+        <!--Settings View Controller-->
+        <scene sceneID="xX9-e0-jNp">
+            <objects>
+                <viewController modalPresentationStyle="fullScreen" id="uBl-oi-ePs" customClass="SettingsViewController" customModule="Beverbende" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="k9W-rI-EZJ">
+                        <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="top" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gaE-eX-dUR">
+                                <rect key="frame" x="50" y="50" width="169" height="84"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="60"/>
+                                <state key="normal" title="Return"/>
+                                <connections>
+                                    <action selector="sequeToMain:" destination="uBl-oi-ePs" eventType="touchUpInside" id="7NX-fJ-VdB"/>
+                                </connections>
+                            </button>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.001" maxValue="2" translatesAutoresizingMaskIntoConstraints="NO" id="NO1-X0-JNv">
+                                <rect key="frame" x="420" y="412" width="527" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="TXd-DY-hoV"/>
+                                </connections>
+                            </slider>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="wrX-4X-FQl"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="gaE-eX-dUR" firstAttribute="top" secondItem="wrX-4X-FQl" secondAttribute="top" constant="50" id="1Ty-dL-nEF"/>
+                            <constraint firstItem="gaE-eX-dUR" firstAttribute="leading" secondItem="wrX-4X-FQl" secondAttribute="leading" constant="50" id="YAb-Is-szY"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="noiseSlider" destination="NO1-X0-JNv" id="nfq-Mf-pMC"/>
+                        <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMainFromSettings" id="lsH-p1-r9y"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="g7V-W6-aF5" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-24" y="-1399"/>
+        </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="4fs-Zt-LfT"/>
+        <segue reference="lsH-p1-r9y"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="knock" width="525" height="260"/>
         <image name="logo" width="1200" height="410"/>
         <image name="rules" width="1342" height="260"/>
+        <image name="settings" width="1052" height="260"/>
         <image name="start" width="827" height="260"/>
         <image name="table" width="5897" height="4480"/>
         <image name="turn" width="712" height="260"/>

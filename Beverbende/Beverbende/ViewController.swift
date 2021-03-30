@@ -9,27 +9,12 @@ import UIKit
 
 class ViewController: UIViewController, BeverbendeDelegate {
     
+    // settings variables
+    var modelNoise = 0.0
+    
     var user = User(with: "You")
     lazy var game = Beverbende(with: user, cognitiveIds: ["left", "top", "right"])
             
-    var animationViewOne: UIImageView = {
-        let theImageView = UIImageView()
-        theImageView.image = nil
-        theImageView.contentMode = .scaleToFill
-        theImageView.clipsToBounds = true
-        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
-        return theImageView
-        }()
-    
-    var animationViewTwo: UIImageView = {
-        let theImageView = UIImageView()
-        theImageView.image = nil
-        theImageView.contentMode = .scaleToFill
-        theImageView.clipsToBounds = true
-        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
-        return theImageView
-        }()
-    
     override func viewDidLoad() {
         print("ViewDidLoad()")
         super.viewDidLoad()
@@ -49,6 +34,25 @@ class ViewController: UIViewController, BeverbendeDelegate {
         let discardePileValue = returnStringMatchingWithCard(forCard: game.discardPile.peek()!)
         showFrontOfCard(show: discardePileValue, on: discardPileView, for: user)
     }
+    
+    var animationViewOne: UIImageView = {
+        let theImageView = UIImageView()
+        theImageView.image = nil
+        theImageView.contentMode = .scaleToFill
+        theImageView.clipsToBounds = true
+        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
+        return theImageView
+        }()
+    
+    var animationViewTwo: UIImageView = {
+        let theImageView = UIImageView()
+        theImageView.image = nil
+        theImageView.contentMode = .scaleToFill
+        theImageView.clipsToBounds = true
+        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
+        return theImageView
+        }()
+    
     @IBOutlet weak var backgroundView: UIImageView!
     
     @IBOutlet weak var deckView: UIImageView!
@@ -309,14 +313,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
         animateEventQueue()
     }
     
-//    func showInspectButton() {
-//        initialInspection = false
-//        inspectButton.isHidden = false
-//        inspectButton.setTitle("Inspect", for: UIControl.State.normal)
-//        inspectButton.backgroundColor =
-//        inspectButton.layer.cornerRadius = 15
-//    }
-    
     var initialInspection = false
     
     @IBAction func touchInspectButton(_ sender: UIButton) {
@@ -567,7 +563,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         let winnerPopUp = UIAlertController(title: "End of the Game", message: message, preferredStyle: .alert)
         
         winnerPopUp.addAction(UIAlertAction(title: "Exit to Menu", style: .cancel, handler: {_ in
-                self.performSegue(withIdentifier: "segueToMain", sender: self)
+                self.performSegue(withIdentifier: "segueToMainFromGame", sender: self)
                 }))
         
         _ = flipOpenAllCards()
