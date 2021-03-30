@@ -22,6 +22,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
 
     private static let learning_rate = 0.1
     
+    // Parameters for Settings page
+    static let activationNoise = 0.2 // Default value
+    static let utilityNoise = 0.2 // Default value
+    static let frozen = false // Default value
+    static let pretrained = true // Default value
+    
     var explorationSchedule = 1.0
     
     // Utilities for swap production rules
