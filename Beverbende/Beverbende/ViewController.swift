@@ -4,16 +4,11 @@
 //
 //  Created by Chiel Wijs on 16/02/2021.
 //
-
+import Foundation
 import UIKit
 
 class ViewController: UIViewController, BeverbendeDelegate {
     
-    // settings variables
-    var activationNoise = 0.2 // Default value
-    var utilityNoise = 0.2 // Default value
-    var frozen = false // Default value
-    var pretrained = true // Default value
     
     var user = User(with: "You")
     lazy var game = Beverbende(with: user, cognitiveIds: ["left", "top", "right"])

@@ -14,7 +14,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
      
      Sources for time-keeping are the AOI reader from the course at the RUG and Anderson, 2008
      */
-
+    // Defaults
+    private static let defaults = UserDefaults.standard
+    
     // Model tuning parameters (Class level)
     private static let cut_off_low = 9
     
@@ -23,10 +25,34 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private static let learning_rate = 0.1
     
     // Parameters for Settings page
-    static var activationNoise = 0.1 // Default value
-    static var utilityNoise = 0.2 // Default value
-    static var frozen = false // Default value
-    static var pretrained = true // Default value
+    private static var activationNoise: Double {
+        get {
+            let noise = BeverbendeOpponent.defaults.double(forKey: "activationNoise")
+            print(noise)
+            return noise
+        }
+    }
+    private static var utilityNoise: Double {
+        get {
+            let noise = BeverbendeOpponent.defaults.double(forKey: "utilityNoise")
+            print(noise)
+            return noise
+        }
+    }
+    private static var frozen: Bool {
+        get {
+            let frozen = BeverbendeOpponent.defaults.bool(forKey: "frozen")
+            print(frozen)
+            return frozen
+        }
+    }
+    private static var pretrained: Bool {
+        get {
+            let pretrained = BeverbendeOpponent.defaults.bool(forKey: "pretrained")
+            print(pretrained)
+            return pretrained
+        }
+    }
     
     var explorationSchedule = 1.0
     

@@ -8,7 +8,7 @@
 import UIKit
 
 class StartViewController: UIViewController {
-
+    let defaults = UserDefaults.standard
     override func viewDidLoad() {
         super.viewDidLoad()
         startGameView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(segueToGame(_ :))))
@@ -17,7 +17,19 @@ class StartViewController: UIViewController {
         settingsView.isUserInteractionEnabled = true
         gameRulesView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(segueToRules(_ :))))
         gameRulesView.isUserInteractionEnabled = true
-        // Do any additional setup after loading the view.
+        
+        // Check whether user has ever used the app
+        let hasCustomized = defaults.bool(forKey: "hasCustomized")
+        
+        if !hasCustomized{
+            defaults.set(0.2,forKey: "activationNoise")
+            defaults.set(0.2,forKey: "utilityNoise")
+            defaults.set(false,forKey: "frozen")
+            defaults.set(true,forKey: "pretrained")
+            
+            defaults.set(true,forKey: "hasCustomized")
+        }
+        
     }
     
     
@@ -52,11 +64,6 @@ class StartViewController: UIViewController {
         }
     }
     
-    var activationNoise = 0.2 // Default value
-    var utilityNoise = 0.2 // Default value
-    var frozen = false // Default value
-    var pretrained = true // Default value
-    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "segueToSettings" {
             /*
@@ -69,11 +76,14 @@ class StartViewController: UIViewController {
             // Now all handled by defaults.
             ()
         } else if segue.identifier == "segueToGame" {
-        guard let gameViewController = segue.destination as? ViewController else { return }
+            /*
+            guard let gameViewController = segue.destination as? ViewController else { return }
             gameViewController.activationNoise = self.activationNoise
             gameViewController.utilityNoise = self.utilityNoise
             gameViewController.frozen = self.frozen
             gameViewController.pretrained = self.pretrained
+             */
+            ()
         }
     }
 

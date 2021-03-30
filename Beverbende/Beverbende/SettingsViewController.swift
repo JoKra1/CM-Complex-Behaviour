@@ -14,11 +14,6 @@ class SettingsViewController: UIViewController {
     let defaults = UserDefaults.standard
     override func viewDidLoad() {
         super.viewDidLoad()
-        let hasCustomized = defaults.bool(forKey: "hasCustomized")
-        if !hasCustomized{
-            setDefaults()
-            defaults.set(true,forKey: "hasCustomized")
-        }
         setSlidersAndSwitches()
         // Do any additional setup after loading the view.
     }
@@ -114,11 +109,14 @@ class SettingsViewController: UIViewController {
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "segueToMainFromSettings" {
+            /*
             guard let startViewController = segue.destination as? StartViewController else { return }
             startViewController.activationNoise = self.activationNoise
             startViewController.utilityNoise = self.utilityNoise
             startViewController.frozen = self.frozen
             startViewController.pretrained = self.pretrained
+             */
+            ()
         }
     }
 
