@@ -59,12 +59,15 @@ class StartViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "segueToSettings" {
+            /*
             guard let settingsViewController = segue.destination as? SettingsViewController else { return }
             settingsViewController.activationNoise = self.activationNoise
             settingsViewController.utilityNoise = self.utilityNoise
             settingsViewController.frozen = self.frozen
             settingsViewController.pretrained = self.pretrained
-            
+            */
+            // Now all handled by defaults.
+            ()
         } else if segue.identifier == "segueToGame" {
         guard let gameViewController = segue.destination as? ViewController else { return }
             gameViewController.activationNoise = self.activationNoise

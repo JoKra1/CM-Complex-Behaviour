@@ -5,20 +5,72 @@
 //  Created by Chiel Wijs on 30/03/2021.
 //
 
+import Foundation
 import UIKit
+// Source for default handling: https://www.hackingwithswift.com/read/12/2/reading-and-writing-basics-userdefaults
 
 class SettingsViewController: UIViewController {
 
+    let defaults = UserDefaults.standard
     override func viewDidLoad() {
         super.viewDidLoad()
+        let hasCustomized = defaults.bool(forKey: "hasCustomized")
+        if !hasCustomized{
+            setDefaults()
+            defaults.set(true,forKey: "hasCustomized")
+        }
         setSlidersAndSwitches()
         // Do any additional setup after loading the view.
     }
     
-    var activationNoise = 0.2 // Default value
-    var utilityNoise = 0.2 // Default value
-    var frozen = false // Default value
-    var pretrained = true // Default value
+    func setDefaults() {
+        activationNoise = 0.2 // Default value
+        utilityNoise = 0.2 // Default value
+        frozen = false // Default value
+        pretrained = true // Default value
+    }
+    
+    var activationNoise: Double {
+        get {
+                
+                let noise = defaults.double(forKey:"activationNoise")
+                return noise
+            }
+        set (new) {
+            defaults.set(new,forKey: "activationNoise")
+        }
+    }
+                                
+    var utilityNoise: Double {
+        get {
+                
+                let noise = defaults.double(forKey:"utilityNoise")
+                return noise
+            }
+        set (new) {
+            defaults.set(new,forKey: "utilityNoise")
+        }
+    }
+    
+    var frozen: Bool {
+        get {
+                let frozen = defaults.bool(forKey:"frozen")
+                return frozen
+            }
+        set (new) {
+            defaults.set(new,forKey: "frozen")
+        }
+    }
+    
+    var pretrained: Bool {
+        get {
+                let pretrained = defaults.bool(forKey:"pretrained")
+                return pretrained
+            }
+        set (new) {
+            defaults.set(new,forKey: "pretrained")
+        }
+    }
     
     @IBOutlet weak var activationSlider: UISlider!
     @IBOutlet weak var utilitySlider: UISlider!
@@ -50,10 +102,7 @@ class SettingsViewController: UIViewController {
     
     
     @IBAction func setDefaultSettings(_ sender: UIButton) {
-        activationNoise = 0.2 // Default value
-        utilityNoise = 0.2 // Default value
-        frozen = false // Default value
-        pretrained = true // Default value
+        setDefaults()
         setSlidersAndSwitches()
     }
     

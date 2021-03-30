@@ -23,7 +23,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private static let learning_rate = 0.1
     
     // Parameters for Settings page
-    static var activationNoise = 0.2 // Default value
+    static var activationNoise = 0.1 // Default value
     static var utilityNoise = 0.2 // Default value
     static var frozen = false // Default value
     static var pretrained = true // Default value
@@ -92,13 +92,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         /**
          Peak first two cards.
          */
-        
-        let leftCard = self.game?.inspectCard(at: 0, for: self)
-        self.memorizeCard(at: 1, with: leftCard!)
-        self.game?.moveCardBackFromHand(to: 0, for: self)
-        let rightCard = self.game?.inspectCard(at: 3, for: self)
-        self.memorizeCard(at: 4, with: rightCard!)
-        self.game?.moveCardBackFromHand(to: 3, for: self)
+        self.dm.activationNoise = BeverbendeOpponent.activationNoise
+        self.loadDMFromCSV(file: self.id)
+        self.inspectFirstCards()
         
     }
     
@@ -249,6 +245,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             }
             // Put all models in restricted game ended mode.
             self.goal.state = .DecideEnd
+            self.exportDM()
             
         /**
          If someone swapped with the model, it will try to adaptively forget the card in the swapped position.
@@ -336,6 +333,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             self.resetfacts(for: "low_value_fact")
         }
         
+        self.inspectFirstCards()
+    }
+    
+    func inspectFirstCards(){
         // Inspect first two cards.
         let leftCard = self.game?.inspectCard(at: 0, for: self)
         self.memorizeCard(at: 1, with: leftCard!)
@@ -364,6 +365,23 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
             
         
+    }
+    
+    
+    private func exportDM() {
+        var DMstorage = [[String:AnyObject]]()
+        for chunk in self.dm.chunks {
+            if chunk.value.slotvals["isa"]!.text()! == "low_value_fact" ||
+               chunk.value.slotvals["isa"]!.text()! == "end_value_fact" {
+                var chunkDict = [String:AnyObject]()
+                chunkDict["Fact"] = chunk.value.slotvals["isa"]!.text()! as AnyObject
+                chunkDict["Outcome"] = chunk.value.slotvals["outcome"]!.text()! as AnyObject
+                chunkDict["Value"] = Int(chunk.value.slotvals["value"]!.number()!) as AnyObject
+                chunkDict["Encounters"] = chunk.value.referenceList.count as AnyObject
+                DMstorage.append(chunkDict)
+            }
+        }
+        self.exportDMToCSV(from: DMstorage, file: self.id)
     }
     
     
@@ -409,7 +427,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             if loadedString != nil {
                 // file exists
                 let lines = loadedString!.split(separator: "\n")
-                for line in lines {
+                for line in lines[1...] {
                     let columns = line.split(separator: ",")
                     assert(columns.count == 4)
                     // Collect data
@@ -422,6 +440,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     chunk.slotvals["isa"] = Value.Text(fact)
                     chunk.slotvals["value"] = Value.Number(Double(value!))
                     chunk.slotvals["outcome"] = Value.Text(outcome)
+                    // Set creation time manually
+                    chunk.creationTime = 0.0
                     // Add references
                     for _ in 0..<encounters! {
                         chunk.referenceList.append(0.0)
@@ -433,6 +453,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         } catch {
             print("error accessing files.")
         }
+        self.summarizeDM()
     }
     
     
@@ -986,9 +1007,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         self.time += 0.3 // motor command to play/discard action card
         game!.discardDrawnCard(for: self)
-        let utilityDiscard = utilities[0] + actrNoise(noise: self.procedural.utilityNoise)
-        let utilitySwapRandom = utilities[1] + actrNoise(noise: self.procedural.utilityNoise)
-        let utilitySwapRecent = utilities[2] + actrNoise(noise: self.procedural.utilityNoise)
+        let utilityDiscard = utilities[0] + actrNoise(noise: BeverbendeOpponent.utilityNoise)
+        let utilitySwapRandom = utilities[1] + actrNoise(noise: BeverbendeOpponent.utilityNoise)
+        let utilitySwapRecent = utilities[2] + actrNoise(noise: BeverbendeOpponent.utilityNoise)
         
         let explorationDecision = Double.random(in: 0...1)
         
