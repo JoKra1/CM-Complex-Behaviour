@@ -68,6 +68,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
     @IBOutlet weak var topModelOnHandCardView: UIImageView!
     @IBOutlet weak var rightModelOnHandCardView: UIImageView!
     
+    @IBOutlet weak var userCardStack: UIStackView!
+    @IBOutlet weak var leftCardStack: UIStackView!
+    @IBOutlet weak var topCardStack: UIStackView!
+    @IBOutlet weak var rightCardStack: UIStackView!
+    
     @IBOutlet weak var onHandCardInfoButton: UIButton!
     
     var discardPileSelected: Bool = false
@@ -84,6 +89,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
         selectedForModelAtIndex = nil
         onHandCardInfoButton.isHidden = true
     }
+    
+    // ############################ USER INTERACTION ############################
     
     @objc func drawCard(_ recognizer: UITapGestureRecognizer) {
         print("constrains!")
@@ -146,37 +153,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     var isFaceUp: Bool = false
     
-    func handleCardSelectionForUser(forView cardView: UIImageView, withIndex cardIndex: Int) {
-        if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
-            cardView.alpha = 1
-            selectedForUserIndex = nil
-        } else { // set the touched card as selected, doesnt matter if another one was already selected or not
-            userOnTableCardViews.forEach { $0.alpha = 1 }
-            cardView.alpha = 0.5
-            selectedForUserIndex = cardIndex
-        }
-    }
     
-    func handleCardSelectionForModel(forModel player: Player, forView cardView: UIImageView, withIndex cardIndex: Int) {
-        if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
-            cardView.alpha = 1
-            selectedForUserIndex = nil
-        } else { // set the touched card as selected, doesnt matter if another one was already selected or not
-            leftModelOnTableCardViews.forEach { $0.alpha = 1 }
-            rightModelOnTableCardViews.forEach { $0.alpha = 1 }
-            topModelOnTableCardViews.forEach { $0.alpha = 1 }
-            cardView.alpha = 0.5
-            selectedForModelAtIndex = (player, cardIndex)
-        }
-    }
-    
-    func undoCardSelections(){
-        discardPileView.alpha = 1
-        userOnTableCardViews.forEach { $0.alpha = 1 }
-        leftModelOnTableCardViews.forEach { $0.alpha = 1 }
-        rightModelOnTableCardViews.forEach { $0.alpha = 1 }
-        topModelOnTableCardViews.forEach { $0.alpha = 1 }
-    }
     
     @objc func tapUserCard(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
@@ -238,16 +215,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
-    func disableUserInteraction(){
-        view.isUserInteractionEnabled = false
-    }
-    
-    func enableUserInteractionAfterDelay(lasting delay: Double) {
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
-            self.view.isUserInteractionEnabled = true
-        }
-    }
-    
     @objc func tapModelCard(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
         case .ended:
@@ -267,48 +234,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
         default:
             break
         }
-    }
-    
-    @IBOutlet weak var endTurnView: UIImageView!
-    @IBOutlet weak var userKnockView: UIImageView!
-
-    @objc func endUserTurn(_ recognizer: UITapGestureRecognizer) {
-        switch recognizer.state {
-        case .ended:
-            endTurnView.isHidden = true
-            userKnockView.isHidden = true
-            letModelsPlay()
-        default:
-            break
-        }
-    }
-    
-    @objc func knockOnTable(_ recognizer: UITapGestureRecognizer) {
-        switch recognizer.state {
-        case .ended:
-            endTurnView.isHidden = true
-            userKnockView.isHidden = true
-            game.knock(from: user)
-            letModelsPlay()
-        default:
-            break
-        }
-    }
-    
-    func letModelsPlay() {
-        disableUserInteraction()
-        userEndTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
-        let userElapsedTime = userEndTime - userStartTime - userAnimationsDuration
-        print("USER ELAPSED TIME: \(userElapsedTime)")
-        userStartTime = 0.0
-        userEndTime = 0.0
-        userAnimationsDuration = 0.0
-        let modelLeftTime = game.nextPlayer(previous: userElapsedTime)
-        let modelTopTime = game.nextPlayer(previous: modelLeftTime)
-        let modelRightTime = game.nextPlayer(previous: modelTopTime)
-        _ = game.nextPlayer(previous: modelRightTime)
-        // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
-        animateEventQueue()
     }
     
     var initialInspection = false
@@ -333,10 +258,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
     }
     
-    @IBOutlet weak var userCardStack: UIStackView!
-    @IBOutlet weak var leftCardStack: UIStackView!
-    @IBOutlet weak var topCardStack: UIStackView!
-    @IBOutlet weak var rightCardStack: UIStackView!
+    // ############################ SETUP ############################
     
     func showBackOfAllCards() {
         showBackOfCard(on: deckView, for: user)
@@ -351,8 +273,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
     func addCardGestures() {
         deckView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(drawCard(_:))))
         deckView.isUserInteractionEnabled = true
+        
         discardPileView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapDiscardPile(_:))))
         discardPileView.isUserInteractionEnabled = true
+        
         userOnHandCardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapOnHandCard(_:))))
         userOnHandCardView.isUserInteractionEnabled = true
         
@@ -360,6 +284,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapUserCard(_:))))
             cardView.isUserInteractionEnabled = true
         }
+        
         for cardViewCollection in [leftModelOnTableCardViews, topModelOnTableCardViews, rightModelOnTableCardViews] {
             for cardView in cardViewCollection! {
                 cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapModelCard(_:))))
@@ -372,6 +297,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         endTurnView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(endUserTurn(_:))))
         endTurnView.isUserInteractionEnabled = true
+        
+        quitView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(quitGame(_:))))
+        quitView.isUserInteractionEnabled = true
     }
 
     func sizeUpAnimationViews() {
@@ -380,6 +308,73 @@ class ViewController: UIViewController, BeverbendeDelegate {
                                      animationViewTwo.widthAnchor.constraint(equalTo: deckView.widthAnchor),
                                      animationViewTwo.heightAnchor.constraint(equalTo: deckView.heightAnchor),
                                      ])
+    }
+    
+    // ############################ END OF USER TURN ACTIONS ############################
+    
+    @IBOutlet weak var endTurnView: UIImageView!
+    @IBOutlet weak var userKnockView: UIImageView!
+    @IBOutlet weak var quitView: UIImageView!
+    
+    func hideEndOfTurnViews() {
+        endTurnView.isHidden = true
+        userKnockView.isHidden = true
+        quitView.isHidden = true
+    }
+    
+    @objc func endUserTurn(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            hideEndOfTurnViews()
+            letModelsPlay()
+        default:
+            break
+        }
+    }
+    
+    @objc func knockOnTable(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            hideEndOfTurnViews()
+            game.knock(from: user)
+            letModelsPlay()
+        default:
+            break
+        }
+    }
+    
+    @objc func quitGame(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            print("TOUCHED QUIT")
+            let quitPopUp = UIAlertController(title: "Quit", message: "If you quit the game your progress will be lost. You can start a new game from the starting menu. Are you sure you want to quit?", preferredStyle: .alert)
+            
+            quitPopUp.addAction(UIAlertAction(title: "Quit", style: .cancel, handler: {_ in
+                    self.performSegue(withIdentifier: "segueToMainFromGame", sender: self)
+                    }))
+            
+            quitPopUp.addAction(UIAlertAction(title: "Continue playing", style: .default, handler: nil ))
+            
+            present(quitPopUp, animated: true)
+        default:
+            break
+        }
+    }
+    
+    func letModelsPlay() {
+        disableUserInteraction()
+        userEndTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
+        let userElapsedTime = userEndTime - userStartTime - userAnimationsDuration
+        print("USER ELAPSED TIME: \(userElapsedTime)")
+        userStartTime = 0.0
+        userEndTime = 0.0
+        userAnimationsDuration = 0.0
+        let modelLeftTime = game.nextPlayer(previous: userElapsedTime)
+        let modelTopTime = game.nextPlayer(previous: modelLeftTime)
+        let modelRightTime = game.nextPlayer(previous: modelTopTime)
+        _ = game.nextPlayer(previous: modelRightTime)
+        // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
+        animateEventQueue()
     }
 
     // ############################ EVENT HANDLING ############################
@@ -445,6 +440,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         if playerPlaceholder.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the player performs his last gesture/action
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
                 self.endTurnView.isHidden = false //always show next turn button
+                self.quitView.isHidden = false // same for the quit option
                 if self.knockedBy == nil {
                     self.userKnockView.isHidden = false // only show when no one knocked already
                 }
@@ -570,6 +566,48 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     // ############################ AUXILAIRIES ############################
+    
+    func handleCardSelectionForUser(forView cardView: UIImageView, withIndex cardIndex: Int) {
+        if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
+            cardView.alpha = 1
+            selectedForUserIndex = nil
+        } else { // set the touched card as selected, doesnt matter if another one was already selected or not
+            userOnTableCardViews.forEach { $0.alpha = 1 }
+            cardView.alpha = 0.5
+            selectedForUserIndex = cardIndex
+        }
+    }
+    
+    func handleCardSelectionForModel(forModel player: Player, forView cardView: UIImageView, withIndex cardIndex: Int) {
+        if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
+            cardView.alpha = 1
+            selectedForUserIndex = nil
+        } else { // set the touched card as selected, doesnt matter if another one was already selected or not
+            leftModelOnTableCardViews.forEach { $0.alpha = 1 }
+            rightModelOnTableCardViews.forEach { $0.alpha = 1 }
+            topModelOnTableCardViews.forEach { $0.alpha = 1 }
+            cardView.alpha = 0.5
+            selectedForModelAtIndex = (player, cardIndex)
+        }
+    }
+    
+    func undoCardSelections(){
+        discardPileView.alpha = 1
+        userOnTableCardViews.forEach { $0.alpha = 1 }
+        leftModelOnTableCardViews.forEach { $0.alpha = 1 }
+        rightModelOnTableCardViews.forEach { $0.alpha = 1 }
+        topModelOnTableCardViews.forEach { $0.alpha = 1 }
+    }
+    
+    func disableUserInteraction(){
+        view.isUserInteractionEnabled = false
+    }
+    
+    func enableUserInteractionAfterDelay(lasting delay: Double) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
+            self.view.isUserInteractionEnabled = true
+        }
+    }
     
     func returnOnHandCardView(for player: Player) -> UIImageView {
         switch player.getId() {

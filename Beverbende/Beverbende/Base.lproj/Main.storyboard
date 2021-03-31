@@ -113,8 +113,8 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="trailing" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4oH-TG-fdE">
-                                <rect key="frame" x="1206" y="14" width="107" height="36"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <rect key="frame" x="1173" y="8" width="140" height="48"/>
+                                <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="25"/>
                                 <state key="normal" title="What to do?"/>
                                 <connections>
                                     <action selector="showGameInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="XsW-nu-5Ig"/>
@@ -160,6 +160,9 @@
                                     <action selector="touchInspectButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="guE-U1-II7"/>
                                 </connections>
                             </button>
+                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="quit" translatesAutoresizingMaskIntoConstraints="NO" id="Fgj-Eh-neI">
+                                <rect key="frame" x="0.0" y="61" width="410" height="123"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" red="0.92143100499999997" green="0.92145264149999995" blue="0.92144101860000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -171,6 +174,7 @@
                             <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerX" secondItem="Vk9-nN-8Av" secondAttribute="centerX" id="3tJ-qf-5hy"/>
                             <constraint firstItem="BoF-uy-CgB" firstAttribute="leading" secondItem="Vk9-nN-8Av" secondAttribute="trailing" id="4cb-NM-2iM"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="height" id="4zt-o2-nJw"/>
+                            <constraint firstItem="Fgj-Eh-neI" firstAttribute="width" secondItem="XLu-hG-IUS" secondAttribute="width" id="5do-Jw-CvC"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="height" secondItem="RKW-yV-bjh" secondAttribute="height" id="5qK-jr-57c"/>
                             <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerY" secondItem="Vk9-nN-8Av" secondAttribute="centerY" id="5zK-5n-kyN"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="width" secondItem="RKW-yV-bjh" secondAttribute="width" id="73B-9E-YE9"/>
@@ -196,6 +200,7 @@
                             <constraint firstItem="BoF-uy-CgB" firstAttribute="height" secondItem="Vk9-nN-8Av" secondAttribute="height" multiplier="0.6" id="KQV-LZ-kNY"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="LCE-vN-mam"/>
                             <constraint firstItem="KD6-5W-jUC" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="40" id="LCZ-oy-3Q6"/>
+                            <constraint firstItem="Fgj-Eh-neI" firstAttribute="centerY" secondItem="y0F-xD-sFd" secondAttribute="centerY" id="NY4-oP-Xu2"/>
                             <constraint firstItem="NtA-jW-US5" firstAttribute="width" secondItem="qvZ-Sl-cDd" secondAttribute="width" id="OJR-FM-0ph"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="leading" secondItem="wcV-Vm-mj3" secondAttribute="trailing" constant="8" symbolic="YES" id="OS6-aS-VhE"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Vk9-nN-8Av" secondAttribute="bottom" constant="20" id="PJn-oP-fUy"/>
@@ -205,11 +210,13 @@
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="top" secondItem="k2e-Id-ibb" secondAttribute="bottom" constant="8" symbolic="YES" id="VtT-Lv-Udm"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="leading" secondItem="v5G-ec-era" secondAttribute="trailing" constant="40" id="X0W-kr-Rbk"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="YGI-z7-oWA"/>
+                            <constraint firstItem="y0F-xD-sFd" firstAttribute="leading" secondItem="Fgj-Eh-neI" secondAttribute="trailing" id="Z5m-H2-cHS"/>
                             <constraint firstItem="3UE-dg-Ecd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="Zx5-Pq-2jq"/>
                             <constraint firstItem="wcV-Vm-mj3" firstAttribute="centerY" secondItem="zTA-CD-xZW" secondAttribute="centerY" id="a40-dg-qMM"/>
                             <constraint firstItem="YHk-Zy-QaZ" firstAttribute="leading" secondItem="4oH-TG-fdE" secondAttribute="trailing" constant="8" symbolic="YES" id="cGH-0q-voL"/>
                             <constraint firstItem="XLu-hG-IUS" firstAttribute="height" secondItem="Vk9-nN-8Av" secondAttribute="height" multiplier="0.6" id="cMV-xM-t0n"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="width" id="dpb-Xz-yds"/>
+                            <constraint firstItem="Fgj-Eh-neI" firstAttribute="height" secondItem="XLu-hG-IUS" secondAttribute="height" id="ejK-ag-MdC"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="height" secondItem="Vk9-nN-8Av" secondAttribute="height" id="esr-Vc-kSq"/>
                             <constraint firstItem="v5G-ec-era" firstAttribute="leading" secondItem="3ID-w9-e5f" secondAttribute="trailing" constant="8" symbolic="YES" id="gDy-S4-Ag1"/>
                             <constraint firstItem="3ID-w9-e5f" firstAttribute="centerY" secondItem="3UE-dg-Ecd" secondAttribute="centerY" id="ju7-Ar-8tE"/>
@@ -247,6 +254,7 @@
                         <outlet property="leftKnockView" destination="3ID-w9-e5f" id="125-eb-uXR"/>
                         <outlet property="leftModelOnHandCardView" destination="KD6-5W-jUC" id="Nu0-Ws-Bbo"/>
                         <outlet property="onHandCardInfoButton" destination="2jY-Ke-cGh" id="ae7-qQ-iAN"/>
+                        <outlet property="quitView" destination="Fgj-Eh-neI" id="6gj-qA-uoX"/>
                         <outlet property="rightCardStack" destination="zTA-CD-xZW" id="9LC-8F-GLp"/>
                         <outlet property="rightKnockView" destination="wcV-Vm-mj3" id="elE-tg-xd3"/>
                         <outlet property="rightModelOnHandCardView" destination="NtA-jW-US5" id="HWZ-tJ-5Ah"/>
@@ -306,7 +314,7 @@
                             </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="esj-Zi-WaL"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" systemColor="systemTealColor"/>
                         <constraints>
                             <constraint firstItem="Aqf-ag-dKh" firstAttribute="top" secondItem="esj-Zi-WaL" secondAttribute="top" constant="50" id="3fA-6j-KHX"/>
                             <constraint firstItem="gEh-26-rnX" firstAttribute="height" secondItem="OIB-NG-YY4" secondAttribute="height" multiplier="0.3" id="43C-8r-mQ9"/>
@@ -328,7 +336,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7Z3-vP-6mj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-24" y="-609"/>
+            <point key="canvasLocation" x="-24.158125915080525" y="-609.375"/>
         </scene>
         <!--Rules View Controller-->
         <scene sceneID="4gN-Fj-9dr">
@@ -339,46 +347,218 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="top" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CTv-Tf-XzI">
-                                <rect key="frame" x="50" y="50" width="169" height="84"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="60"/>
+                                <rect key="frame" x="50" y="50" width="154" height="83"/>
+                                <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="50"/>
                                 <state key="normal" title="Return"/>
                                 <connections>
                                     <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMainFromRules" id="RoQ-ja-81b"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="top" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Cju-7c-AMV">
-                                <rect key="frame" x="720" y="50" width="596" height="84"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="60"/>
-                                <state key="normal" title="Beverbende game rules">
-                                    <color key="titleColor" red="0.86310345870000005" green="0.30008204939999999" blue="0.1244584715" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </state>
-                            </button>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="The goal of the game is to end the game with as few points as possible" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k78-Yb-n8P">
-                                <rect key="frame" x="100" y="125" width="1166" height="774"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="rules" translatesAutoresizingMaskIntoConstraints="NO" id="juD-C0-2eF">
+                                <rect key="frame" x="12" y="40.5" width="1342" height="102"/>
+                            </imageView>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" usesAttributedText="YES" allowsEditingTextAttributes="YES" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fy2-lL-x4p">
+                                <rect key="frame" x="20" y="162.5" width="1326" height="841.5"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <color key="textColor" systemColor="labelColor"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                <attributedString key="attributedText">
+                                    <fragment>
+                                        <string key="content">Tip: You can look at the rules during the game by tapping on "What to do ?" in the top-right corner of the screen. This will provide you with the information that is relevant to you at that moment, and guide you through the game. You can also receive information about a card that you drew by clicking on the "?" icon that appears next to it.
+
+</string>
+                                        <attributes>
+                                            <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <string key="content">Goal of the Game
+</string>
+                                        <attributes>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="24" name="ChalkboardSE-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <string key="content" base64-UTF8="YES">
+Cg
+</string>
+                                        <attributes>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <string key="content">Achieve the lowest score, which is the sum of the cards in front of you. Do this is done by getting rid of the high-numbered cards and hanging onto the lower numbered cards.
+
+</string>
+                                        <attributes>
+                                            <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                            <color key="NSStrokeColor" red="0.066669999999999993" green="0.066669999999999993" blue="0.066669999999999993" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment content="The Cards">
+                                        <attributes>
+                                            <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="24" name="ChalkboardSE-Regular"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                            <color key="NSStrokeColor" red="0.066669999999999993" green="0.066669999999999993" blue="0.066669999999999993" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <mutableString key="content">
+
+A deck of Otter-Gang cards contains numbered cards and actions cards:
+- 4x numbered cards each for the values of 1 till 8
+- 9x numbered card with a value of 9
+- 7x INSPECT action card
+- 5x DRAW 2 action card
+- 9x SWAP action card
+
+The INSPECT card lets you peek at one of the cards in front of you. The DRAW 2 card lets you draw two new cards from the deck. you only get to draw the second one if you discarded the first. The SWAP card lets you swap one of your own cards with a card from one of the opponents.
+
+</mutableString>
+                                        <attributes>
+                                            <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                            <color key="NSStrokeColor" red="0.066669999999999993" green="0.066669999999999993" blue="0.066669999999999993" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment content="Start of the Game">
+                                        <attributes>
+                                            <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="24" name="ChalkboardSE-Regular"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                            <color key="NSStrokeColor" red="0.066669999999999993" green="0.066669999999999993" blue="0.066669999999999993" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <string key="content">
+
+Each player gets 4 cards in front of him/her on the table. Before the first round, you can look at the two outermost cards. Try to remember what these cards are!
+
+</string>
+                                        <attributes>
+                                            <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                            <color key="NSStrokeColor" red="0.066669999999999993" green="0.066669999999999993" blue="0.066669999999999993" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment content="Playing the Game">
+                                        <attributes>
+                                            <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="24" name="ChalkboardSE-Regular"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <font key="NSOriginalFont" size="24" name="ChalkboardSE-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                            <color key="NSStrokeColor" red="0.066669999999999993" green="0.066669999999999993" blue="0.066669999999999993" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <string key="content">
+
+You can start the game by either drawing a card from the deck or trading one of your own cards with the card on top of the discarded pile. If you draw a card only you get to see what card it is. If the drawn card is a numbered card then you can choose to either trade it with one of your own cards or discard it. If the drawn card is an action card then you can choose to either use that action card (by tapping on it) or discard it.
+
+</string>
+                                        <attributes>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment content="Ending the game">
+                                        <attributes>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="24" name="ChalkboardSE-Regular"/>
+                                            <font key="NSOriginalFont" size="24" name="ChalkboardSE-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <string key="content" base64-UTF8="YES">
+Cgo
+</string>
+                                        <attributes>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <string key="content">If you, at the end of you turn, think that you have a winning set of cards in front of you, you can knock to let the other players know that this is the last turn. The rest of the players can then play one more round. Afterwards, everyone flips open their cards. Any ACTION cards are discarded and replaced with a card from the top of the deck, until there are only numbered cards in front of each player.</string>
+                                        <attributes>
+                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" lineSpacing="1" defaultTabInterval="28" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                </attributedString>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="pmw-FH-42j"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="Fy2-lL-x4p" firstAttribute="top" secondItem="juD-C0-2eF" secondAttribute="bottom" constant="20" id="9dm-P5-OfN"/>
+                            <constraint firstItem="juD-C0-2eF" firstAttribute="height" secondItem="bMx-St-Odu" secondAttribute="height" multiplier="0.0996094" id="Pfc-7c-kjJ"/>
                             <constraint firstItem="CTv-Tf-XzI" firstAttribute="top" secondItem="pmw-FH-42j" secondAttribute="top" constant="50" id="Qnf-nX-syE"/>
+                            <constraint firstItem="Fy2-lL-x4p" firstAttribute="leading" secondItem="pmw-FH-42j" secondAttribute="leading" constant="20" id="Si4-iM-9KT"/>
+                            <constraint firstItem="Fy2-lL-x4p" firstAttribute="top" secondItem="juD-C0-2eF" secondAttribute="bottom" constant="20" id="Yg3-PA-BBO"/>
+                            <constraint firstItem="juD-C0-2eF" firstAttribute="centerY" secondItem="CTv-Tf-XzI" secondAttribute="centerY" id="a7d-5L-4Hw"/>
                             <constraint firstItem="CTv-Tf-XzI" firstAttribute="leading" secondItem="pmw-FH-42j" secondAttribute="leading" constant="50" id="f1a-ag-4WW"/>
-                            <constraint firstItem="Cju-7c-AMV" firstAttribute="top" secondItem="pmw-FH-42j" secondAttribute="top" constant="50" id="jmb-kW-2KX"/>
-                            <constraint firstItem="pmw-FH-42j" firstAttribute="trailing" secondItem="Cju-7c-AMV" secondAttribute="trailing" constant="50" id="tw6-UT-lm8"/>
+                            <constraint firstItem="pmw-FH-42j" firstAttribute="bottom" secondItem="Fy2-lL-x4p" secondAttribute="bottom" constant="20" id="nlZ-Fs-tKn"/>
+                            <constraint firstItem="juD-C0-2eF" firstAttribute="centerX" secondItem="pmw-FH-42j" secondAttribute="centerX" id="uWw-w4-TiU"/>
+                            <constraint firstItem="pmw-FH-42j" firstAttribute="trailing" secondItem="Fy2-lL-x4p" secondAttribute="trailing" constant="20" id="xmZ-cn-Sci"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="rAV-I7-JYz"/>
-                    <connections>
-                        <outlet property="rulesText" destination="k78-Yb-n8P" id="u9L-ey-ckV"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LE5-py-E9A" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="631.62518301610532" y="-672.0703125"/>
+            <point key="canvasLocation" x="613.6163982430453" y="-609.375"/>
         </scene>
         <!--Settings View Controller-->
         <scene sceneID="xX9-e0-jNp">
@@ -467,11 +647,14 @@
                             </stackView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O8U-Bx-zzQ">
                                 <rect key="frame" x="50" y="183" width="1266" height="120.5"/>
-                                <mutableString key="text">The model you will be playing against tries to remember which cards are in front of it, just like you. It does this by trying to retrieve so called memory "chunks". During the game, as you will experience, you will sometimes trade a card of your own that you do not know the value of, you consider "hmmm is the card that I will trade it for of low value". A similar value based consideration happens at the end of your turn, you think "hmmm is the sum om my cards low enough that it will win me the game".  Both of these cut-off values (when is a card "low" and when do I knock to end the game) were initially determined by the creators of this application. You can change a number of settings below that will influence various aspects of the model(s) you play against.</mutableString>
+                                <string key="text">The model you will be playing against tries to remember which cards are in front of it, just like you. It does this by trying to retrieve so called memory "chunks". During the game, as you will experience, you will sometimes trade a card of your own that you do not know the value of, you consider "hmmm is the card that I will trade it for of low value". A similar value based consideration happens at the end of your turn, you think "hmmm is the sum om my cards low enough that it will win me the game".  Both of these cut-off values (when is a card "low" and when do I knock to end the game) were initially determined by the creators of this application. You can change a number of settings below that will influence various aspects of the model(s) you play against.</string>
                                 <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="settings" translatesAutoresizingMaskIntoConstraints="NO" id="b18-kb-pgl">
+                                <rect key="frame" x="157" y="40" width="1052" height="103"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="wrX-4X-FQl"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -479,8 +662,11 @@
                             <constraint firstItem="y08-4y-xWL" firstAttribute="firstBaseline" secondItem="O8U-Bx-zzQ" secondAttribute="baseline" constant="100" id="0Gn-Kh-3TB"/>
                             <constraint firstItem="gaE-eX-dUR" firstAttribute="top" secondItem="wrX-4X-FQl" secondAttribute="top" constant="50" id="1Ty-dL-nEF"/>
                             <constraint firstItem="iO5-xd-Gwf" firstAttribute="height" secondItem="y08-4y-xWL" secondAttribute="height" id="1o4-oj-rfV"/>
+                            <constraint firstItem="b18-kb-pgl" firstAttribute="height" secondItem="k9W-rI-EZJ" secondAttribute="height" multiplier="0.100586" id="2U0-oP-aZb"/>
+                            <constraint firstItem="b18-kb-pgl" firstAttribute="centerY" secondItem="8RE-8B-uY1" secondAttribute="centerY" id="4YJ-0W-lwF"/>
                             <constraint firstItem="O8U-Bx-zzQ" firstAttribute="leading" secondItem="wrX-4X-FQl" secondAttribute="leading" constant="50" id="4fC-wj-X3O"/>
                             <constraint firstItem="iO5-xd-Gwf" firstAttribute="leading" secondItem="wrX-4X-FQl" secondAttribute="leading" constant="50" id="5he-zV-X0j"/>
+                            <constraint firstItem="b18-kb-pgl" firstAttribute="centerX" secondItem="wrX-4X-FQl" secondAttribute="centerX" id="J8H-0l-uJ2"/>
                             <constraint firstItem="iO5-xd-Gwf" firstAttribute="width" secondItem="y08-4y-xWL" secondAttribute="width" id="KGu-mX-gBV"/>
                             <constraint firstItem="wrX-4X-FQl" firstAttribute="trailing" secondItem="O8U-Bx-zzQ" secondAttribute="trailing" constant="50" id="P92-8V-abs"/>
                             <constraint firstItem="y08-4y-xWL" firstAttribute="width" secondItem="k9W-rI-EZJ" secondAttribute="width" multiplier="0.4" id="Wac-hL-RaR"/>
@@ -503,25 +689,26 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="g7V-W6-aF5" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-24.158125915080525" y="-1399.21875"/>
+            <point key="canvasLocation" x="-24.158125915080525" y="-1272.0703125"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="lsH-p1-r9y"/>
+        <segue reference="RoQ-ja-81b"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="knock" width="525" height="260"/>
         <image name="logo" width="1200" height="410"/>
+        <image name="quit" width="393" height="260"/>
         <image name="rules" width="1342" height="260"/>
         <image name="settings" width="1052" height="260"/>
         <image name="start" width="827" height="260"/>
         <image name="table" width="5897" height="4480"/>
         <image name="turn" width="712" height="260"/>
-        <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemTealColor">
+            <color red="0.35294117647058826" green="0.78431372549019607" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

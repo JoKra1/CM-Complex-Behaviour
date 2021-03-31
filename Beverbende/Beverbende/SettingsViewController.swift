@@ -95,30 +95,12 @@ class SettingsViewController: UIViewController {
         pretrainedSwitch.setOn(pretrained, animated: true)
     }
     
-    
     @IBAction func setDefaultSettings(_ sender: UIButton) {
         setDefaults()
         setSlidersAndSwitches()
     }
     
-    
     @IBAction func sequeToMain(_ sender: UIButton) {
         performSegue(withIdentifier: "segueToMainFromSettings", sender: self)
     }
-    
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "segueToMainFromSettings" {
-            /*
-            guard let startViewController = segue.destination as? StartViewController else { return }
-            startViewController.activationNoise = self.activationNoise
-            startViewController.utilityNoise = self.utilityNoise
-            startViewController.frozen = self.frozen
-            startViewController.pretrained = self.pretrained
-             */
-            ()
-        }
-    }
-
-
 }
