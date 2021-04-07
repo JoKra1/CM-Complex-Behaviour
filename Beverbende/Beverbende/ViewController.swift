@@ -246,7 +246,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             let button = recognizer.view as! UIImageView
             if initialInspection == false {
                 initialInspection = true
-                button.image = UIImage(named: "hide")
+                button.image = UIImage(named: "initial_hide")
                 for index in [0, 3] { // the outer cards
                     let cardView = userOnTableCardViews[index]
                     let value = returnStringMatchingWithCard(forCard: user.getCardsOnTable()[index]!)
@@ -1130,7 +1130,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 if knockedBy != nil {
                     gameState = .knockedStart
                 } else {
-                    gameState = .start
+                    gameState = .end
                 }
             }
         } else {
