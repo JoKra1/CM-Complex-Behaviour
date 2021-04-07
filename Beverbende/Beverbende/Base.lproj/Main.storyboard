@@ -144,24 +144,11 @@
                             <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="knock" translatesAutoresizingMaskIntoConstraints="NO" id="BoF-uy-CgB">
                                 <rect key="frame" x="956" y="840" width="410" height="123"/>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Ej-Vr-p8e">
-                                <rect key="frame" x="579" y="860" width="208" height="83"/>
-                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="50"/>
-                                <state key="normal" title=" Inspect ">
-                                    <color key="titleColor" red="0.95458275079999999" green="0.94089740509999997" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </state>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="15"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="touchInspectButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="guE-U1-II7"/>
-                                </connections>
-                            </button>
                             <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="quit" translatesAutoresizingMaskIntoConstraints="NO" id="Fgj-Eh-neI">
                                 <rect key="frame" x="0.0" y="61" width="410" height="123"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="initial_inspect" translatesAutoresizingMaskIntoConstraints="NO" id="kJi-Y7-Uvp">
+                                <rect key="frame" x="395" y="668" width="576" height="123"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -171,14 +158,13 @@
                             <constraint firstItem="x10-Cx-fnI" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0xp-FO-cC8"/>
                             <constraint firstItem="k2e-Id-ibb" firstAttribute="centerX" secondItem="y0F-xD-sFd" secondAttribute="centerX" id="2Ca-hU-boF"/>
                             <constraint firstItem="v5G-ec-era" firstAttribute="width" secondItem="Lq7-rZ-5Xg" secondAttribute="width" id="3K2-mW-zkR"/>
-                            <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerX" secondItem="Vk9-nN-8Av" secondAttribute="centerX" id="3tJ-qf-5hy"/>
                             <constraint firstItem="BoF-uy-CgB" firstAttribute="leading" secondItem="Vk9-nN-8Av" secondAttribute="trailing" id="4cb-NM-2iM"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="height" id="4zt-o2-nJw"/>
                             <constraint firstItem="Fgj-Eh-neI" firstAttribute="width" secondItem="XLu-hG-IUS" secondAttribute="width" id="5do-Jw-CvC"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="height" secondItem="RKW-yV-bjh" secondAttribute="height" id="5qK-jr-57c"/>
-                            <constraint firstItem="3Ej-Vr-p8e" firstAttribute="centerY" secondItem="Vk9-nN-8Av" secondAttribute="centerY" id="5zK-5n-kyN"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="width" secondItem="RKW-yV-bjh" secondAttribute="width" id="73B-9E-YE9"/>
                             <constraint firstItem="Xzj-N5-4Ha" firstAttribute="width" secondItem="Lq7-rZ-5Xg" secondAttribute="width" id="7Qx-Lq-bd0"/>
+                            <constraint firstItem="kJi-Y7-Uvp" firstAttribute="centerX" secondItem="Vk9-nN-8Av" secondAttribute="centerX" id="7eW-wZ-EaQ"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="height" secondItem="Lq7-rZ-5Xg" secondAttribute="height" id="8CF-Pu-OZe"/>
                             <constraint firstItem="v5G-ec-era" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="8Dn-2h-jxb"/>
                             <constraint firstItem="BoF-uy-CgB" firstAttribute="width" secondItem="Vk9-nN-8Av" secondAttribute="width" multiplier="0.75" id="9rk-9e-z2Y"/>
@@ -210,6 +196,7 @@
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="top" secondItem="k2e-Id-ibb" secondAttribute="bottom" constant="8" symbolic="YES" id="VtT-Lv-Udm"/>
                             <constraint firstItem="ZVh-9f-JmA" firstAttribute="leading" secondItem="v5G-ec-era" secondAttribute="trailing" constant="40" id="X0W-kr-Rbk"/>
                             <constraint firstItem="zTA-CD-xZW" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="YGI-z7-oWA"/>
+                            <constraint firstItem="Vk9-nN-8Av" firstAttribute="firstBaseline" secondItem="kJi-Y7-Uvp" secondAttribute="baseline" constant="8" symbolType="layoutAnchor" id="YpM-3e-Ny1"/>
                             <constraint firstItem="y0F-xD-sFd" firstAttribute="leading" secondItem="Fgj-Eh-neI" secondAttribute="trailing" id="Z5m-H2-cHS"/>
                             <constraint firstItem="3UE-dg-Ecd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="Zx5-Pq-2jq"/>
                             <constraint firstItem="wcV-Vm-mj3" firstAttribute="centerY" secondItem="zTA-CD-xZW" secondAttribute="centerY" id="a40-dg-qMM"/>
@@ -239,17 +226,17 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Xzj-N5-4Ha" secondAttribute="bottom" constant="40" id="wV3-g3-pr9"/>
                             <constraint firstItem="f0s-tB-xvf" firstAttribute="leading" secondItem="y0F-xD-sFd" secondAttribute="trailing" multiplier="1.015" constant="8" symbolic="YES" id="xSx-Kp-Wbt"/>
                             <constraint firstItem="3ID-w9-e5f" firstAttribute="leading" secondItem="3UE-dg-Ecd" secondAttribute="trailing" constant="8" symbolic="YES" id="xc4-4m-cJg"/>
+                            <constraint firstItem="kJi-Y7-Uvp" firstAttribute="height" secondItem="Vk9-nN-8Av" secondAttribute="height" multiplier="0.6" id="yDm-oL-6Fi"/>
                             <constraint firstItem="k2e-Id-ibb" firstAttribute="width" secondItem="3ID-w9-e5f" secondAttribute="width" id="zqG-69-ZiH"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="ncd-Hp-Tva"/>
                     <connections>
-                        <outlet property="InspectButton" destination="3Ej-Vr-p8e" id="5FC-fP-PFs"/>
                         <outlet property="backgroundView" destination="x10-Cx-fnI" id="lbz-16-uya"/>
                         <outlet property="deckView" destination="ZVh-9f-JmA" id="lOa-wb-XYB"/>
                         <outlet property="discardPileView" destination="v5G-ec-era" id="VEu-a1-mgb"/>
                         <outlet property="endTurnView" destination="XLu-hG-IUS" id="kV3-LS-fuO"/>
-                        <outlet property="inspectButton" destination="3Ej-Vr-p8e" id="I13-a1-wb5"/>
+                        <outlet property="initialInspectView" destination="kJi-Y7-Uvp" id="g31-UI-rhY"/>
                         <outlet property="leftCardStack" destination="3UE-dg-Ecd" id="5c6-wF-1Qb"/>
                         <outlet property="leftKnockView" destination="3ID-w9-e5f" id="125-eb-uXR"/>
                         <outlet property="leftModelOnHandCardView" destination="KD6-5W-jUC" id="Nu0-Ws-Bbo"/>
@@ -424,7 +411,7 @@ Cg
                                         </attributes>
                                     </fragment>
                                     <fragment>
-                                        <mutableString key="content">
+                                        <string key="content">
 
 A deck of Otter-Gang cards contains numbered cards and actions cards:
 - 4x numbered cards each for the values of 1 till 8
@@ -435,7 +422,7 @@ A deck of Otter-Gang cards contains numbered cards and actions cards:
 
 The INSPECT card lets you peek at one of the cards in front of you. The DRAW 2 card lets you draw two new cards from the deck. you only get to draw the second one if you discarded the first. The SWAP card lets you swap one of your own cards with a card from one of the opponents.
 
-</mutableString>
+</string>
                                         <attributes>
                                             <color key="NSBackgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
@@ -693,9 +680,10 @@ Cgo
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="RoQ-ja-81b"/>
+        <segue reference="4fs-Zt-LfT"/>
     </inferredMetricsTieBreakers>
     <resources>
+        <image name="initial_inspect" width="576" height="260"/>
         <image name="knock" width="525" height="260"/>
         <image name="logo" width="1200" height="410"/>
         <image name="quit" width="393" height="260"/>

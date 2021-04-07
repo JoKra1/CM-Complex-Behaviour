@@ -75,6 +75,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBOutlet weak var onHandCardInfoButton: UIButton!
     
+    @IBOutlet weak var initialInspectView: UIImageView!
+    
     var discardPileSelected: Bool = false
     var selectedForUserIndex: Int? = nil
     var selectedForModelAtIndex: (Player, Int)? = nil
@@ -237,24 +239,30 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     var initialInspection = false
-    
-    @IBAction func touchInspectButton(_ sender: UIButton) {
-        if initialInspection == false {
-            initialInspection = true
-            sender.setTitle(" Hide ", for: UIControl.State.normal)
-            for index in [0, 3] { // the outer cards
-                let cardView = userOnTableCardViews[index]
-                let value = returnStringMatchingWithCard(forCard: user.getCardsOnTable()[index]!)
-                flipOpen(show: value, on: cardView, for: user)
+        
+    @objc func tapInspectButton(_ recognizer: UITapGestureRecognizer) {
+        switch recognizer.state {
+        case .ended:
+            let button = recognizer.view as! UIImageView
+            if initialInspection == false {
+                initialInspection = true
+                button.image = UIImage(named: "hide")
+                for index in [0, 3] { // the outer cards
+                    let cardView = userOnTableCardViews[index]
+                    let value = returnStringMatchingWithCard(forCard: user.getCardsOnTable()[index]!)
+                    flipOpen(show: value, on: cardView, for: user)
+                }
+            } else {
+                for index in [0, 3] {
+                    let cardView = userOnTableCardViews[index]
+                    flipClosed(hide: cardView, for: user)
+                    isUserTurn = true // the user can now play the rest of the game
+                }
+                userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
+                button.isHidden = true
             }
-        } else {
-            for index in [0, 3] {
-                let cardView = userOnTableCardViews[index]
-                flipClosed(hide: cardView, for: user)
-                isUserTurn = true // the user can now play the rest of the game
-            }
-            userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
-            sender.isHidden = true
+        default:
+        break
         }
     }
     
@@ -300,6 +308,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         quitView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(quitGame(_:))))
         quitView.isUserInteractionEnabled = true
+        
+        initialInspectView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapInspectButton(_:))))
+        initialInspectView.isUserInteractionEnabled = true
     }
 
     func sizeUpAnimationViews() {
@@ -1103,7 +1114,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         if isUserTurn == false {
             if endTurnView.isHidden == false {
                 if knockedBy != nil {
-                    gameState = .knocked
+                    gameState = .knockedEnd
                 } else {
                     gameState = .end
                 }
@@ -1116,7 +1127,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
             } else if playedAction == .inspect {
                 gameState = .inspect
             } else {
-                gameState = .start
+                if knockedBy != nil {
+                    gameState = .knockedStart
+                } else {
+                    gameState = .start
+                }
             }
         } else {
             gameState = .drawn
