@@ -33,12 +33,13 @@ class ViewController: UIViewController, BeverbendeDelegate {
         showFrontOfCard(show: discardePileValue, on: discardPileView, for: user)
     }
     
+    // These two views will be used for the information. See the "ANIMATIONS" section for more information
     var animationViewOne: UIImageView = {
         let theImageView = UIImageView()
         theImageView.image = nil
         theImageView.contentMode = .scaleToFill
         theImageView.clipsToBounds = true
-        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
+        theImageView.translatesAutoresizingMaskIntoConstraints = false
         return theImageView
         }()
     
@@ -47,7 +48,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         theImageView.image = nil
         theImageView.contentMode = .scaleToFill
         theImageView.clipsToBounds = true
-        theImageView.translatesAutoresizingMaskIntoConstraints = false //You need to call this property so the image is added to your view
+        theImageView.translatesAutoresizingMaskIntoConstraints = false
         return theImageView
         }()
     
@@ -93,8 +94,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     // ############################ USER INTERACTION ############################
     
     @objc func drawCard(_ recognizer: UITapGestureRecognizer) {
-        print("constrains!")
-//        print(animationViewThree.constraints)
+        /*
+         When the user taps the central card, he draws a card from the deck.
+         */
         switch recognizer.state {
         case .ended:
             if isUserTurn, user.getCardOnHand() == nil, (playedAction == nil || playedAction == .twice) {
@@ -109,6 +111,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     @objc func tapDiscardPile(_ recognizer: UITapGestureRecognizer) {
+        /*
+         Tapping the discard pile is done for two different actions: discarding a card, trading one of your own cards with the discard pile.
+         */
         switch recognizer.state {
         case .ended:
             if isUserTurn {
@@ -133,9 +138,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     @objc func tapOnHandCard(_ recognizer: UITapGestureRecognizer) {
+        /*
+         Tapping a drawn action card activates the action of that card. Nothing happens when it is a value card.
+         */
         switch recognizer.state {
         case .ended:
-            if let onHandCard = user.getCardOnHand() { // activate action card
+            if let onHandCard = user.getCardOnHand() {
                 onHandCardInfoButton.isHidden = true
                 switch onHandCard.getType() {
                 case .value:
@@ -153,22 +161,23 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     var isFaceUp: Bool = false
     
-    
-    
     @objc func tapUserCard(_ recognizer: UITapGestureRecognizer) {
+        /*
+         Tapping one of the user cards can result in various actions: trading with a drawn card, trading with the discard pile, or performing any of the actions associated with the action cards.
+         */
         switch recognizer.state {
         case .ended:
             if let touchedCardView = recognizer.view as? UIImageView , isUserTurn {
                 let touchedCardIndex = userOnTableCardViews.firstIndex(of: touchedCardView)!
                 
                 if let action = playedAction {
-                    switch action {
+                    switch action { // see if and which action card was played
                     case .inspect:
                         endUserTurn()
                         _ = game.inspectCard(at: touchedCardIndex, for: user)
                         game.moveCardBackFromHand(to: touchedCardIndex, for: user) // in order to comply with the "mental card moving around" done by the model
                     case .swap:
-                        if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex {
+                        if let (selectedModel, selectedForModelIndex) = selectedForModelAtIndex { // one of the opponent's cards is already selected
                             undoCardSelections()
                             endUserTurn()
                             game.swapCards(cardAt: touchedCardIndex, for: user, withCardAt: selectedForModelIndex, for: selectedModel)
@@ -181,14 +190,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
                             endUserTurn()
                             game.tradeDrawnCardWithCard(at: touchedCardIndex, for: user)
                         case .action:
-                            // nothing should happen here, the player first had to discard the action card to play it
+                            // nothing should happen here, the player first has to discard the action card to play it
                             break
                         default:
                             break
                         }
                     }
                 } else { // there was no action card played
-                    if user.getCardOnHand() == nil { // prcoess of trading with the discarded pile
+                    if user.getCardOnHand() == nil { // process of trading with the discarded pile
                         if discardPileSelected { // the discarded pile was already selected
                             endUserTurn()
                             game.tradeDiscardedCardWithCard(at: touchedCardIndex, for: user)
@@ -220,9 +229,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case .ended:
             if let touchedCardView = recognizer.view as? UIImageView {
                 let (touchedModel, touchedCardIndex) = returnPlayerAndIndexForView(for: touchedCardView)
-                if playedAction == .swap { // the action card had to be played for this to work
+                if playedAction == .swap { // the action card has to be played already for this tap to have any effect
                     if let selectedUserIndex = selectedForUserIndex {
-                        // TODO: do the trade, Loran adds this to the game model first
                         undoCardSelections()
                         endUserTurn()
                         game.swapCards(cardAt: selectedUserIndex, for: user, withCardAt: touchedCardIndex, for: touchedModel)
@@ -241,13 +249,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
     @objc func tapInspectButton(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
         case .ended:
-            let button = recognizer.view as! UIImageView
+            let inspectButton = recognizer.view as! UIImageView
             if initialInspection == false {
                 initialInspection = true
-                button.image = UIImage(named: "initial_hide")
+                inspectButton.image = UIImage(named: "initial_hide")
                 for index in [0, 3] { // the outer cards
                     let cardView = userOnTableCardViews[index]
                     let value = returnStringMatchingWithCard(forCard: user.getCardsOnTable()[index]!)
+                    // this doesnt go through the model as the event handling doesnt allow for two cards to be flipped at once
                     flipOpen(show: value, on: cardView, for: user)
                 }
             } else {
@@ -257,7 +266,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     isUserTurn = true // the user can now play the rest of the game
                 }
                 userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
-                button.isHidden = true
+                inspectButton.isHidden = true
             }
         default:
         break
@@ -277,6 +286,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func addCardGestures() {
+        /*
+         Tap gestures are used to interact with the game. The user can either tap the cards, or buttons (which are UIIamgeviews such that we can show themed buttons/text)
+         */
         deckView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(drawCard(_:))))
         deckView.isUserInteractionEnabled = true
         
@@ -321,6 +333,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     // ############################ END OF USER TURN ACTIONS ############################
     
+    /*
+     At the end of their turn a user has multiple options for continuing the game: End their turn and play on, knock to signal that the other players get one last round before the end of the game, or quit the game to go to the main menu.
+     */
+    
     @IBOutlet weak var endTurnView: UIImageView!
     @IBOutlet weak var userKnockView: UIImageView!
     @IBOutlet weak var quitView: UIImageView!
@@ -356,13 +372,15 @@ class ViewController: UIViewController, BeverbendeDelegate {
         switch recognizer.state {
         case .ended:
             
-            let quitPopUp = UIAlertController(title: "Quit", message: "If you quit the game your progress will be lost. You can start a new game from the starting menu. Are you sure you want to quit?", preferredStyle: .alert)
+            let quitPopUp = UIAlertController(title: "Quit", message: "If you quit the game your progress will be lost. Are you sure you want to quit?", preferredStyle: .alert)
             
             quitPopUp.addAction(UIAlertAction(title: "Quit", style: .cancel, handler: {_ in
                     self.performSegue(withIdentifier: "segueToMainFromGame", sender: self)
                     }))
             
             quitPopUp.addAction(UIAlertAction(title: "Continue playing", style: .default, handler: nil ))
+            
+            quitPopUp.addAction(UIAlertAction(title: "Start New Game", style: .default, handler: {_ in self.performSegue(withIdentifier: "segueToLogoFromGame", sender: self)}))
             
             present(quitPopUp, animated: true)
         default:
@@ -382,7 +400,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         let modelTopTime = game.nextPlayer(previous: modelLeftTime)
         let modelRightTime = game.nextPlayer(previous: modelTopTime)
         _ = game.nextPlayer(previous: modelRightTime)
-        if !gameEnded { eventQueue.enqueue(element: Event(type: .userTurnIndicator, info: [:])) }
+        if !gameWrapUp { eventQueue.enqueue(element: Event(type: .userTurnIndicator, info: [:])) }
         // the models have made all their moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
         animateEventQueue()
     }
@@ -394,7 +412,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var eventQueue = Queue<Event>()
     
     var gameWrapUp = false
-    var gameEnded = false
     
     var knockedBy: Player? = nil
     
@@ -419,8 +436,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
             gameWrapUp = true
         case let .knocked(player):
             knockedBy = player
-        case .gameEnded:
-            gameEnded = true
         default:
             break
         }
@@ -575,7 +590,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         let winnerPopUp = UIAlertController(title: "End of the Game", message: message, preferredStyle: .alert)
         
-        winnerPopUp.addAction(UIAlertAction(title: "New Game", style: .default, handler: {_ in self.performSegue(withIdentifier: "segueToLogoFromGame", sender: self)}))
+        winnerPopUp.addAction(UIAlertAction(title: "Start New Game", style: .default, handler: {_ in self.performSegue(withIdentifier: "segueToLogoFromGame", sender: self)}))
         
         winnerPopUp.addAction(UIAlertAction(title: "Exit to Menu", style: .cancel, handler: {_ in
                 self.performSegue(withIdentifier: "segueToMainFromGame", sender: self)
@@ -854,7 +869,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func animateCardDraw(by player: Player, withValue value: String) -> Double {
-//        from the deck to an onHand location
         
         var duration = 1.0
 
@@ -925,6 +939,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
 
     func animateDiscardFromHand(by player: Player, withValue value: String, openOnHand: Bool) -> Double {
+        
         var duration = 1.0
         var delay = 0.0
         
