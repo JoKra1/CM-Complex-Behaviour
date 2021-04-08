@@ -34,6 +34,8 @@ class Chunk: CustomStringConvertible {
     var isRequest: Bool = false
     /// The order in which the slots have been declarared, necessary for proper printing
     var printOrder: [String] = [] // Order in which slots have to be printed
+    /// Made optimized learning a property of the chunk.
+    var optimizedLearning = false
     init (s: String, m: Model) {
         name = s
         model = m
@@ -71,7 +73,7 @@ class Chunk: CustomStringConvertible {
     */
     func startTime() {
         creationTime = model.time
-        if !model.dm.optimizedLearning {
+        if !self.optimizedLearning {
             referenceList.append(model.time)
         }
     }
@@ -84,7 +86,7 @@ Set the baselevel of a chunk
  */
     func setBaseLevel(timeDiff: Double, references: Int) {
         creationTime = model.time + timeDiff
-        if model.dm.optimizedLearning {
+        if self.optimizedLearning {
             self.references = references
         } else {
             let increment = -timeDiff / Double(references)
@@ -108,9 +110,9 @@ Set the baselevel of a chunk
             return fixedActivation!
         } else if model.dm.baseLevelDecay == nil {
             return 0.0
-        } else if model.dm.optimizedLearning {
-            let x: Double = log((Double(references)/(1 - model.dm.baseLevelDecay!)))
-            let y = model.dm.baseLevelDecay! + log(model.time - creationTime!)
+        } else if self.optimizedLearning {
+            let x: Double = log((Double(references)/(1 - 0.01)))
+            let y = 0.01 + log(model.time - creationTime!)
             return x - y
         } else {
             return log(self.referenceList.map{ pow((self.model.time - $0),(-self.model.dm.baseLevelDecay!))}.reduce(0.0, + )) // Wew! almost lisp! This is the standard baselevel equation
@@ -122,9 +124,9 @@ Set the baselevel of a chunk
     */
     func addReference() {
         if creationTime == nil { return }
-        if model.dm.optimizedLearning {
+        if self.optimizedLearning {
             references += 1
-            print("Added reference to \(self) references = \(references)")
+            creationTime = model.time
         }
         else {
             referenceList.append(model.time)

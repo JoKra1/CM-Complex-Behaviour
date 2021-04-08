@@ -74,7 +74,14 @@ class Beverbende {
             self.players.append(opponent)
         }
         
-        // Quick and dirty fix here, I know I know its code repetition :-(
+        // Check and apply changes to model settings
+        let defaults = UserDefaults.standard
+        let SettingsDidChange = defaults.bool(forKey: "changedModelSettings")
+        if SettingsDidChange {
+            defaults.setValue(false, forKey: "changedModelSettings")
+        }
+        
+        // Assign cards to human player
         var cards: [Card?] = []
         for _ in 0..<4 {
             cards.append(self.drawPile.pop()!)

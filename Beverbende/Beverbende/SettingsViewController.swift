@@ -54,6 +54,7 @@ class SettingsViewController: UIViewController {
             }
         set (new) {
             defaults.set(new,forKey: "frozen")
+            defaults.set(true,forKey: "changedModelSettings")
         }
     }
     
@@ -64,6 +65,7 @@ class SettingsViewController: UIViewController {
             }
         set (new) {
             defaults.set(new,forKey: "pretrained")
+            defaults.set(true,forKey: "changedModelSettings")
         }
     }
     
