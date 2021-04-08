@@ -56,8 +56,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
     @IBOutlet weak var deckView: UIImageView!
     @IBOutlet weak var discardPileView: UIImageView!
     
-    @IBOutlet weak var inspectButton: UIButton!
-    
     @IBOutlet var userOnTableCardViews: [UIImageView]!
     @IBOutlet var leftModelOnTableCardViews: [UIImageView]!
     @IBOutlet var topModelOnTableCardViews: [UIImageView]!
@@ -75,7 +73,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBOutlet weak var onHandCardInfoButton: UIButton!
     
-    @IBOutlet weak var initialInspectView: UIImageView!
+    @IBOutlet weak var userMessageView: UIImageView!
     
     var discardPileSelected: Bool = false
     var selectedForUserIndex: Int? = nil
@@ -309,8 +307,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
         quitView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(quitGame(_:))))
         quitView.isUserInteractionEnabled = true
         
-        initialInspectView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapInspectButton(_:))))
-        initialInspectView.isUserInteractionEnabled = true
+        userMessageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapInspectButton(_:))))
+        userMessageView.isUserInteractionEnabled = true
     }
 
     func sizeUpAnimationViews() {
@@ -357,7 +355,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     @objc func quitGame(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
         case .ended:
-            print("TOUCHED QUIT")
+            
             let quitPopUp = UIAlertController(title: "Quit", message: "If you quit the game your progress will be lost. You can start a new game from the starting menu. Are you sure you want to quit?", preferredStyle: .alert)
             
             quitPopUp.addAction(UIAlertAction(title: "Quit", style: .cancel, handler: {_ in
@@ -384,7 +382,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
         let modelTopTime = game.nextPlayer(previous: modelLeftTime)
         let modelRightTime = game.nextPlayer(previous: modelTopTime)
         _ = game.nextPlayer(previous: modelRightTime)
-        // the models have made all there moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
+        eventQueue.enqueue(element: Event(type: .userTurnIndicator, info: [:]))
+        // the models have made all their moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
         animateEventQueue()
     }
 
@@ -406,7 +405,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         if let firstEvent = eventQueue.dequeue() {
                 _ = self.animateEvent(for: firstEvent)
                 self.isUserTurn = true
-        } else { print("there should be events in the eventQueueueue") }
+        } else { print("there should be events in the eventQueue") }
     }
     
     func handleEvent(for type: EventType, with info: [String : Any]) {
@@ -532,6 +531,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
         case let .gameEnded(player):
             playerPlaceholder = player
             showWinner(for: player)
+            
+        case .userTurnIndicator:
+            duration = animateUserTurnIndicator()
+            
         default:
             playerPlaceholder = game.players[1]
             duration = 0.01
@@ -565,15 +568,19 @@ class ViewController: UIViewController, BeverbendeDelegate {
             }
         }
         
+        _ = flipOpenAllCards()
+        
         let winnerPopUp = UIAlertController(title: "End of the Game", message: message, preferredStyle: .alert)
+        
+        winnerPopUp.addAction(UIAlertAction(title: "New Game", style: .default, handler: {_ in self.performSegue(withIdentifier: "segueToLogoFromGame", sender: self)}))
         
         winnerPopUp.addAction(UIAlertAction(title: "Exit to Menu", style: .cancel, handler: {_ in
                 self.performSegue(withIdentifier: "segueToMainFromGame", sender: self)
                 }))
         
-        _ = flipOpenAllCards()
-        
-        present(winnerPopUp, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.61){
+            self.present(winnerPopUp, animated: true)
+        }
     }
     
     // ############################ AUXILAIRIES ############################
@@ -1071,7 +1078,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
             
             flashKnockLabel(flashesToMake: nKnocks*2, forView: knockView)
 
-            
             return Double(nKnocks) * (0.4 + 0.1) * 2 + 0.01
         }
         return 0.0
@@ -1083,11 +1089,24 @@ class ViewController: UIViewController, BeverbendeDelegate {
             UIView.animate(withDuration: 0.4, delay: 0.1,
                            options: [],
                            animations: {
-                            view.alpha = (view.alpha == 1) ? 0 : 1},
+                            view.alpha = (view.alpha == 1) ? 0 : 1
+                           },
                            completion: { _ in
                             self.flashKnockLabel(flashesToMake: count-1, forView: view)
                            })
         }
+    }
+    
+    func animateUserTurnIndicator() -> Double {
+        userMessageView.image = UIImage(named: "your_turn")
+        userMessageView.alpha = 0
+        userMessageView.isHidden = false
+        
+        UIView.animate(withDuration: 0.4, animations: { self.userMessageView.alpha = 1 }, completion: nil)
+        
+        UIView.animate(withDuration: 0.4, delay: 0.4 + 1, animations: { self.userMessageView.alpha = 0 }, completion: nil)
+        
+        return 1.81
     }
 
     // ############################ INFORMATION PROVIDANCE ############################
@@ -1130,7 +1149,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 if knockedBy != nil {
                     gameState = .knockedStart
                 } else {
-                    gameState = .end
+                    gameState = .start
                 }
             }
         } else {

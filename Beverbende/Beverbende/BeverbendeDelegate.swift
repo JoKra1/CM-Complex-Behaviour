@@ -19,7 +19,8 @@ enum EventType {
          cardInspected(Player, Card, Int),
          knocked(Player),
          tradingLeftoverActionCards,
-         gameEnded(Player)
+         gameEnded(Player),
+         userTurnIndicator
 }
 
 protocol BeverbendeDelegate: AnyObject {

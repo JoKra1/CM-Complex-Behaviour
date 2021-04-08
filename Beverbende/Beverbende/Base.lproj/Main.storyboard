@@ -108,6 +108,12 @@
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHk-Zy-QaZ">
                                 <rect key="frame" x="1321" y="20" width="25" height="24"/>
+                                <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="11"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="showGameInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="1NW-Ri-rio"/>
                                 </connections>
@@ -122,6 +128,12 @@
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2jY-Ke-cGh">
                                 <rect key="frame" x="393" y="755" width="25" height="24"/>
+                                <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="11"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="showCardInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="FQe-e7-UU5"/>
                                 </connections>
@@ -147,8 +159,8 @@
                             <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="quit" translatesAutoresizingMaskIntoConstraints="NO" id="Fgj-Eh-neI">
                                 <rect key="frame" x="0.0" y="61" width="410" height="123"/>
                             </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="initial_inspect" translatesAutoresizingMaskIntoConstraints="NO" id="kJi-Y7-Uvp">
-                                <rect key="frame" x="395" y="668" width="576" height="123"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="initial_inspect" translatesAutoresizingMaskIntoConstraints="NO" id="kJi-Y7-Uvp">
+                                <rect key="frame" x="-82" y="491" width="1583" height="123"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -236,7 +248,6 @@
                         <outlet property="deckView" destination="ZVh-9f-JmA" id="lOa-wb-XYB"/>
                         <outlet property="discardPileView" destination="v5G-ec-era" id="VEu-a1-mgb"/>
                         <outlet property="endTurnView" destination="XLu-hG-IUS" id="kV3-LS-fuO"/>
-                        <outlet property="initialInspectView" destination="kJi-Y7-Uvp" id="g31-UI-rhY"/>
                         <outlet property="leftCardStack" destination="3UE-dg-Ecd" id="5c6-wF-1Qb"/>
                         <outlet property="leftKnockView" destination="3ID-w9-e5f" id="125-eb-uXR"/>
                         <outlet property="leftModelOnHandCardView" destination="KD6-5W-jUC" id="Nu0-Ws-Bbo"/>
@@ -250,6 +261,7 @@
                         <outlet property="topModelOnHandCardView" destination="f0s-tB-xvf" id="SoZ-94-HeO"/>
                         <outlet property="userCardStack" destination="Vk9-nN-8Av" id="46N-hY-pEc"/>
                         <outlet property="userKnockView" destination="BoF-uy-CgB" id="hva-be-9CE"/>
+                        <outlet property="userMessageView" destination="kJi-Y7-Uvp" id="g31-UI-rhY"/>
                         <outlet property="userOnHandCardView" destination="Xzj-N5-4Ha" id="7sn-Y9-q6n"/>
                         <outletCollection property="userOnTableCardViews" destination="Lq7-rZ-5Xg" collectionClass="NSMutableArray" id="IOt-bG-zOs"/>
                         <outletCollection property="userOnTableCardViews" destination="KCE-gM-OXt" collectionClass="NSMutableArray" id="vDv-oH-czv"/>
@@ -268,11 +280,12 @@
                         <outletCollection property="rightModelOnTableCardViews" destination="qQZ-4F-JNH" collectionClass="NSMutableArray" id="MDW-Nn-wV7"/>
                         <outletCollection property="rightModelOnTableCardViews" destination="1wA-ai-kyl" collectionClass="NSMutableArray" id="ZtG-ky-OG8"/>
                         <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMainFromGame" id="4fs-Zt-LfT"/>
+                        <segue destination="UBS-1b-qaN" kind="presentation" identifier="segueToLogoFromGame" id="iUJ-WW-fHs"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-23.718887262079061" y="60.351562499999993"/>
+            <point key="canvasLocation" x="-24" y="64"/>
         </scene>
         <!--Start View Controller-->
         <scene sceneID="f2n-Nn-0gO">
@@ -345,7 +358,7 @@
                                 <rect key="frame" x="12" y="40.5" width="1342" height="102"/>
                             </imageView>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" usesAttributedText="YES" allowsEditingTextAttributes="YES" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fy2-lL-x4p">
-                                <rect key="frame" x="20" y="162.5" width="1326" height="841.5"/>
+                                <rect key="frame" x="20" y="162.5" width="1169.5" height="841.5"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <attributedString key="attributedText">
                                     <fragment>
@@ -525,20 +538,55 @@ Cgo
                                 </attributedString>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="1" translatesAutoresizingMaskIntoConstraints="NO" id="sk1-ob-Pfk">
+                                <rect key="frame" x="1209.5" y="162.5" width="136.5" height="841.5"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="inspect" translatesAutoresizingMaskIntoConstraints="NO" id="QX2-Um-d5s">
+                                        <rect key="frame" x="0.0" y="0.0" width="136.5" height="139.5"/>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="INSPECT" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="54L-I1-2zh">
+                                        <rect key="frame" x="0.0" y="140.5" width="136.5" height="139.5"/>
+                                        <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="twice" translatesAutoresizingMaskIntoConstraints="NO" id="ED2-tW-Mba">
+                                        <rect key="frame" x="0.0" y="281" width="136.5" height="139.5"/>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="DRAW 2" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3wC-rf-sBf">
+                                        <rect key="frame" x="0.0" y="421.5" width="136.5" height="139"/>
+                                        <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="swap" translatesAutoresizingMaskIntoConstraints="NO" id="o1U-dJ-Wo5">
+                                        <rect key="frame" x="0.0" y="561.5" width="136.5" height="139.5"/>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SWAP" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2vL-tA-KtT">
+                                        <rect key="frame" x="0.0" y="702" width="136.5" height="139.5"/>
+                                        <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="pmw-FH-42j"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="sk1-ob-Pfk" firstAttribute="top" secondItem="juD-C0-2eF" secondAttribute="bottom" constant="20" id="0Wq-MP-3ZW"/>
                             <constraint firstItem="Fy2-lL-x4p" firstAttribute="top" secondItem="juD-C0-2eF" secondAttribute="bottom" constant="20" id="9dm-P5-OfN"/>
+                            <constraint firstItem="sk1-ob-Pfk" firstAttribute="leading" secondItem="Fy2-lL-x4p" secondAttribute="trailing" constant="20" id="J3J-K8-xnD"/>
+                            <constraint firstItem="pmw-FH-42j" firstAttribute="trailing" secondItem="sk1-ob-Pfk" secondAttribute="trailing" constant="20" id="N12-6d-fQM"/>
                             <constraint firstItem="juD-C0-2eF" firstAttribute="height" secondItem="bMx-St-Odu" secondAttribute="height" multiplier="0.0996094" id="Pfc-7c-kjJ"/>
                             <constraint firstItem="CTv-Tf-XzI" firstAttribute="top" secondItem="pmw-FH-42j" secondAttribute="top" constant="50" id="Qnf-nX-syE"/>
                             <constraint firstItem="Fy2-lL-x4p" firstAttribute="leading" secondItem="pmw-FH-42j" secondAttribute="leading" constant="20" id="Si4-iM-9KT"/>
-                            <constraint firstItem="Fy2-lL-x4p" firstAttribute="top" secondItem="juD-C0-2eF" secondAttribute="bottom" constant="20" id="Yg3-PA-BBO"/>
                             <constraint firstItem="juD-C0-2eF" firstAttribute="centerY" secondItem="CTv-Tf-XzI" secondAttribute="centerY" id="a7d-5L-4Hw"/>
+                            <constraint firstItem="sk1-ob-Pfk" firstAttribute="bottom" secondItem="pmw-FH-42j" secondAttribute="bottom" constant="-20" id="bbg-d5-PPJ"/>
+                            <constraint firstItem="sk1-ob-Pfk" firstAttribute="width" secondItem="bMx-St-Odu" secondAttribute="width" multiplier="0.1" id="bti-PJ-M7s"/>
                             <constraint firstItem="CTv-Tf-XzI" firstAttribute="leading" secondItem="pmw-FH-42j" secondAttribute="leading" constant="50" id="f1a-ag-4WW"/>
                             <constraint firstItem="pmw-FH-42j" firstAttribute="bottom" secondItem="Fy2-lL-x4p" secondAttribute="bottom" constant="20" id="nlZ-Fs-tKn"/>
                             <constraint firstItem="juD-C0-2eF" firstAttribute="centerX" secondItem="pmw-FH-42j" secondAttribute="centerX" id="uWw-w4-TiU"/>
-                            <constraint firstItem="pmw-FH-42j" firstAttribute="trailing" secondItem="Fy2-lL-x4p" secondAttribute="trailing" constant="20" id="xmZ-cn-Sci"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="rAV-I7-JYz"/>
@@ -678,22 +726,58 @@ Cgo
             </objects>
             <point key="canvasLocation" x="-24.158125915080525" y="-1272.0703125"/>
         </scene>
+        <!--New Game View Controller-->
+        <scene sceneID="F53-pI-dmh">
+            <objects>
+                <viewController modalPresentationStyle="fullScreen" id="UBS-1b-qaN" customClass="newGameViewController" customModule="Beverbende" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="wHB-h3-Fwy">
+                        <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="40j-Cm-a0c">
+                                <rect key="frame" x="50" y="50" width="1266" height="924"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="GOp-Ym-5Te"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="40j-Cm-a0c" firstAttribute="top" secondItem="GOp-Ym-5Te" secondAttribute="top" constant="50" id="5hh-Ic-dA4"/>
+                            <constraint firstItem="GOp-Ym-5Te" firstAttribute="trailing" secondItem="40j-Cm-a0c" secondAttribute="trailing" constant="50" id="X2g-OW-mRX"/>
+                            <constraint firstItem="GOp-Ym-5Te" firstAttribute="bottom" secondItem="40j-Cm-a0c" secondAttribute="bottom" constant="50" id="tqJ-9x-QW5"/>
+                            <constraint firstItem="40j-Cm-a0c" firstAttribute="leading" secondItem="GOp-Ym-5Te" secondAttribute="leading" constant="50" id="zXD-NE-DA6"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="presentation" identifier="segueToGameFromLogo" id="AYk-mW-I6f"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6Lk-xz-xIb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="614" y="64"/>
+        </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="4fs-Zt-LfT"/>
+        <segue reference="RoQ-ja-81b"/>
+        <segue reference="AYk-mW-I6f"/>
     </inferredMetricsTieBreakers>
     <resources>
-        <image name="initial_inspect" width="576" height="260"/>
+        <image name="initial_inspect" width="1583" height="260"/>
+        <image name="inspect" width="393" height="574"/>
         <image name="knock" width="525" height="260"/>
         <image name="logo" width="1200" height="410"/>
         <image name="quit" width="393" height="260"/>
         <image name="rules" width="1342" height="260"/>
         <image name="settings" width="1052" height="260"/>
         <image name="start" width="827" height="260"/>
+        <image name="swap" width="393" height="574"/>
         <image name="table" width="5897" height="4480"/>
         <image name="turn" width="712" height="260"/>
+        <image name="twice" width="393" height="574"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray6Color">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemTealColor">
             <color red="0.35294117647058826" green="0.78431372549019607" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

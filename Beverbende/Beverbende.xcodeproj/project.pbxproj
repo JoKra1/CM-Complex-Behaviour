@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04A2F682261F21C200D33190 /* newGameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A2F681261F21C200D33190 /* newGameViewController.swift */; };
 		04ABBFEE261323B700006F32 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04ABBFED261323B700006F32 /* SettingsViewController.swift */; };
 		04B5CD3C25FF6CAA00709961 /* infoText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B5CD3B25FF6CAA00709961 /* infoText.swift */; };
 		04B5CD4125FF9A4600709961 /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B5CD4025FF9A4600709961 /* StartViewController.swift */; };
@@ -68,6 +69,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04A2F681261F21C200D33190 /* newGameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = newGameViewController.swift; sourceTree = "<group>"; };
 		04ABBFED261323B700006F32 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		04B5CD3B25FF6CAA00709961 /* infoText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = infoText.swift; sourceTree = "<group>"; };
 		04B5CD4025FF9A4600709961 /* StartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 				04BB714B25F782070060DC73 /* Queue.swift */,
 				5E1B826E25F8E09F0092EE72 /* User.swift */,
 				5EF324C72608D4380095A730 /* Event.swift */,
+				04A2F681261F21C200D33190 /* newGameViewController.swift */,
 			);
 			path = Beverbende;
 			sourceTree = "<group>";
@@ -389,6 +392,7 @@
 				F94B992225EF95AA002FFEE3 /* Vision.swift in Sources */,
 				F9CDFBD025DD307100CCAF9F /* ActionCard.swift in Sources */,
 				F94B992425EF95AA002FFEE3 /* Procedural.swift in Sources */,
+				04A2F682261F21C200D33190 /* newGameViewController.swift in Sources */,
 				5E1B826425F3CDE70092EE72 /* WeakContainer.swift in Sources */,
 				F909C39B25E6621200848876 /* Player.swift in Sources */,
 				F9CDFBC625DD279800CCAF9F /* Card.swift in Sources */,
