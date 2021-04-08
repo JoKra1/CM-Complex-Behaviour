@@ -382,7 +382,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         let modelTopTime = game.nextPlayer(previous: modelLeftTime)
         let modelRightTime = game.nextPlayer(previous: modelTopTime)
         _ = game.nextPlayer(previous: modelRightTime)
-        eventQueue.enqueue(element: Event(type: .userTurnIndicator, info: [:]))
+        if !gameEnded { eventQueue.enqueue(element: Event(type: .userTurnIndicator, info: [:])) }
         // the models have made all their moves and signaled that it is the users turn, time to animate the model actions (and the wrap up of the game, in case the game ends at the user)
         animateEventQueue()
     }
@@ -394,6 +394,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var eventQueue = Queue<Event>()
     
     var gameWrapUp = false
+    var gameEnded = false
     
     var knockedBy: Player? = nil
     
@@ -418,12 +419,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
             gameWrapUp = true
         case let .knocked(player):
             knockedBy = player
+        case .gameEnded:
+            gameEnded = true
         default:
             break
         }
         
         if gameWrapUp { // finishing of the game, trading all action cards for value cards from the pile
-            eventQueue.enqueue(element: event) // these come in during the animation of the model's actions, fast enough not to be an issue i assume
+            eventQueue.enqueue(element: event)
         } else { // normal gameplay
             if let player = event.info["player"] as? Player {
                 if player.getId() == user.getId() { // event relating to the user require the start of animation(s) (under certain conditions)
