@@ -7,6 +7,80 @@
 
 import Foundation
 
+/**
+ A stored DM, randomly selected from a learning model that
+ played 1000 games.
+ */
+
+let preTrainedDM = """
+Fact,Outcome,Value,Encounters,CreationTime
+end_value_fact,bad,24,150,0.0
+end_value_fact,bad,31,28,0.0
+low_value_fact,good,8,70,0.0
+end_value_fact,good,2,2,0.0
+end_value_fact,bad,25,136,0.0
+end_value_fact,bad,19,211,0.0
+end_value_fact,bad,33,14,0.0
+end_value_fact,good,9,79,0.0
+end_value_fact,bad,36,2,0.0
+low_value_fact,good,1,8,0.0
+end_value_fact,good,11,107,0.0
+end_value_fact,good,16,11,0.0
+end_value_fact,bad,17,198,0.0
+end_value_fact,good,18,5,0.0
+end_value_fact,good,5,12,0.0
+low_value_fact,good,4,21,0.0
+end_value_fact,bad,12,62,0.0
+low_value_fact,good,2,6,0.0
+low_value_fact,bad,6,20,0.0
+low_value_fact,good,3,18,0.0
+low_value_fact,bad,7,48,0.0
+end_value_fact,good,3,8,0.0
+end_value_fact,bad,28,83,0.0
+end_value_fact,good,14,145,0.0
+end_value_fact,good,7,35,0.0
+end_value_fact,good,12,139,0.0
+end_value_fact,bad,13,104,0.0
+low_value_fact,good,6,37,0.0
+low_value_fact,good,5,33,0.0
+low_value_fact,bad,5,10,0.0
+end_value_fact,good,19,2,0.0
+end_value_fact,bad,21,194,0.0
+end_value_fact,good,1,2,0.0
+end_value_fact,bad,16,176,0.0
+low_value_fact,good,9,267,0.0
+end_value_fact,good,20,1,0.0
+end_value_fact,bad,18,197,0.0
+low_value_fact,bad,9,628,0.0
+end_value_fact,bad,11,42,0.0
+end_value_fact,bad,26,139,0.0
+end_value_fact,bad,10,9,0.0
+end_value_fact,good,17,7,0.0
+end_value_fact,good,6,20,0.0
+end_value_fact,good,13,150,0.0
+end_value_fact,bad,35,5,0.0
+end_value_fact,bad,32,26,0.0
+end_value_fact,bad,8,2,0.0
+end_value_fact,bad,27,103,0.0
+end_value_fact,good,15,103,0.0
+low_value_fact,bad,8,110,0.0
+end_value_fact,bad,29,72,0.0
+end_value_fact,bad,20,191,0.0
+end_value_fact,good,8,52,0.0
+end_value_fact,bad,9,7,0.0
+end_value_fact,bad,15,245,0.0
+end_value_fact,bad,7,1,0.0
+end_value_fact,good,10,108,0.0
+end_value_fact,bad,34,11,0.0
+end_value_fact,good,4,11,0.0
+low_value_fact,bad,4,7,0.0
+end_value_fact,bad,30,48,0.0
+end_value_fact,bad,14,180,0.0
+end_value_fact,bad,23,188,0.0
+end_value_fact,bad,22,173,0.0
+low_value_fact,good,7,61,0.0
+"""
+
 class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     /**
@@ -28,33 +102,37 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private static var activationNoise: Double {
         get {
             let noise = BeverbendeOpponent.defaults.double(forKey: "activationNoise")
-            print(noise)
             return noise
         }
     }
     private static var utilityNoise: Double {
         get {
             let noise = BeverbendeOpponent.defaults.double(forKey: "utilityNoise")
-            print(noise)
             return noise
         }
     }
     private static var frozen: Bool {
         get {
             let frozen = BeverbendeOpponent.defaults.bool(forKey: "frozen")
-            print(frozen)
             return frozen
         }
     }
     private static var pretrained: Bool {
         get {
             let pretrained = BeverbendeOpponent.defaults.bool(forKey: "pretrained")
-            print(pretrained)
             return pretrained
         }
     }
     
-    var explorationSchedule = 1.0
+    private static var SettingsDidChange: Bool {
+        get {
+            let changeSettings = BeverbendeOpponent.defaults.bool(forKey: "changedModelSettings")
+            return changeSettings
+        }
+    }
+    
+    // Epsilon greedy exploration schedule.
+    var explorationSchedule = 0.0
     
     // Utilities for swap production rules
     private var utilities = [0.0,0.0,0.0] // Discard, swapRandom, swapRecent
@@ -100,7 +178,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     init(with ID: String, with Cards: [Card?], for Game: Beverbende) {
-        
         self.id = ID
         self.goal.state = .Begin
         self.goal.remembered = nil
@@ -111,16 +188,31 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         super.init()
         self.game?.add(delegate: self)
         self.setup()
-        print("DM: \(self.dm.chunks)")
+        
     }
     
     func setup() {
         /**
          Peak first two cards.
          */
+        print("Model \(self.id) is being set up")
+        if BeverbendeOpponent.SettingsDidChange {
+            // Clean wipe
+            self.wipeMemory()
+            // Check whether model should be pre-trained
+            if BeverbendeOpponent.pretrained {
+                print("Loading pre-trained DM")
+                self.preTrain()
+            }
+            
+        }
+        let passedTime = BeverbendeOpponent.defaults.double(forKey: self.id + "_time")
+        self.time = passedTime
+        
         self.dm.activationNoise = BeverbendeOpponent.activationNoise
         self.loadDMFromCSV(file: self.id)
         self.inspectFirstCards()
+        self.summarizeDM()
         
     }
     
@@ -202,25 +294,21 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          In case it is not the models turn, the model will rehearse its cards.
          */
         case .nextTurn(let player, let previousDuration, let previousPlayer):
-            print("Model \(self.id) received previous time of \(previousDuration)")
+            
             if !(previousPlayer.id == self.id) {
-                print("Model \(self.id) updated its time for previous player \(previousPlayer.id)")
                 self.time += previousDuration
             }
             
-            
-            if player.id == self.id, let game = self.game {
-                //self.time += 15.0
+            if player.id == self.id {
+                
                 let startTime = self.time
-                self.summarizeDM()
-                print("It is Model \(self.id)'s turn.")
                 self.advanceGame()
                 self.turnTime = self.time - startTime
-                //let _ = game.nextPlayer()
+                
             } else {
                 // Rehearse at beginning of turn
                 self.time += 0.05
-                print("Model \(self.id) is rehearsing since it is not its turn.")
+                
                 for card_index in 1...4 {
                     
                     _ = self.rehearsal(at: card_index)
@@ -236,10 +324,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         case .gameEnded(let winner):
             self.time += 0.05
-            print("\(self.id) received game ended signal.")
+            
             if winner.id == self.id {
                 // Model won
-                print("Hooray")
                 if self.didKnock {
                     let cutoff = self.endCutoff!
                     
@@ -264,22 +351,34 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     self.memorizeDecision(for: "end_value_fact", was: false, for: sum)
                     self.reinforceSwap(with: 0.0)
                 }
-                
-                // Also memorize winners sum as a good
-                let winnerSum = sumCards(for: winner)
-                self.memorizeDecision(for: "end_value_fact", was: true, for: winnerSum)
             }
+            for player in self.game!.players {
+                if player.id != self.id {
+                    // Also memorize sums of all other players
+                    let Sum = sumCards(for: player)
+                    if player.id == winner.id {
+                        self.memorizeDecision(for: "end_value_fact", was: true, for: Sum)
+                    } else {
+                        self.memorizeDecision(for: "end_value_fact", was: false, for: Sum)
+                    }
+                    
+                }
+            }
+            
             // Put all models in restricted game ended mode.
             self.goal.state = .DecideEnd
             self.exportDM()
+            BeverbendeOpponent.defaults.set(self.time,forKey: self.id + "_time")
             
         /**
          If someone swapped with the model, it will try to adaptively forget the card in the swapped position.
          */
         case .cardsSwapped(let pos1, let player1,
                            let pos2, let player2):
-            self.time += 0.05
-            if player2.id == self.id {
+            
+            if player2.id == self.id, !game!.gameEnded {
+                
+                self.time += 0.05
                 // Someone swapped with me, I should forget the card in that position
                 self.memorizeUnknown(isa: "Pos_Fact",
                                      for: "type",
@@ -291,15 +390,17 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          it can swap with that player (in the position) in the future.
          */
         case .discardedCardTraded(let player, _, _, let pos, _):
-            self.time += 0.05
-            if player.id != self.id {
+            if player.id != self.id, !game!.gameEnded {
+                
+                self.time += 0.05
                 // Someone other than me replaced a card, I should memorize this.
                 self.memorizeSwapper(who: player.id, at: pos + 1)
             }
         
         case .cardTraded(let player, _, let pos, _):
-            self.time += 0.05
-            if player.id != self.id {
+            if player.id != self.id, !game!.gameEnded {
+                self.time += 0.05
+                
                 // Someone other than me replaced a card, I should memorize this.
                 self.memorizeSwapper(who: player.id, at: pos + 1)
             }
@@ -327,41 +428,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     }
     
     
-    func resetOpponent(){
-        /**
-         - Description:
-         Reset the opponent after a game was played.
-         Called by the game model.
-         */
-        
-        // Reset time
-        self.time = 0.0
-        
-        // Reset any game ending decisions
-        self.didKnock = false
-        self.endCutoff = nil
-        self.goal.state = .Begin
-        self.goal.remembered = nil
-        self.goal.latencies = nil
-        
-        // Clear swapping history
-        self.swapHistory = []
-        
-        // Clear all positional and swapper facts and reset time for decision facts
-        self.resetfacts(for: "Pos_Fact")
-        self.resetfacts(for: "swapped_recently_fact")
-        self.resetTimeFacts(for: "end_value_fact")
-        self.resetTimeFacts(for: "low_value_fact")
-        
-        // If the model is not learning, all value facts can be discarded.
-        if BeverbendeOpponent.frozen {
-            self.resetfacts(for: "end_value_fact")
-            self.resetfacts(for: "low_value_fact")
-        }
-        
-        self.inspectFirstCards()
-    }
-    
     func inspectFirstCards(){
         // Inspect first two cards.
         let leftCard = self.game?.inspectCard(at: 0, for: self)
@@ -386,100 +452,13 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                chunk.value.slotvals["isa"]!.text()! == "end_value_fact" {
                 print(chunk.value.slotvals)
                 print(chunk.value.baseLevelActivation())
-                print(chunk.value.referenceList)
+                print(chunk.value.references)
+                print(chunk.value.creationTime!)
+                print(self.time)
             }
         }
             
         
-    }
-    
-    
-    private func exportDM() {
-        var DMstorage = [[String:AnyObject]]()
-        for chunk in self.dm.chunks {
-            if chunk.value.slotvals["isa"]!.text()! == "low_value_fact" ||
-               chunk.value.slotvals["isa"]!.text()! == "end_value_fact" {
-                var chunkDict = [String:AnyObject]()
-                chunkDict["Fact"] = chunk.value.slotvals["isa"]!.text()! as AnyObject
-                chunkDict["Outcome"] = chunk.value.slotvals["outcome"]!.text()! as AnyObject
-                chunkDict["Value"] = Int(chunk.value.slotvals["value"]!.number()!) as AnyObject
-                chunkDict["Encounters"] = chunk.value.referenceList.count as AnyObject
-                DMstorage.append(chunkDict)
-            }
-        }
-        self.exportDMToCSV(from: DMstorage, file: self.id)
-    }
-    
-    
-    private func exportDMToCSV (from data:[[String:AnyObject]], file name: String) {
-        // Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
-        // Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
-        var csvString = "\("Fact"),\("Outcome"),\("Value"),\("Encounters")\n"
-        for dct in data {
-            csvString = csvString.appending("\(dct["Fact"]! as! String),\(dct["Outcome"]! as! String),\(dct["Value"]! as! Int),\(dct["Encounters"]! as! Int)\n")
-        }
-        
-        let fileManager = FileManager.default
-        do {
-            
-            let path = try fileManager.url(for: .documentDirectory,
-                                           in: .userDomainMask,
-                                           appropriateFor: nil,
-                                           create: false)
-            print(path)
-            let fileURL = path.appendingPathComponent(name + ".csv")
-            try csvString.write(to: fileURL, atomically: true, encoding: .utf8)
-        } catch {
-            print("error writing files.")
-        }
-    }
-    
-    private func loadDMFromCSV(file name:String) {
-        // Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
-        // Source 2: https://developer.apple.com/forums/thread/90293
-        
-        // Set DM to empty dict by default.
-        self.dm.chunks = [String:Chunk]()
-        let fileManager = FileManager.default
-        do {
-            
-            let path = try fileManager.url(for: .documentDirectory,
-                                           in: .userDomainMask,
-                                           appropriateFor: nil,
-                                           create: false)
-            print(path)
-            let fileURL = path.appendingPathComponent(name + ".csv")
-            let loadedString = try? String(contentsOf: fileURL)
-            if loadedString != nil {
-                // file exists
-                let lines = loadedString!.split(separator: "\n")
-                for line in lines[1...] {
-                    let columns = line.split(separator: ",")
-                    assert(columns.count == 4)
-                    // Collect data
-                    let fact = String(columns[0])
-                    let outcome = String(columns[1])
-                    let value = Int(columns[2])
-                    let encounters = Int(columns[3])
-                    // Write to DM
-                    let chunk = self.generateNewChunk(string: fact)
-                    chunk.slotvals["isa"] = Value.Text(fact)
-                    chunk.slotvals["value"] = Value.Number(Double(value!))
-                    chunk.slotvals["outcome"] = Value.Text(outcome)
-                    // Set creation time manually
-                    chunk.creationTime = 0.0
-                    // Add references
-                    for _ in 0..<encounters! {
-                        chunk.referenceList.append(0.0)
-                    }
-                    self.dm.chunks[chunk.name] = chunk
-                }
-            }
-            
-        } catch {
-            print("error accessing files.")
-        }
-        self.summarizeDM()
     }
     
     
@@ -513,6 +492,171 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     /**
      Helpers
      */
+    
+    
+    private func wipeMemory(){
+        /**
+         - Description:
+         Wipes any existing memory files.
+         
+        - References:
+         Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
+         Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
+         */
+       let fileManager = FileManager.default
+       do {
+           
+           let path = try fileManager.url(for: .documentDirectory,
+                                          in: .userDomainMask,
+                                          appropriateFor: nil,
+                                          create: false)
+           
+           let fileURL = path.appendingPathComponent(self.id + ".csv")
+           try fileManager.removeItem(at: fileURL)
+           BeverbendeOpponent.defaults.set(0.0,forKey: self.id + "_time")
+       } catch {
+           print("error deleting files.")
+       }
+   }
+   
+    
+   private func preTrain() {
+        /**
+         - Description:
+         Overwrites any pre-existing DM file with the pre-trained DM.
+         
+        - References:
+         Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
+         Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
+         */
+       let fileManager = FileManager.default
+       do {
+           
+           let path = try fileManager.url(for: .documentDirectory,
+                                          in: .userDomainMask,
+                                          appropriateFor: nil,
+                                          create: false)
+           
+           let fileURL = path.appendingPathComponent(self.id + ".csv")
+           try preTrainedDM.write(to: fileURL, atomically: true, encoding: .utf8)
+       } catch {
+           print("error loading pre-training files.")
+       }
+   }
+    
+    
+    private func exportDM() {
+        /**
+         - Description:
+         Exports DM in .csv format for easy analysis and inspection and
+         the ability to load the DM later on.
+         
+        - References:
+         Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
+         Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
+         */
+        var DMstorage = [[String:AnyObject]]()
+        for chunk in self.dm.chunks {
+            if chunk.value.slotvals["isa"]!.text()! == "low_value_fact" ||
+               chunk.value.slotvals["isa"]!.text()! == "end_value_fact" {
+                var chunkDict = [String:AnyObject]()
+                chunkDict["Fact"] = chunk.value.slotvals["isa"]!.text()! as AnyObject
+                chunkDict["Outcome"] = chunk.value.slotvals["outcome"]!.text()! as AnyObject
+                chunkDict["Value"] = Int(chunk.value.slotvals["value"]!.number()!) as AnyObject
+                chunkDict["Encounters"] = chunk.value.references as AnyObject
+                chunkDict["CreationTime"] = chunk.value.creationTime as AnyObject
+                DMstorage.append(chunkDict)
+            }
+        }
+        self.exportDMToCSV(from: DMstorage, file: self.id)
+    }
+    
+    
+    private func exportDMToCSV (from data:[[String:AnyObject]], file name: String) {
+        /**
+         - Description:
+         Writes the exported DM file to documents.
+         
+        - References:
+         Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
+         Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
+         */
+        var csvString = "\("Fact"),\("Outcome"),\("Value"),\("Encounters"),\("CreationTime")\n"
+        for dct in data {
+            csvString = csvString.appending("\(dct["Fact"]! as! String),\(dct["Outcome"]! as! String),\(dct["Value"]! as! Int),\(dct["Encounters"]! as! Int),\(dct["CreationTime"]! as! Double)\n")
+        }
+        
+        let fileManager = FileManager.default
+        do {
+            
+            let path = try fileManager.url(for: .documentDirectory,
+                                           in: .userDomainMask,
+                                           appropriateFor: nil,
+                                           create: false)
+            
+            let fileURL = path.appendingPathComponent(name + ".csv")
+            try csvString.write(to: fileURL, atomically: true, encoding: .utf8)
+        } catch {
+            print("error writing files.")
+        }
+    }
+    
+    private func loadDMFromCSV(file name:String) {
+        /**
+         - Description:
+         Imports a stored DM file from documents.
+         
+        - References:
+         Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
+         Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
+         */
+        
+        // Set DM to empty dict by default.
+        self.dm.chunks = [String:Chunk]()
+        let fileManager = FileManager.default
+        do {
+            
+            let path = try fileManager.url(for: .documentDirectory,
+                                           in: .userDomainMask,
+                                           appropriateFor: nil,
+                                           create: false)
+            
+            let fileURL = path.appendingPathComponent(name + ".csv")
+            let loadedString = try? String(contentsOf: fileURL)
+            if loadedString != nil {
+                // file exists
+                let lines = loadedString!.split(separator: "\n")
+                for line in lines[1...] {
+                    let columns = line.split(separator: ",")
+                    assert(columns.count == 5)
+                    // Collect data
+                    let fact = String(columns[0])
+                    let outcome = String(columns[1])
+                    let value = Int(columns[2])
+                    let encounters = Int(columns[3])
+                    let createdAt = Double(columns[4])
+                    // Write to DM
+                    let chunk = self.generateNewChunk(string: fact)
+                    chunk.slotvals["isa"] = Value.Text(fact)
+                    chunk.slotvals["value"] = Value.Number(Double(value!))
+                    chunk.slotvals["outcome"] = Value.Text(outcome)
+                    // Set creation time manually
+                    chunk.creationTime = createdAt!
+                    // Add references
+                    chunk.references = encounters!
+                    // Turn on optimized learning
+                    chunk.optimizedLearning = true
+                    // Insert
+                    self.dm.chunks[chunk.name] = chunk
+                }
+            }
+            
+        } catch {
+            print("error accessing files.")
+        }
+        //self.summarizeDM()
+    }
+    
     
     private func IDToPlayer (for id:String) -> Player? {
         /**
@@ -719,6 +863,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             case false:
                 chunk.slotvals["outcome"] = Value.Text("bad")
         }
+        chunk.optimizedLearning = true
         self.dm.addToDM(chunk)
         self.time += 0.05
         
@@ -747,7 +892,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             to predict, which is why replacing them is always considered
             a good idea.
             */
-            //print("Model \(self.id) memorizes the cut-off for low value decision as good")
+            
             self.memorizeDecision(for: "low_value_fact", was: true, for: retrievedCutoff)
             self.time += 0.05
         case .value(let previousValue):
@@ -758,11 +903,11 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
              improvement since knowing the value of the card is beneficial in any case.
             */
             if previousValue > value {
-                //print("Model \(self.id) memorizes the cut-off for low value decision as good")
+                
                 self.memorizeDecision(for: "low_value_fact", was: true, for: retrievedCutoff)
                 self.time += 0.05
             } else {
-                //print("Model \(self.id) memorizes the cut-off for low value decision as bad")
+                
                 self.memorizeDecision(for: "low_value_fact", was: false, for: retrievedCutoff)
                 self.time += 0.05
             }
@@ -830,7 +975,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 if retrievedType == "action"{
                     // Retrieved card is an action card
                     let retrieved_action = String(retrievedChunk.slotvals["value"]!.text()!)
-                    //print("Model \(self.id) remembered an action card: \(retrieved_action) at position: \(pos)")
+                    
                     // Check possible cases
                     if retrieved_action == "twice" {
                         representationHand.append(.action(.twice))
@@ -843,7 +988,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 } else if retrievedType == "value" {
                     // Retrieved card is a value card
                     let retrieved_value = Int(retrievedChunk.slotvals["value"]!.number()!)
-                    //print("Model \(self.id) remembered a value card: \(retrieved_value) at position: \(pos)")
                     representationHand.append(.value(retrieved_value))
                 } else {
                     // Recalled that this card was adaptively forgotten!.
@@ -854,7 +998,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 representationHand.append(nil)
             }
         }
-        //print("Model \(self.id) latencies: \(latencies) ")
         return (representationHand,latencies)
     }
     
@@ -980,14 +1123,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         game!.discardDrawnCard(for: self)
         var iteration = 2
         while iteration > 0 {
-            //print("Model \(self.id) draws \(2 - iteration) card of take twice action.")
             self.time += 0.3 // Motor command to draw new card
             self.time += 0.085 // Encoding card value/action
             let newCard = game!.drawCard(for: self)
             switch newCard.getType() {
             
             case .action(let action):
-                //print("Model \(self.id) got a new action card.")
                 // Swap action cards
                 switch action {
                 case .inspect:
@@ -1006,11 +1147,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 }
                 
             case .value:
-                //print("Model \(self.id) got a new value card! Will decide now.")
                 let decision = self.decideValue(for: newCard as! ValueCard)
                 switch decision {
                 case true:
-                    //print("Model \(self.id) takes the value card in iteration \(2 - iteration)")
                     return
                 case false:
                     self.time += 0.3 // motor command to discard card
@@ -1039,7 +1178,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
         let explorationDecision = Double.random(in: 0...1)
         
-        if explorationDecision.isLess(than: explorationSchedule) {
+        if explorationDecision.isLess(than: explorationSchedule),
+           !explorationSchedule.isEqual(to: 0.0){
 
             let choice = Int.random(in: 0..<3)
             
@@ -1186,28 +1326,25 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          - Parameters:
             - reward: The reward received at the end of the game (0 or 1)
          */
-        let timeDist = self.time
-        //print("Model \(self.id) timeDist \(timeDist)")
-        for (production,timeMatched) in swapHistory {
-            //print("Model \(self.id) production \(production) at time: \(timeMatched)")
-            let timeDiff = (timeDist - timeMatched) / timeDist // Ratio of time diff
-            //print("Model \(self.id) time-diff: \(timeDiff)")
-            let actual_reward = reward - timeDiff
-            //print("Model \(self.id) actual-reward: \(actual_reward)")
+        // let timeDist = self.time
+        
+        for (production,_) in swapHistory {
+            // let timeDiff = timeDist - timeMatched
+            var actual_reward = reward
             
             switch production {
                 case .discard:
                     let q_update = actual_reward - utilities[0]
                     utilities[0] = utilities[0] + BeverbendeOpponent.learning_rate * q_update
-                    //print("Model \(self.id) utility for discard: \(utilities[0])")
+                    
                 case .swapRandom:
                     let q_update = actual_reward - utilities[1]
                     utilities[1] = utilities[1] + BeverbendeOpponent.learning_rate * q_update
-                    //print("Model \(self.id) utility for random: \(utilities[1])")
+                    
                 case .swapRecent:
                     let q_update = actual_reward - utilities[2]
                     utilities[2] = utilities[2] + BeverbendeOpponent.learning_rate * q_update
-                    //print("Model \(self.id) utility for recent: \(utilities[2])")
+                    
             }
             
         }
@@ -1227,25 +1364,20 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          */
         switch self.goal.state {
         case .Begin:
-            //print("Model \(self.id) skips top discarded action card")
             // Cannot take action cards from discarded pile.
             // Thus no motor command necessary, since card was just attended.
             game!.discardDrawnCard(for: self)
             goal.state = .Processed_Discarded
         default:
-            //print("Model \(self.id) matches action card")
             let action = card.getAction()
             switch action {
             case .inspect:
                 // Always plays this card.
-                //print("Model \(self.id) will decide inspect.")
                 self.decideInspect()
             case .twice:
                 // Always play this card.
-                //print("Model \(self.id) will decide twice.")
                 self.decideTwice()
             case .swap:
-                //print("Model \(self.id) will decide swap.")
                 self.decideSwap()
             }
             // No matter the outcome set goal to processed all
@@ -1280,10 +1412,8 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         // Compare the value of the current card to the representation of the hand.
         let (known_max, unknown) = compareHand(for: card, with: hand)
         if let found_max = known_max {
-            //print("Model \(self.id) took the value card to replace a known higher one.")
+            
             memorizeCard(at: found_max, with: card)
-            //self.summarizeDM()
-            //print(self.time)
             self.time += 0.3 // motor command to replace cards
             game!.tradeDrawnCardWithCard(at: found_max - 1,
                                         for: self)
@@ -1314,21 +1444,18 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             if let retrievedChunk = retrieval,
                !BeverbendeOpponent.frozen {
                 
-                self.dm.addToDM(retrievedChunk)
-                self.time += 0.05
+                //self.dm.addToDM(retrievedChunk)
+                //self.time += 0.05
                 
                 let retrievedOutcome = retrievedChunk.slotvals["outcome"]!.text()!
                 let retrievedValue = Int(retrievedChunk.slotvals["value"]!.number()!)
-                //print("Model \(self.id) retrieved an outcome of \(retrievedOutcome) based on retrieved value: \(retrievedValue)")
                 
                 // In the part this (or a similar value) was good enough
                 // to replace an unknown card.
                 if retrievedOutcome == "good" {
+                    
                     let choice = Int.random(in:0..<unknown.count)
                     memorizeCard(at: unknown[choice], with: card)
-                    
-                    //self.summarizeDM()
-                    //print(self.time)
                     self.time += 0.3 // motor command to replace cards
                     game!.tradeDrawnCardWithCard(at: unknown[choice] - 1,
                                                 for: self)
@@ -1359,11 +1486,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 print("Model \(self.id) could not retrieve a strategy, falls back to cut-off.")
                 // Failure to retrieve a strategy for the current value, fall back to cut-off
                 if value < BeverbendeOpponent.cut_off_low {
+                    
                     let choice = Int.random(in:0..<unknown.count)
                     memorizeCard(at: unknown[choice], with: card)
-                    
-                    //self.summarizeDM()
-                    //print(self.time)
                     self.time += 0.3 // motor command to replace cards
                     game!.tradeDrawnCardWithCard(at: unknown[choice] - 1,
                                                 for: self)
@@ -1462,16 +1587,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
         switch goal.state {
             case .Begin:
-                //print("Model \(self.id) representation \(goal.remembered)")
-                //print("Model \(self.id) latencies \(goal.latencies)")
                 self.time += 0.05
-                //print("Model \(self.id) will look at discarded pile now:")
                 // Place card in hand
                 self.time += 0.085 // Attend top discarded card
                 let card = game!.drawDiscardedCard(for: self)
             
                 // Attempt to remember the deck
-                //print("Model \(self.id) will try to remember its cards now.")
                 let (remembered,latencies) = self.rememberHand()
                 
                 // Update Goal (Imaginal) slots
@@ -1485,7 +1606,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 
             case .Processed_Discarded:
                 self.time += 0.05
-                //print("Model \(self.id) looked at discarded, will look at Deck as well.")
                 // Place card in hand
                 self.time += 0.3 // Motor command to flip over top deck card
                 self.time += 0.085 // Attend top deck card.
@@ -1495,13 +1615,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
 
             case .Processed_All:
                 self.time += 0.05
-                //print("Model \(self.id) looked at Discarded pile and/or Deck.")
-                
                 if !game!.knocked {
                     let decision = self.decideGame()
                     switch decision {
                         case true:
-                            //print("\(self.id): I knock")
                             self.time += 0.3 // Motor action to knock.
                             game!.knock(from: self)
                             goal.state = .DecideEnd
@@ -1509,21 +1626,19 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                             goal.state = .DecideContinue
                     }
                 } else {
-                    //print("Someone already knocked so I will continue.")
                     goal.state = .DecideContinue
                 }
                 
                 
             case .DecideContinue:
                 self.time += 0.05
-                //print("Model has decided to continue.")
                 // Clear all slots
                 goal.state = .Begin
                 goal.remembered = nil
                 goal.latencies = nil
             
             case .DecideEnd:
-                print("I am out of the game.")
+                ()
         }
     }
     
@@ -1539,8 +1654,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          can later remember whether this decision was good or bad based on the current sum.
          */
         let remembered = goal.remembered!
-        //print("Model \(self.id) representation \(remembered)")
-        //print("Model \(self.id) latencies \(goal.latencies)")
+
         var sum = 0
         for possiblyRetrieved in remembered{
             if let retrievedType = possiblyRetrieved {
@@ -1572,21 +1686,21 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         // Retrieval of outcome in a similar situation in the past.
         if let retrievedChunk = retrieval,
            !BeverbendeOpponent.frozen {
-            self.dm.addToDM(retrievedChunk)
-            self.time += 0.05
+            //self.dm.addToDM(retrievedChunk)
+            //self.time += 0.05
             
             let retrievedOutcome = retrievedChunk.slotvals["outcome"]!.text()!
             let retrievedValue = Int(retrievedChunk.slotvals["value"]!.number()!)
-            //print("Model \(self.id) retrieved end outcome of \(retrievedOutcome) for \(retrievedValue).")
+            
             if retrievedOutcome == "good" {
-                // Set did knock to true so that retrieved cut-off
+                // Set did knock to true so that cut-off
                 // can be reinforced.
                 self.didKnock = true
                 self.endCutoff = sum
                 return true
             }
         } else {
-            print("Model \(self.id) could not retrieve end outcome, falls back to cut-off.")
+            
             // Fall back to cut-off.
             if sum < BeverbendeOpponent.cut_off_decide {
                 // Set did knock to true so that retrieved cut-off
