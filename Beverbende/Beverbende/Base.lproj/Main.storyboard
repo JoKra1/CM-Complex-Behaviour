@@ -652,28 +652,30 @@ Cgo
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="50" translatesAutoresizingMaskIntoConstraints="NO" id="iO5-xd-Gwf">
                                 <rect key="frame" x="50" y="398" width="546.5" height="526"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activation noise: retrieving a memory chunk is a noisy process. A higher value will increase the change of mistakes" textAlignment="justified" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="acC-MT-CJ8">
-                                        <rect key="frame" x="0.0" y="0.0" width="546.5" height="48.5"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="wordWrap" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="acC-MT-CJ8">
+                                        <rect key="frame" x="0.0" y="0.0" width="546.5" height="72.5"/>
+                                        <string key="text">Activation noise parameter: retrieving a memory chunk is a noisy process. A higher value will increase the change of mistakes. Default: 0.1</string>
                                         <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RPa-zg-Zel">
                                         <rect key="frame" x="0.0" y="135" width="546.5" height="96.5"/>
-                                        <string key="text">Utility noise: the model's startegy for swapping cards with it's opponent relies on the utility value of three different strategies. Increasing the value increases the likelihood that the model does not pick the best strategy.</string>
+                                        <string key="text">Utility noise parameter: the model's strategy for swapping cards with it's opponent relies on the utility value of three different strategies. Increasing the value increases the likelihood that the model does not pick the best strategy. Default: 0.2</string>
                                         <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Adaptive learning: select wether you want the model to continue learning while you play againts it. " textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Sw-Dd-A4a">
-                                        <rect key="frame" x="0.0" y="318.5" width="546.5" height="48.5"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Sw-Dd-A4a">
+                                        <rect key="frame" x="0.0" y="294.5" width="546.5" height="96.5"/>
+                                        <string key="text">Freeze model: Freezing the model prevents it from learning from past experiences. If enabled the model accepts any value card to replace an unknown card and knocks once it believes that it has 15 points or less. Disabled by default. </string>
                                         <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ypt-Ea-pAD">
                                         <rect key="frame" x="0.0" y="453.5" width="546.5" height="72.5"/>
-                                        <string key="text">Pretrained model: set this to true if you want to play against a model that has learned and optimized the predefined cut-off values during 1000 games.</string>
+                                        <string key="text">Pretrained model: set this to true if you want to play against a model that has learned and optimized the predefined cut-off values during 1000 games. Enabled by default.</string>
                                         <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -682,7 +684,7 @@ Cgo
                             </stackView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O8U-Bx-zzQ">
                                 <rect key="frame" x="50" y="183" width="1266" height="120.5"/>
-                                <string key="text">The model you will be playing against tries to remember which cards are in front of it, just like you. It does this by trying to retrieve so called memory "chunks". During the game, as you will experience, you will sometimes trade a card of your own that you do not know the value of, you consider "hmmm is the card that I will trade it for of low value". A similar value based consideration happens at the end of your turn, you think "hmmm is the sum om my cards low enough that it will win me the game".  Both of these cut-off values (when is a card "low" and when do I knock to end the game) were initially determined by the creators of this application. You can change a number of settings below that will influence various aspects of the model(s) you play against.</string>
+                                <mutableString key="text">The model you will be playing against tries to remember which cards are in front of it, just like you. It does this by trying to retrieve so called memory "chunks". During the game, as you will experience, you will sometimes trade a card of your own that you do not know the value of, you consider "hmmm is the card that I will trade it for of low value". A similar value based consideration happens at the end of your turn, you think "hmmm is the sum of my cards low enough that it will win me the game".  Both of these cut-off values (when is a card "low" and when do I knock to end the game) were initially determined by the creators of this application. You can change a number of settings below that will influence various aspects of the model(s) you play against.</mutableString>
                                 <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -757,8 +759,7 @@ Cgo
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="iUJ-WW-fHs"/>
-        <segue reference="RoQ-ja-81b"/>
+        <segue reference="lsH-p1-r9y"/>
         <segue reference="AYk-mW-I6f"/>
     </inferredMetricsTieBreakers>
     <resources>
