@@ -575,7 +575,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         /*
          The duration of an animation plus a small additional buffer (for smoothness) are used as a delay for making the recursive call to the animateEvent() function
          */
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration + 0.025) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration + 0.25) {
             print("ANIMATION END")
             if let nextEvent = self.eventQueue.dequeue() { // there is a next event in the queue, continue animating
                 _ = self.animateEvent(for: nextEvent)
