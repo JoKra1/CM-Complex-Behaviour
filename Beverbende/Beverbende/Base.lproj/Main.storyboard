@@ -362,7 +362,7 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <attributedString key="attributedText">
                                     <fragment>
-                                        <string key="content">Tip: You can look at the rules during the game by tapping on "What to do ?" in the top-right corner of the screen. This will provide you with the information that is relevant to you at that moment, and guide you through the game. You can also receive information about a card that you drew by clicking on the "?" icon that appears next to it.
+                                        <string key="content">Tip: You can look at the rules during the game by tapping on "What to do? i" in the top-right corner of the screen. This will provide you with the information that is relevant to you at that moment, and guide you through the game. You can also receive information about a card that you drew by clicking on the "i" icon that appears next to it.
 
 </string>
                                         <attributes>
@@ -758,7 +758,7 @@ Cgo
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="iUJ-WW-fHs"/>
-        <segue reference="4fs-Zt-LfT"/>
+        <segue reference="RoQ-ja-81b"/>
         <segue reference="AYk-mW-I6f"/>
     </inferredMetricsTieBreakers>
     <resources>
