@@ -563,6 +563,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             showWinner(for: player)
             
         case .userTurnIndicator:
+            enableUserInteractionAfterDelay(lasting: 0)
             duration = animateUserTurnIndicator()
             
         default:
