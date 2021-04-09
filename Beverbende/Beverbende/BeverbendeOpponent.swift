@@ -1483,7 +1483,6 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                     
                 }
             } else {
-                print("Model \(self.id) could not retrieve a strategy, falls back to cut-off.")
                 // Failure to retrieve a strategy for the current value, fall back to cut-off
                 if value < BeverbendeOpponent.cut_off_low {
                     
