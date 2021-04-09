@@ -208,7 +208,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
         let passedTime = BeverbendeOpponent.defaults.double(forKey: self.id + "_time")
         self.time = passedTime
-        
+        print(passedTime)
         self.dm.activationNoise = BeverbendeOpponent.activationNoise
         self.loadDMFromCSV(file: self.id)
         self.inspectFirstCards()
@@ -294,7 +294,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          In case it is not the models turn, the model will rehearse its cards.
          */
         case .nextTurn(let player, let previousDuration, let previousPlayer):
-            
+            //print(previousDuration,previousPlayer)
             if !(previousPlayer.id == self.id) {
                 self.time += previousDuration
             }
@@ -539,6 +539,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
            
            let fileURL = path.appendingPathComponent(self.id + ".csv")
            try preTrainedDM.write(to: fileURL, atomically: true, encoding: .utf8)
+           BeverbendeOpponent.defaults.set(1000.0,forKey: self.id + "_time")
        } catch {
            print("error loading pre-training files.")
        }
@@ -1452,6 +1453,9 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 
                 // In the part this (or a similar value) was good enough
                 // to replace an unknown card.
+                
+                //print("Model \(self.id) retrieved \(retrievedOutcome) for value \(retrievedValue) for value \(value)")
+                
                 if retrievedOutcome == "good" {
                     
                     let choice = Int.random(in:0..<unknown.count)
@@ -1596,6 +1600,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 
                 // Update Goal (Imaginal) slots
                 goal.remembered = remembered
+                //print("Model \(self.id) remembered \(remembered) and has \(self.cardsOnTable)")
                 goal.latencies = latencies
                 
                 self.time += 0.2 // Cost of forming representation
@@ -1690,7 +1695,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             
             let retrievedOutcome = retrievedChunk.slotvals["outcome"]!.text()!
             let retrievedValue = Int(retrievedChunk.slotvals["value"]!.number()!)
-            
+            //print("Model \(self.id) retrieved \(retrievedOutcome) for value \(retrievedValue) for sum \(sum)")
             if retrievedOutcome == "good" {
                 // Set did knock to true so that cut-off
                 // can be reinforced.

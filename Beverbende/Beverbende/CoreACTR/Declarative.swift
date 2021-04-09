@@ -24,7 +24,7 @@ class Declarative  {
     /// A dictionary with all the chunks in DM, indexed by chunk name
     var chunks = [String:Chunk]()
     /// The mismatch penalty, to be used in partial matching (mp in ACT-R)
-    var misMatchPenalty: Double = 2.5
+    var misMatchPenalty: Double = 5
     /// The latency factor parameter (lf in ACT-R)
     var latencyFactor = 0.2
     
