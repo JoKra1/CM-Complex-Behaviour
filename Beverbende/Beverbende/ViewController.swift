@@ -225,6 +225,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     @objc func tapModelCard(_ recognizer: UITapGestureRecognizer) {
+        /*
+         The users taps cards that are not their own to indicate which card should be swapped after the user player the SWAP action card.
+         */
         switch recognizer.state {
         case .ended:
             if let touchedCardView = recognizer.view as? UIImageView {
@@ -247,6 +250,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     var initialInspection = false
         
     @objc func tapInspectButton(_ recognizer: UITapGestureRecognizer) {
+        /*
+         At the start of the game, the user gets to inspect their cards by using a button on screen.
+         */
         switch recognizer.state {
         case .ended:
             let inspectButton = recognizer.view as! UIImageView
@@ -277,7 +283,6 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     func showBackOfAllCards() {
         showBackOfCard(on: deckView, for: user)
-        // Rotate the figures on the back of the cards
         for (playerIndex, cardViewCollection) in [userOnTableCardViews, leftModelOnTableCardViews, topModelOnTableCardViews, rightModelOnTableCardViews].enumerated() {
             for cardView in cardViewCollection! {
                 showBackOfCard(on: cardView, for: game.players[playerIndex])
@@ -389,6 +394,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func letModelsPlay() {
+        /*
+         This function controls the turns for the model. The models need to know how long another player's turn was in order to keep time. Each game.nextplayer() call makes one of the models play their entire turn. During such a call the events that the controller recieved, as one of the game's delegates, are stored in a queue. When all turns are done, the event queue is dequeue'ed and animated.
+         */
         disableUserInteraction()
         userEndTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
         let userElapsedTime = userEndTime - userStartTime - userAnimationsDuration
@@ -406,6 +414,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
 
     // ############################ EVENT HANDLING ############################
+    
     
     var isUserTurn = false // user starts the game, but first needs to inspect the cards, only then is it really its turn
     
