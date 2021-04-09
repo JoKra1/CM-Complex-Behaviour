@@ -88,9 +88,6 @@
                                     </imageView>
                                 </subviews>
                             </stackView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="v5G-ec-era">
-                                <rect key="frame" x="536.5" y="409.5" width="130.5" height="205"/>
-                            </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ZVh-9f-JmA">
                                 <rect key="frame" x="707" y="409.5" width="130.5" height="205"/>
                             </imageView>
@@ -160,7 +157,10 @@
                                 <rect key="frame" x="0.0" y="61" width="410" height="123"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="initial_inspect" translatesAutoresizingMaskIntoConstraints="NO" id="kJi-Y7-Uvp">
-                                <rect key="frame" x="-82" y="491" width="1583" height="123"/>
+                                <rect key="frame" x="-108" y="662" width="1583" height="123"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v5G-ec-era">
+                                <rect key="frame" x="535" y="409" width="130.5" height="205"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -757,7 +757,8 @@ Cgo
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="RoQ-ja-81b"/>
+        <segue reference="iUJ-WW-fHs"/>
+        <segue reference="4fs-Zt-LfT"/>
         <segue reference="AYk-mW-I6f"/>
     </inferredMetricsTieBreakers>
     <resources>

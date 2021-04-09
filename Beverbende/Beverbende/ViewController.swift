@@ -339,7 +339,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     // ############################ END OF USER TURN ACTIONS ############################
     
     /*
-     At the end of their turn a user has multiple options for continuing the game: End their turn and play on, knock to signal that the other players get one last round before the end of the game, or quit the game to go to the main menu.
+     At the end of their turn a user has multiple options for continuing the game: End their turn and play on, knock to signal that the other players get one last round before the end of the game, or quit the game to go to the main menu/start a new game.
      */
     
     @IBOutlet weak var endTurnView: UIImageView!
@@ -395,7 +395,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     func letModelsPlay() {
         /*
-         This function controls the turns for the model. The models need to know how long another player's turn was in order to keep time. Each game.nextplayer() call makes one of the models play their entire turn. During such a call the events that the controller recieved, as one of the game's delegates, are stored in a queue. When all turns are done, the event queue is dequeue'ed and animated.
+         This function controls the turns for the model. The models need to know how long another player's turn was in order to keep time. Each game.nextplayer() call makes one of the models play their entire turn. During such a call the events that the controller recieves, as one of the game's delegates, are stored in a queue. When all turns are done, the eventQueue is dequeue'ed and animated.
          */
         disableUserInteraction()
         userEndTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
@@ -435,13 +435,13 @@ class ViewController: UIViewController, BeverbendeDelegate {
         } else { print("there should be events in the eventQueue") }
     }
     
-    func handleEvent(for type: EventType, with info: [String : Any]) {
+    func handleEvent(for type: EventType, with info: [String : Any]) { // from the BeverbendeDelagate protocol
         print("incoming event: \(type)")
 
         let event = Event(type: type, info: info)
         
         switch event.type {
-        case .tradingLeftoverActionCards: // this needs separate management due to user related animations being added to the queueueueue
+        case .tradingLeftoverActionCards: // this needs separate management due to user related animations being added to the queue
             gameWrapUp = true
         case let .knocked(player):
             knockedBy = player
@@ -458,10 +458,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     case .knocked:
                         () // this case should not trigger the animations as the models are allowed to play first
                     case .nextTurn:
-                        () // // this case should not trigger the animations as their should be no wait between the last model and the player
+                        () // // this case should not trigger the animations as there should be no wait between the last model and the player
                     default:
                         let duration = animateEvent(for: event) // imediatelly animate the user's actions
-                        userAnimationsDuration += duration
+                        userAnimationsDuration += duration // this time is subtracted from the total time of the user's turn, as a similar time measurement (without animations) is implemented by the models.
                     }
                 } else {
                     eventQueue.enqueue(element: event) // add the model actions to the queue, wait with animation till the user's turn
@@ -472,9 +472,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     func tryProgressGameFromUser(forAnimationWithDuration duration: Double) {
         /*
-         This function determines when not only the players actions, but also the acompanying animations, are done, the player then chooses to progress to the next player (e.i. the model to the left) or to knock and then progress)
+         This function determines when not only the users actions, but also the acompanying animations, are done, the user then chooses to progress to the next player (e.i. the model to the left) or to knock and then progress)
          */
-        if playerPlaceholder.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the player performs his last gesture/action
+        if playerPlaceholder.getId() == user.getId(), !isUserTurn { // isUserTurn is set false when the user performs their last gesture/action
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
                 self.endTurnView.isHidden = false //always show next turn button
                 self.quitView.isHidden = false // same for the quit option
@@ -488,6 +488,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     lazy var playerPlaceholder: Player = self.user
     
     func animateEvent(for event: Event) -> Double {
+        /*
+         This function is user recursively to animate (some of) the event messages that the viewcontroller recieved from the game model (as its delegate).
+         */
         disableUserInteraction()
         var duration = 0.0
         
@@ -531,7 +534,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             duration = animateTradeOnHand(withCardAtIndex: cardFromPlayerIndex, by: player, withValue: returnStringMatchingWithCard(forCard: cardFromPlayer), closeOnHand: toIsFaceUp)
             
         case let .discardedCardTraded(player, cardToPlayer, cardFromPlayer, cardFromPlayerIndex, topOfDeckCard): // ["player": Player, "CardToPlayer": Card, "cardFromPlayer": Card, "cardFromPlayerIndex": Int]
-            // only ever issued by model
+            // only issued by user
             playerPlaceholder = player
             var tempDiscardPileValue: String? = nil
             if topOfDeckCard != nil {
@@ -568,13 +571,15 @@ class ViewController: UIViewController, BeverbendeDelegate {
         }
         
         tryProgressGameFromUser(forAnimationWithDuration: duration)
-        
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration) {
+        /*
+         The duration of an animation plus a small additional buffer (for smoothness) are used as a delay for making the recursive call to the animateEvent() function
+         */
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration + 0.025) {
             print("ANIMATION END")
-            if let nextEvent = self.eventQueue.dequeue() { // there is a next event in the queue
+            if let nextEvent = self.eventQueue.dequeue() { // there is a next event in the queue, continue animating
                 _ = self.animateEvent(for: nextEvent)
             } else { // the eventQueue is empty (during player turn, or at the end of all animations for the models)
-                if self.playerPlaceholder.getId() == self.game.players[3].getId() { // end of model animations signify the start of the models turn
+                if self.playerPlaceholder.getId() == self.game.players[3].getId() { // end of model animations signify the start a user their turn. (queue is empty and last event was related to the model that has its turn before the user)
                     self.userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
                 }
                 self.enableUserInteractionAfterDelay(lasting: 0)
@@ -624,9 +629,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func handleCardSelectionForModel(forModel player: Player, forView cardView: UIImageView, withIndex cardIndex: Int) {
-        if let selectedIndex = selectedForUserIndex, selectedIndex == cardIndex { // the touched card was already selected so deselect it
+        if let (selectedModel, selectedIndex) = selectedForModelAtIndex, player.getId() == selectedModel.getId(), selectedIndex == cardIndex { // the touched card was already selected so deselect it
             cardView.alpha = 1
-            selectedForUserIndex = nil
+            selectedForModelAtIndex = nil
         } else { // set the touched card as selected, doesnt matter if another one was already selected or not
             leftModelOnTableCardViews.forEach { $0.alpha = 1 }
             rightModelOnTableCardViews.forEach { $0.alpha = 1 }
@@ -700,6 +705,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func returnStringMatchingWithCard(forCard card: Card) -> String {
+        /*
+         The image names in the assets.xcassets container are matched to either the value of the card or the action. This name is used to create a UIImage matching with the card.
+         */
         switch card.getType() {
         case .value:
             let valueCard = card as! ValueCard
@@ -744,7 +752,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     // ############################ SHOW CARD IMAGES ############################
     
     func showFrontOfCard(show value: String, on cardView: UIImageView, for player: Player) {
-        let frontImage = UIImage(named: value) ?? UIImage(named: "empty")
+        let frontImage = UIImage(named: value) ?? UIImage(named: "empty") // a catch in order to prevent crashes
         
         let orientedImage = UIImage(cgImage: frontImage!.cgImage!,
                                     scale: frontImage!.scale,
@@ -765,6 +773,18 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     // ############################ ANIMATIONS ############################
     
+    /*
+     All animations (apart from flipping) work with the autoLayout contraints. There are two animationViews (animationViewOne, animationViewTwo) which are used for animating card movement. These animationViews are created with sizing contraints but without any positional contraints, and without an image. All animations follow the same pattern. For a moce form card position A to B the following steps occur:
+     
+     1. An animationView is positioned and oriented (rotational) on top of card A. For the orientation, a transformation is performed to match the rotation of card A. For the position this is done by adding autoLayout constraints to the animationView, to match the position of card A. These constraints are activated (but the card is not yet moved in the layout) and then the main view of the controller (of which the animationView is a subview/ the animationView's superview) is told to perform the layout according to the newly added constraints (this actually moves the animationView). Also, the animationView's image is set to match the image of card A. After this the autoLayout contraints to the position of card A are deactivated to allow for later animation.
+     2. To move the animationView from position A to position B, a new set of autoLayout contraints is created and activated. The set of constraints sets the location of the animation view to card B. Now, the message to do the autoLayout according to the now activated layoutConstraint is made within an animation function "UIView.transition". Within this transition function the orientation of the animationView is also set to the orientation of card B. This causes the autoLayout update to span a certain time, and thus we see the card move from A to B, as well as orientate itself from the orientation of A to the orientation of B.
+     3. All postitional autoLayout contraints of the animationView(s) is deactivated to prepare this UIImageView for the next animation. It's image is set to nil as well. The image at position B is set to the animationView's image, which was the image/card at A prior to the animation.
+     
+     This pattern is used for all animation of moving cards. There are small differences between functions, as sometimes additional flipping of cards is needed.
+     
+     Each animation functions returns a duration that is used when animating form the eventQueue, to make sure that one animation is done before another starts. This is neccessary as the same animationView would otherwise be used by both animations.
+     */
+    
     func retrieveOverlayConstraints(set animationView: UIImageView, to targetView: UIImageView) -> [NSLayoutConstraint] {
         return [animationView.centerXAnchor.constraint(equalTo: targetView.centerXAnchor),
                 animationView.centerYAnchor.constraint(equalTo: targetView.centerYAnchor)]
@@ -772,15 +792,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     func setViewToOverlay(set animationView: UIImageView, to targetView: UIImageView, deactivateAfter: Bool = true) -> [NSLayoutConstraint] {
         //without animation
-        print("begin setViewToOVerlay()")
-        let overlayConstraints = retrieveOverlayConstraints(set: animationView, to: targetView)
+        let overlayConstraints = retrieveOverlayConstraints(set: animationView, to: targetView) // overlay position
         NSLayoutConstraint.activate(overlayConstraints)
         if targetView.image != nil {
             animationView.image = UIImage(cgImage: (targetView.image?.cgImage)!, scale: 1, orientation: .up)
         } else {
-            animationView.image = UIImage(named: "empty")
+            animationView.image = UIImage(named: "empty") // catch to prevent crashes and make any problem's visible
         }
-            animationView.superview?.layoutIfNeeded()
+        animationView.superview?.layoutIfNeeded() // this call is what actually changes the position
         if deactivateAfter {
             NSLayoutConstraint.deactivate(overlayConstraints)
             return []
@@ -790,7 +809,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func setViewToOverlayDouble(set animationView1: UIImageView, to targetView1: UIImageView, andSet animationView2: UIImageView, to targetView2: UIImageView) {
-        // function for trades
+        // function for swaps, both animationViews need to be overlayed
         let startOverlayConstraints1 = setViewToOverlay(set: animationViewOne, to: targetView1, deactivateAfter: false)
         let startOverlayConstraints2 = setViewToOverlay(set: animationViewTwo, to: targetView2, deactivateAfter: false)
         self.animationViewOne.superview?.layoutIfNeeded()
@@ -799,6 +818,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func flipOpen(show value: String, on cardView: UIImageView, for player: Player) {
+        // always flip cards open towards the center
         var flipFrom: UIView.AnimationOptions {
             switch player.getId() {
             case game.players[1].getId():
@@ -823,6 +843,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func flipClosed(hide cardView: UIImageView, for player: Player) {
+        // always close cards away from the center
         var flipFrom: UIView.AnimationOptions {
             switch player.getId() {
             case game.players[1].getId():
@@ -851,18 +872,19 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         var duration: Double
         
-        if player.getId() == user.getId() {
-            duration = 0.61 * 2 + 1 // time to: flip open, flip closed, inspect
+        if player.getId() == user.getId() { // user
             flipOpen(show: value, on: cardView, for: player)
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.61 + 1) {
                 self.flipClosed(hide: cardView, for: player)
             }
+            duration = 0.61 * 2 + 1 // time to: flip open (with a small buffer), inspect, flip closed(with a small buffer)
         } else { // model
-            duration = 1.01
+            duration = 1
             
             animationViewOne.transform = returnRotationTransform(for: player)
             _ = setViewToOverlay(set: animationViewOne, to: cardView)
             
+            // increase the scale to make it look like the model "picks up" the card
             UIView.transition(with: animationViewOne,
                               duration: 1.0,
                               options: [.curveEaseInOut],
@@ -901,29 +923,31 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           } )
         NSLayoutConstraint.deactivate(overlayConstraints)
         
-        if player.getId() == user.getId(), !gameWrapUp {
-            duration += 0.01 + 0.61
+        if player.getId() == user.getId(), !gameWrapUp { // the suer gets to see it's own drawn card so this has to be flipped over, expect when it the game wrap up and the left over action cards aare traded off.
+            
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
                 self.flipOpen(show: value, on: onHandCardView, for: player)
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.6) {
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.6) { // show the info buttons once the card is flipped open
                     self.onHandCardInfoButton.isHidden = false
                 }
             }
+            duration += 0.01 + 0.61 // buffer after movement and card flip time
         }
-        return duration + 0.01
+        return duration
     }
     
     func animateTradeFromDiscardPile(withCardAtIndex cardIndex: Int, fromValue: String, toValue: String, tempDiscardPileValue: String?, by player: Player) -> Double {
-//        from the discard pile to an onHand location
+        
+        // first animate from the discard pile to an onHand location
         let onHandCardView = returnOnHandCardView(for: player)
         
         animationViewOne.transform = returnRotationTransform(for: user)
         _ = setViewToOverlay(set: animationViewOne, to: discardPileView)
         
-        if tempDiscardPileValue != nil {
+        if tempDiscardPileValue != nil { // temporily show the second to top card when this trade is happening
             showFrontOfCard(show: tempDiscardPileValue!, on: discardPileView, for: user)
         } else {
-            discardPileView.image = nil
+            discardPileView.image = nil // if there was only one card in the discard pile, there is nothing to show
         }
 
         let overlayConstraints = retrieveOverlayConstraints(set: animationViewOne, to: onHandCardView)
@@ -941,20 +965,21 @@ class ViewController: UIViewController, BeverbendeDelegate {
                           } )
         NSLayoutConstraint.deactivate(overlayConstraints)
 
+        // second, animate a trade with the card on hand, which is the card from the discard pile
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.01) {
             _ = self.animateTradeOnHand(withCardAtIndex: cardIndex, by: player, withValue: fromValue, closeOnHand: true)
         }
-        return 1 + 0.01 + 0.61 + 1.0 + 0.01 //time to move from pile, then to flip, then to move again
+        return 1 + 0.01 + 0.61 + 1.0 //time to move from pile + small buffer, then to flip (including small buffer), then to move again
     }
 
     func animateDiscardFromHand(by player: Player, withValue value: String, openOnHand: Bool) -> Double {
         
-        var duration = 1.0
+        var duration = 1.0 // the time to move the card
         var delay = 0.0
         
         let onHandView = returnOnHandCardView(for: player)
         
-        if openOnHand {
+        if openOnHand { // this is not needed when it is the user's card, as this is already flipped after being drawn, so this only happens for the models
             flipOpen(show: value, on: onHandView, for: player)
             delay = 0.61
             duration += delay
@@ -982,14 +1007,14 @@ class ViewController: UIViewController, BeverbendeDelegate {
             NSLayoutConstraint.deactivate(overlayConstraints)
         }
         
-        return duration + 0.01
+        return duration
     }
 
     func animateTradeOnHand(withCardAtIndex cardIndex: Int, by player: Player, withValue value: String, closeOnHand: Bool) -> Double {
-//        trade the drawn card with one of your own (for either model or player)
+        // trade the drawn card with one of your own (for either model or player)
         let onHandCardView = returnOnHandCardView(for: player)
         
-        if closeOnHand {
+        if closeOnHand { // only for the user and not during wrap up, as its card is openend when being drawn
             flipClosed(hide: onHandCardView, for: player)
         }
         
@@ -1030,11 +1055,11 @@ class ViewController: UIViewController, BeverbendeDelegate {
             NSLayoutConstraint.deactivate(OverlayConstraints2)
 
         }
-        return 1.61 + 0.01
+        return 0.61 + 1 // card flip with smaller buffer + time to move the cards
     }
     
     func animateCardTrade(ofCardAtIndex cardIndex1: Int, by player1: Player, withCardAtIndex cardIndex2: Int, from player2: Player) -> Double {
-        // Trade cars between Actors
+        // Trade cars player
         let cardView1 = returnOnTableCardViews(for: player1)[cardIndex1]
         let cardView2 = returnOnTableCardViews(for: player2)[cardIndex2]
         
@@ -1042,7 +1067,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         self.animationViewTwo.transform = self.returnRotationTransform(for: player2)
         setViewToOverlayDouble(set: animationViewOne, to: cardView1, andSet: animationViewTwo, to: cardView2)
         
-        cardView1.image = nil//.isHidden does not work as these are in a stackView
+        cardView1.image = nil
         cardView2.image = nil
         
         let endOverlayConstraints1 = retrieveOverlayConstraints(set: animationViewOne, to: cardView2)
@@ -1068,7 +1093,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
         NSLayoutConstraint.deactivate(endOverlayConstraints1)
         NSLayoutConstraint.deactivate(endOverlayConstraints2)
         
-        return 1.0 + 0.01 // duration
+        return 1.0 // time it takes to move the cards
     }
     
     func flipOpenAllCards() -> Double {
@@ -1079,7 +1104,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 flipOpen(show: value, on: onTableCardView, for: player)
             }
         }
-        return 0.61
+        return 0.61 // card flip duration including a small buffer
     }
     
     @IBOutlet weak var leftKnockView: UIImageView!
@@ -1088,6 +1113,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     
     func animateKnock(by player: Player) -> Double {
+        /*
+         This function calls the recursive function flashKnockLabel(), t show a label to let the user know that a model has knocked
+         */
         if player.getId() != user.getId() {
             
             var knockView: UIImageView {
@@ -1105,9 +1133,10 @@ class ViewController: UIViewController, BeverbendeDelegate {
             
             flashKnockLabel(flashesToMake: nKnocks*2, forView: knockView)
 
-            return Double(nKnocks) * (0.4 + 0.1) * 2 + 0.01
+            return Double(nKnocks) * (0.4 + 0.1) * 2 // the time all the flashes take
         }
-        return 0.0
+        
+        return 0.0 // flashing needed when it was the user that knocked
     }
     
     func flashKnockLabel(flashesToMake count: Int, forView view: UIImageView) {
@@ -1116,7 +1145,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             UIView.animate(withDuration: 0.4, delay: 0.1,
                            options: [],
                            animations: {
-                            view.alpha = (view.alpha == 1) ? 0 : 1
+                            view.alpha = (view.alpha == 1) ? 0 : 1 // show if not yet visible, hide if already visible
                            },
                            completion: { _ in
                             self.flashKnockLabel(flashesToMake: count-1, forView: view)
@@ -1125,6 +1154,9 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func animateUserTurnIndicator() -> Double {
+        /*
+         Thi functions show the label to indicate the user that it is their turn
+         */
         userMessageView.image = UIImage(named: "your_turn")
         userMessageView.alpha = 0
         userMessageView.isHidden = false
@@ -1133,15 +1165,20 @@ class ViewController: UIViewController, BeverbendeDelegate {
         
         UIView.animate(withDuration: 0.4, delay: 0.4 + 1, animations: { self.userMessageView.alpha = 0 }, completion: nil)
         
-        return 1.81
+        return 1.8
     }
 
     // ############################ INFORMATION PROVIDANCE ############################
     
-    let infoText = InfoText()
+    
+    let infoText = InfoText() // an InfoText object ontaints two libraries filled with strings, one for game info and one for card info.
+    
     
     @IBAction func showCardInfo(_ sender: UIButton) {
-        
+        /*
+         This function control the small info buttons that shows next to a drawn card.
+         */
+         
         let message = infoText.getCardInfo(forCardWithName: returnStringMatchingWithCard(forCard: user.getCardOnHand()!))
         
         let infoPopUp = UIAlertController(title: "Drawn Card", message: message, preferredStyle: .alert)
@@ -1155,31 +1192,35 @@ class ViewController: UIViewController, BeverbendeDelegate {
     
     @IBAction func showGameInfo(_ sender: UIButton) {
         
+        /*
+         This function control the small info buttons that shows inthe right top corner of the screen with the text "What to do i".
+         */
+        
         var gameState: GameState
 
         if isUserTurn == false {
-            if endTurnView.isHidden == false {
-                if knockedBy != nil {
+            if endTurnView.isHidden == false { // triggered at the end of a users turn
+                if knockedBy != nil { // someone already knocked, so this is no longer an option for the user
                     gameState = .knockedEnd
                 } else {
                     gameState = .end
                 }
-            } else {
-                gameState = .initialInspect // only during initial inspection, buttons cant be pressed during animations
+            } else { // only during initial inspection
+                gameState = .initialInspect
             }
-        } else if user.getCardOnHand() == nil {
+        } else if user.getCardOnHand() == nil { // no drawn card, either not drawn yet, or an action card was already played
             if playedAction == .swap {
                 gameState = .swap
             } else if playedAction == .inspect {
                 gameState = .inspect
-            } else {
+            } else { // no action card played
                 if knockedBy != nil {
                     gameState = .knockedStart
                 } else {
                     gameState = .start
                 }
             }
-        } else {
+        } else { // there is a card drawn, the user can request information using the info button next to that card.
             gameState = .drawn
         }
         
