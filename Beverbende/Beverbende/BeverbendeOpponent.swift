@@ -208,11 +208,11 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
         let passedTime = BeverbendeOpponent.defaults.double(forKey: self.id + "_time")
         self.time = passedTime
-        print(passedTime)
+        print("Model \(self.id) loaded passed time between games: \(passedTime)")
         self.dm.activationNoise = BeverbendeOpponent.activationNoise
         self.loadDMFromCSV(file: self.id)
         self.inspectFirstCards()
-        self.summarizeDM()
+        //self.summarizeDM()
         
     }
     
@@ -461,6 +461,60 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
     }
     
+    func summarizeShortTerm(){
+        /**
+         - Description:
+         Summarize the fast paced memories formed over the positional facts.
+         */
+        print("Summarizing Short term memory:")
+
+        for chunk in self.dm.chunks {
+            if chunk.value.slotvals["isa"]!.text()! == "Pos_Fact" {
+                print(chunk.value.slotvals)
+                print(chunk.value.baseLevelActivation())
+                print(chunk.value.referenceList)
+                print(self.time)
+            }
+        }
+            
+        
+    }
+    
+    func summarizeRemembered(for remembered:[CardType?]){
+        /**
+         - Description:
+         Summarize the cards the model remembered, and the cards the model
+         actually has (the model does not know about these.)
+         */
+        print("Model \(self.id) remembered:")
+        for representation in remembered {
+            if representation != nil {
+                switch representation! {
+                case .value(let points):
+                    print("I remembered a value card with \(points)")
+                case .action(let action):
+                    print("I remembered an action card with \(action)")
+                }
+            } else {
+                print("I did not remember anything")
+            }
+        }
+        
+        print("And has actual cards:")
+        for card in self.cardsOnTable {
+            if card != nil {
+                switch card!.getType(){
+                case .value(let points):
+                    print("I have a value card with \(points)")
+                case .action(let action):
+                    print("I have an action card with \(action)")
+                }
+                
+            }
+        }
+        
+    }
+    
     
     override func mismatchFunction(x: Value, y: Value) -> Double? {
         /**
@@ -539,7 +593,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
            
            let fileURL = path.appendingPathComponent(self.id + ".csv")
            try preTrainedDM.write(to: fileURL, atomically: true, encoding: .utf8)
-           BeverbendeOpponent.defaults.set(1000.0,forKey: self.id + "_time")
+           BeverbendeOpponent.defaults.set(2500.0,forKey: self.id + "_time")
        } catch {
            print("error loading pre-training files.")
        }
@@ -1454,7 +1508,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 // In the part this (or a similar value) was good enough
                 // to replace an unknown card.
                 
-                //print("Model \(self.id) retrieved \(retrievedOutcome) for value \(retrievedValue) for value \(value)")
+                print("Model \(self.id) retrieved outcome \(retrievedOutcome) for memorised value \(retrievedValue) for current value \(value)")
                 
                 if retrievedOutcome == "good" {
                     
@@ -1590,6 +1644,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
         switch goal.state {
             case .Begin:
+                print("Model \(self.id) current time \(self.time)")
                 self.time += 0.05
                 // Place card in hand
                 self.time += 0.085 // Attend top discarded card
@@ -1600,7 +1655,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
                 
                 // Update Goal (Imaginal) slots
                 goal.remembered = remembered
-                //print("Model \(self.id) remembered \(remembered) and has \(self.cardsOnTable)")
+                self.summarizeRemembered(for: remembered)
                 goal.latencies = latencies
                 
                 self.time += 0.2 // Cost of forming representation
@@ -1665,12 +1720,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
 
                 switch retrievedType {
                 case .action:
-                    sum += 10
+                    sum += 9
                 case .value(let value):
                     sum += value
                 }
             } else {
-                sum += 10
+                sum += 9
             }
         }
         
@@ -1695,7 +1750,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             
             let retrievedOutcome = retrievedChunk.slotvals["outcome"]!.text()!
             let retrievedValue = Int(retrievedChunk.slotvals["value"]!.number()!)
-            //print("Model \(self.id) retrieved \(retrievedOutcome) for value \(retrievedValue) for sum \(sum)")
+            print("Model \(self.id) retrieved \(retrievedOutcome) for memorised sum \(retrievedValue) for current sum \(sum)")
             if retrievedOutcome == "good" {
                 // Set did knock to true so that cut-off
                 // can be reinforced.

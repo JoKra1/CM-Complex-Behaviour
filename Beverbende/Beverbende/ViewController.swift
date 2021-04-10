@@ -399,7 +399,12 @@ class ViewController: UIViewController, BeverbendeDelegate {
          */
         disableUserInteraction()
         userEndTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
-        let userElapsedTime = userEndTime - userStartTime - userAnimationsDuration
+        var userElapsedTime = userEndTime - userStartTime - userAnimationsDuration
+        if userElapsedTime.isLess(than: 0.0) {
+            userElapsedTime = 5.0 // Just a sanity check
+        } else if !userElapsedTime.isLessThanOrEqualTo(30.0) {
+            userElapsedTime = 30.0 // Prevent too long idle
+        }
         print("USER ELAPSED TIME: \(userElapsedTime)")
         userStartTime = 0.0
         userEndTime = 0.0
@@ -436,7 +441,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
     }
     
     func handleEvent(for type: EventType, with info: [String : Any]) { // from the BeverbendeDelagate protocol
-        print("incoming event: \(type)")
+        //print("incoming event: \(type)")
 
         let event = Event(type: type, info: info)
         
@@ -494,8 +499,8 @@ class ViewController: UIViewController, BeverbendeDelegate {
         disableUserInteraction()
         var duration = 0.0
         
-        print("ANIMATION START")
-        print("WITH EVENT: \(event)")
+        //print("ANIMATION START")
+        //print("WITH EVENT: \(event)")
         
         switch event.type {
         case let .cardDrawn(player, card): // ["player": Player, "card": Card]
@@ -576,7 +581,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
          The duration of an animation plus a small additional buffer (for smoothness) are used as a delay for making the recursive call to the animateEvent() function
          */
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration + 0.25) {
-            print("ANIMATION END")
+            //print("ANIMATION END")
             if let nextEvent = self.eventQueue.dequeue() { // there is a next event in the queue, continue animating
                 _ = self.animateEvent(for: nextEvent)
             } else { // the eventQueue is empty (during player turn, or at the end of all animations for the models)
@@ -584,7 +589,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                     self.userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
                 }
                 self.enableUserInteractionAfterDelay(lasting: 0)
-                print("USER INTERACTION ENABLED")
+                //print("USER INTERACTION ENABLED")
             }
         }
         

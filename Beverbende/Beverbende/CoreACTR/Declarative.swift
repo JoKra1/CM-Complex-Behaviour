@@ -20,11 +20,11 @@ class Declarative  {
     /// Retrieval threshold parameter (rt in ACT-R)
     var retrievalThreshold: Double = -3.5
     /// Activation noise parameter (ans in ACT-R). Can be nil to switch off noise.
-    var activationNoise: Double? = 0.1
+    var activationNoise: Double? = 0.01
     /// A dictionary with all the chunks in DM, indexed by chunk name
     var chunks = [String:Chunk]()
     /// The mismatch penalty, to be used in partial matching (mp in ACT-R)
-    var misMatchPenalty: Double = 5
+    var misMatchPenalty: Double = 2.5
     /// The latency factor parameter (lf in ACT-R)
     var latencyFactor = 0.2
     
