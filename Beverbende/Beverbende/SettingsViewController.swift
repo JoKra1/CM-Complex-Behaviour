@@ -18,7 +18,7 @@ class SettingsViewController: UIViewController {
     }
     
     func setDefaults() {
-        activationNoise = 0.1 // Default value
+        activationNoise = 0.01 // Default value
         utilityNoise = 0.2 // Default value
         frozen = false // Default value
         pretrained = true // Default value

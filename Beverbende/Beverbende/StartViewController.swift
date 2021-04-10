@@ -22,7 +22,7 @@ class StartViewController: UIViewController {
         let hasCustomized = defaults.bool(forKey: "hasCustomized")
         
         if !hasCustomized{
-            defaults.set(0.1,forKey: "activationNoise")
+            defaults.set(0.01,forKey: "activationNoise")
             defaults.set(0.2,forKey: "utilityNoise")
             defaults.set(false,forKey: "frozen")
             defaults.set(true,forKey: "pretrained")
