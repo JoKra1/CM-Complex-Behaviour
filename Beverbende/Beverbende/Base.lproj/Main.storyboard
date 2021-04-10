@@ -626,13 +626,13 @@ Cgo
                                         <rect key="frame" x="0.0" y="0.0" width="546.5" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.01 " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g3e-c8-tXl">
-                                                <rect key="frame" x="0.0" y="0.0" width="23.5" height="30"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="19.5" height="30"/>
                                                 <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.10000000000000001" minValue="0.01" maxValue="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="NO1-X0-JNv">
-                                                <rect key="frame" x="21.5" y="0.0" width="490.5" height="31"/>
+                                                <rect key="frame" x="17.5" y="0.0" width="494.5" height="31"/>
                                                 <connections>
                                                     <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="TXd-DY-hoV"/>
                                                 </connections>
@@ -649,13 +649,13 @@ Cgo
                                         <rect key="frame" x="0.0" y="171" width="546.5" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.01 " lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ph7-Px-vph">
-                                                <rect key="frame" x="0.0" y="0.0" width="28" height="30"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="24" height="30"/>
                                                 <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.10000000149011612" minValue="0.0099999997764825821" maxValue="0.30000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="AZc-Uw-Qcx">
-                                                <rect key="frame" x="26" y="0.0" width="486" height="31"/>
+                                                <rect key="frame" x="22" y="0.0" width="490" height="31"/>
                                                 <connections>
                                                     <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="0O2-Fc-Pxk"/>
                                                     <action selector="utilitySliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="NUe-eE-7sc"/>
@@ -793,8 +793,7 @@ Cgo
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="iUJ-WW-fHs"/>
-        <segue reference="4fs-Zt-LfT"/>
+        <segue reference="lsH-p1-r9y"/>
         <segue reference="AYk-mW-I6f"/>
     </inferredMetricsTieBreakers>
     <resources>
