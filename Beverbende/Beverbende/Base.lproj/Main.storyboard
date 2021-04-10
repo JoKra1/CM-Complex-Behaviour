@@ -362,7 +362,7 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <attributedString key="attributedText">
                                     <fragment>
-                                        <string key="content">Tip: You can look at the rules during the game by tapping on "What to do? i" in the top-right corner of the screen. This will provide you with the information that is relevant to you at that moment, and guide you through the game. You can also receive information about a card that you drew by clicking on the "i" icon that appears next to it.
+                                        <string key="content">Tip: You can look at the rules during the game by tapping on "What to do?" and the "i" icon in the top-right corner of the screen. This will provide you with the information that is relevant to you at that moment, and guide you through the game. You can also receive information about a card that you drew by clicking on the "i" icon that appears next to it.
 
 </string>
                                         <attributes>
@@ -426,9 +426,9 @@ Cg
                                     <fragment>
                                         <string key="content">
 
-A deck of Otter-Gang cards contains numbered cards and actions cards:
-- 4x numbered cards each for the values of 1 till 8
-- 9x numbered card with a value of 9
+A deck of Otter-Gang cards contains value cards and actions cards:
+- 4x value cards each for the values of 1 till 8
+- 9x value card with a value of 9
 - 7x INSPECT action card
 - 5x DRAW 2 action card
 - 9x SWAP action card
@@ -492,7 +492,7 @@ Each player gets 4 cards in front of him/her on the table. Before the first roun
                                     <fragment>
                                         <string key="content">
 
-You can start the game by either drawing a card from the deck or trading one of your own cards with the card on top of the discarded pile. If you draw a card only you get to see what card it is. If the drawn card is a numbered card then you can choose to either trade it with one of your own cards or discard it. If the drawn card is an action card then you can choose to either use that action card (by tapping on it) or discard it.
+You can start the game by either drawing a card from the deck or trading one of your own cards with the card on top of the discarded pile. If you draw a card only you get to see what card it is. If the drawn card is a value card then you can choose to either trade it with one of your own cards or discard it. If the drawn card is an action card then you can choose to either use that action card (by tapping on it) or discard it.
 
 </string>
                                         <attributes>
@@ -526,7 +526,7 @@ Cgo
                                         </attributes>
                                     </fragment>
                                     <fragment>
-                                        <string key="content">If you, at the end of you turn, think that you have a winning set of cards in front of you, you can knock to let the other players know that this is the last turn. The rest of the players can then play one more round. Afterwards, everyone flips open their cards. Any ACTION cards are discarded and replaced with a card from the top of the deck, until there are only numbered cards in front of each player.</string>
+                                        <string key="content">If you, at the end of you turn, think that you have a winning set of cards in front of you, you can knock to let the other players know that this is the last turn. The rest of the players can then play one more round. Afterwards, everyone flips open their cards. Any ACTION cards are discarded and replaced with a card from the top of the deck, until there are only value cards in front of each player.</string>
                                         <attributes>
                                             <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                             <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
@@ -620,29 +620,63 @@ Cgo
                                 </connections>
                             </button>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="y08-4y-xWL">
-                                <rect key="frame" x="769.5" y="398" width="546.5" height="526"/>
+                                <rect key="frame" x="769.5" y="379" width="546.5" height="545"/>
                                 <subviews>
-                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.20000000000000001" minValue="0.01" maxValue="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="NO1-X0-JNv">
-                                        <rect key="frame" x="-2" y="0.0" width="550.5" height="31"/>
-                                        <connections>
-                                            <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="TXd-DY-hoV"/>
-                                        </connections>
-                                    </slider>
-                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.20000000000000001" minValue="0.01" maxValue="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="GPP-Ra-2Ph">
-                                        <rect key="frame" x="-2" y="164.5" width="550.5" height="31"/>
-                                        <connections>
-                                            <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="zfl-jE-mmw"/>
-                                            <action selector="utilitySliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="xrI-PQ-Y0p"/>
-                                        </connections>
-                                    </slider>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1NE-NL-sCG">
+                                        <rect key="frame" x="0.0" y="0.0" width="546.5" height="30"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.01 " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g3e-c8-tXl">
+                                                <rect key="frame" x="0.0" y="0.0" width="19.5" height="30"/>
+                                                <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.10000000000000001" minValue="0.01" maxValue="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="NO1-X0-JNv">
+                                                <rect key="frame" x="17.5" y="0.0" width="494.5" height="31"/>
+                                                <connections>
+                                                    <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="TXd-DY-hoV"/>
+                                                </connections>
+                                            </slider>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  0.3" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rJU-Cv-5Gc">
+                                                <rect key="frame" x="510" y="0.0" width="36.5" height="30"/>
+                                                <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="82Q-SG-vPl">
+                                        <rect key="frame" x="0.0" y="171" width="546.5" height="30"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.01 " lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ph7-Px-vph">
+                                                <rect key="frame" x="0.0" y="0.0" width="24" height="30"/>
+                                                <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.10000000149011612" minValue="0.0099999997764825821" maxValue="0.30000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="AZc-Uw-Qcx">
+                                                <rect key="frame" x="22" y="0.0" width="490" height="31"/>
+                                                <connections>
+                                                    <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="0O2-Fc-Pxk"/>
+                                                    <action selector="utilitySliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="NUe-eE-7sc"/>
+                                                </connections>
+                                            </slider>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  0.3" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QlC-IX-5R3">
+                                                <rect key="frame" x="510" y="0.0" width="36.5" height="30"/>
+                                                <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
                                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" title="Adaptive" translatesAutoresizingMaskIntoConstraints="NO" id="uZG-gd-TQZ">
-                                        <rect key="frame" x="0.0" y="329.5" width="548.5" height="31"/>
+                                        <rect key="frame" x="0.0" y="342" width="548.5" height="31"/>
                                         <connections>
                                             <action selector="frozenSwitchChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="J4W-JX-aAv"/>
                                         </connections>
                                     </switch>
                                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4sn-W5-or5">
-                                        <rect key="frame" x="0.0" y="495" width="548.5" height="31"/>
+                                        <rect key="frame" x="0.0" y="514" width="548.5" height="31"/>
                                         <connections>
                                             <action selector="pretrainedSwitchChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="4HE-VM-6Lb"/>
                                         </connections>
@@ -650,7 +684,7 @@ Cgo
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="50" translatesAutoresizingMaskIntoConstraints="NO" id="iO5-xd-Gwf">
-                                <rect key="frame" x="50" y="398" width="546.5" height="526"/>
+                                <rect key="frame" x="50" y="379" width="546.5" height="545"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="wordWrap" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="acC-MT-CJ8">
                                         <rect key="frame" x="0.0" y="0.0" width="546.5" height="72.5"/>
@@ -660,21 +694,21 @@ Cgo
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RPa-zg-Zel">
-                                        <rect key="frame" x="0.0" y="135" width="546.5" height="96.5"/>
+                                        <rect key="frame" x="0.0" y="141.5" width="546.5" height="96.5"/>
                                         <string key="text">Utility noise parameter: the model's strategy for swapping cards with it's opponent relies on the utility value of three different strategies. Increasing the value increases the likelihood that the model does not pick the best strategy. Default: 0.2</string>
                                         <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Sw-Dd-A4a">
-                                        <rect key="frame" x="0.0" y="294.5" width="546.5" height="96.5"/>
+                                        <rect key="frame" x="0.0" y="307" width="546.5" height="96.5"/>
                                         <string key="text">Freeze model: Freezing the model prevents it from learning from past experiences. If enabled the model accepts any value card to replace an unknown card and knocks once it believes that it has 15 points or less. Disabled by default. </string>
                                         <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ypt-Ea-pAD">
-                                        <rect key="frame" x="0.0" y="453.5" width="546.5" height="72.5"/>
+                                        <rect key="frame" x="0.0" y="472.5" width="546.5" height="72.5"/>
                                         <string key="text">Pretrained model: set this to true if you want to play against a model that has learned and optimized the predefined cut-off values during 1000 games. Enabled by default.</string>
                                         <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -684,7 +718,7 @@ Cgo
                             </stackView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O8U-Bx-zzQ">
                                 <rect key="frame" x="50" y="183" width="1266" height="120.5"/>
-                                <mutableString key="text">The model you will be playing against tries to remember which cards are in front of it, just like you. It does this by trying to retrieve so called memory "chunks". During the game, as you will experience, you will sometimes trade a card of your own that you do not know the value of, you consider "hmmm is the card that I will trade it for of low value". A similar value based consideration happens at the end of your turn, you think "hmmm is the sum of my cards low enough that it will win me the game".  Both of these cut-off values (when is a card "low" and when do I knock to end the game) were initially determined by the creators of this application. You can change a number of settings below that will influence various aspects of the model(s) you play against.</mutableString>
+                                <string key="text">The model you will be playing against tries to remember which cards are in front of it, just like you. It does this by trying to retrieve so called memory "chunks". During the game, as you will experience, you will sometimes trade a card of your own that you do not know the value of, you consider "hmmm is the card that I will trade it for of low value". A similar value based consideration happens at the end of your turn, you think "hmmm is the sum of my cards low enough that it will win me the game".  Both of these cut-off values (when is a card "low" and when do I knock to end the game) were initially determined by the creators of this application. You can change a number of settings below that will influence various aspects of the model(s) you play against.</string>
                                 <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -720,7 +754,7 @@ Cgo
                         <outlet property="activationSlider" destination="NO1-X0-JNv" id="nfq-Mf-pMC"/>
                         <outlet property="frozenSwitch" destination="uZG-gd-TQZ" id="434-le-6sp"/>
                         <outlet property="pretrainedSwitch" destination="4sn-W5-or5" id="YBo-QG-z0f"/>
-                        <outlet property="utilitySlider" destination="GPP-Ra-2Ph" id="X3z-yX-0Bh"/>
+                        <outlet property="utilitySlider" destination="AZc-Uw-Qcx" id="bcd-PB-5WI"/>
                         <segue destination="jhN-70-wKO" kind="presentation" identifier="segueToMainFromSettings" id="lsH-p1-r9y"/>
                     </connections>
                 </viewController>
