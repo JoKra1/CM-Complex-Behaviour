@@ -135,7 +135,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     var explorationSchedule = 0.0
     
     // Utilities for swap production rules
-    private var utilities = [0.0,0.0,0.0] // Discard, swapRandom, swapRecent
+    private var utilities = [0.0,0.0,1.5] // Discard, swapRandom, swapRecent
     
     // swap action fire enumeration
     private enum productionFired {
