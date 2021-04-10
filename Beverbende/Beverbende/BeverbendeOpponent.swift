@@ -9,7 +9,10 @@ import Foundation
 
 /**
  A stored DM, randomly selected from a learning model that
- played 1000 games.
+ played 1000 games. Creatin times are all set to zero, so
+ that this can easily be used whenever the user wants. To
+ get approximately the right activation profile depicted in
+ the report the model time is set to 2500.0 when being pre-trained.
  */
 
 let preTrainedDM = """
@@ -87,6 +90,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
      Beverbende opponent, inherits from Model class and implements Player protocol.
      
      Sources for time-keeping are the AOI reader from the course at the RUG and Anderson, 2008
+     
+     Sources for everything ACT-R related is mainly Anderson 2007 but also AOI reader
+     
+     Sources for Utility learning are further specified in report.
      */
     // Defaults
     private static let defaults = UserDefaults.standard
@@ -131,7 +138,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
     }
     
-    // Epsilon greedy exploration schedule.
+    // Epsilon greedy exploration schedule. (see Géron: Hands on Machine learning 2017)
     var explorationSchedule = 0.0
     
     // Utilities for swap production rules
@@ -208,7 +215,19 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         }
         let passedTime = BeverbendeOpponent.defaults.double(forKey: self.id + "_time")
         self.time = passedTime
-        print("Model \(self.id) loaded passed time between games: \(passedTime)")
+
+        if !self.time.isLess(than: 0.9 * Double.greatestFiniteMagnitude) {
+            // Prevent eventual over-flow
+            print("Resetting DM to prevent over-flow")
+            self.wipeMemory()
+            if BeverbendeOpponent.pretrained {
+                print("Loading pre-trained DM")
+                self.preTrain()
+            }
+            self.time = BeverbendeOpponent.defaults.double(forKey: self.id + "_time")
+        }
+        
+        print("Model \(self.id) loaded passed time between games: \(self.time)")
         self.dm.activationNoise = BeverbendeOpponent.activationNoise
         self.loadDMFromCSV(file: self.id)
         self.inspectFirstCards()
@@ -373,7 +392,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         /**
          If someone swapped with the model, it will try to adaptively forget the card in the swapped position.
          */
-        case .cardsSwapped(let pos1, let player1,
+        case .cardsSwapped(_, _,
                            let pos2, let player2):
             
             if player2.id == self.id, !game!.gameEnded {
@@ -429,7 +448,10 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     
     
     func inspectFirstCards(){
-        // Inspect first two cards.
+        /**
+         - Description:
+         Inspect first two cards.
+         */
         let leftCard = self.game?.inspectCard(at: 0, for: self)
         self.memorizeCard(at: 1, with: leftCard!)
         self.game?.moveCardBackFromHand(to: 0, for: self)
@@ -707,7 +729,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
             }
             
         } catch {
-            print("error accessing files.")
+            print("error loading in DM files.")
         }
         //self.summarizeDM()
     }
@@ -733,7 +755,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private func resetfacts(for fact: String) {
         /**
          - Description:
-         Clears the models DM from all facts of a specified type.
+         Clears the models DM from all facts of a specified type. (Legacy, no longer used)
          
          - Parameters:
             - fact: Fact type as string.
@@ -749,7 +771,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
     private func resetTimeFacts(for fact:String) {
         /**
          - Description:
-         Sets all references for all decision facts of a specific type to time 0.0.
+         Sets all references for all decision facts of a specific type to time 0.0. (Legacy, no longer used)
          
          - Parameters:
             - fact: A string corresponding to the type of any decision fact (low or end).
@@ -824,11 +846,12 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         let cardType = card.getType()
         switch cardType {
         case .value(let points):
+            
             chunk.slotvals["type"] = Value.Text("value")
             chunk.slotvals["value"] = Value.Number(Double(points))
-            //print("Model \(self.id) memorized \(points) at position \(position)")
+            
         case .action(let action):
-            //print("Model \(self.id) memorized \(action) at position \(position)")
+            
             chunk.slotvals["type"] = Value.Text("action")
             switch action {
             case .twice:
@@ -1223,7 +1246,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
          three core actions available to the model when encountering this card. This method
          selects the action with the highest (noisy) current utility only with a certain probability.
          Otherwise the model selects an action at random, which is referred to as epsilon-greedy policy
-         to explore the action space in Géron's (2018) book "Hands-on machine learning".
+         to explore the action space in Géron's (2017) book "Hands-on machine learning".
          */
         self.time += 0.3 // motor command to play/discard action card
         game!.discardDrawnCard(for: self)
@@ -1385,7 +1408,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         
         for (production,_) in swapHistory {
             // let timeDiff = timeDist - timeMatched
-            var actual_reward = reward
+            let actual_reward = reward
             
             switch production {
                 case .discard:
