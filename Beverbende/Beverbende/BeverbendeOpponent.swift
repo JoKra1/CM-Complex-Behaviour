@@ -686,6 +686,7 @@ class BeverbendeOpponent:Model,Player,BeverbendeDelegate{
         - References:
          Source 1: https://stackoverflow.com/questions/55870174/how-to-create-a-csv-file-using-swift
          Source 2: https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory
+         Source 3: https://developer.apple.com/forums/thread/90293
          */
         
         // Set DM to empty dict by default.
