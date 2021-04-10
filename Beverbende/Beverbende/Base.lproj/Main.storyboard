@@ -528,7 +528,7 @@ Cgo
                                         </attributes>
                                     </fragment>
                                     <fragment>
-                                        <string key="content">If you, at the end of your turn, think that you have a winning set of cards in front of you, you can knock to let the other players know that this is the last turn. The rest of the players can then play one more round. Afterwards, everyone flips open their cards. Any ACTION cards are discarded and replaced with a card from the top of the deck, until there are only value cards in front of each player.</string>
+                                        <string key="content">If you, at the end of your turn, think that you have a winning set of cards in front of you, you can KNOCK to let the other players know that this is the last turn. The rest of the players can then play one more round. Afterwards, everyone flips open their cards. Any action cards are discarded and replaced with a card from the top of the deck, until there are only value cards in front of each player.</string>
                                         <attributes>
                                             <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                             <font key="NSFont" size="17" name="ChalkboardSE-Regular"/>
@@ -628,13 +628,13 @@ Cgo
                                         <rect key="frame" x="0.0" y="0.0" width="546.5" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.01 " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g3e-c8-tXl">
-                                                <rect key="frame" x="0.0" y="0.0" width="7.5" height="30"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="3.5" height="30"/>
                                                 <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.10000000000000001" minValue="0.01" maxValue="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="NO1-X0-JNv">
-                                                <rect key="frame" x="5.5" y="0.0" width="506.5" height="31"/>
+                                                <rect key="frame" x="1.5" y="0.0" width="510.5" height="31"/>
                                                 <connections>
                                                     <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="TXd-DY-hoV"/>
                                                 </connections>
@@ -651,13 +651,13 @@ Cgo
                                         <rect key="frame" x="0.0" y="171" width="546.5" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.01 " lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ph7-Px-vph">
-                                                <rect key="frame" x="0.0" y="0.0" width="12" height="30"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="8" height="30"/>
                                                 <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.10000000149011612" minValue="0.0099999997764825821" maxValue="0.30000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="AZc-Uw-Qcx">
-                                                <rect key="frame" x="10" y="0.0" width="502" height="31"/>
+                                                <rect key="frame" x="6" y="0.0" width="506" height="31"/>
                                                 <connections>
                                                     <action selector="noiseSliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="0O2-Fc-Pxk"/>
                                                     <action selector="utilitySliderChanged:" destination="uBl-oi-ePs" eventType="valueChanged" id="NUe-eE-7sc"/>
