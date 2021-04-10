@@ -273,6 +273,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
                 }
                 userStartTime = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
                 inspectButton.isHidden = true
+                _ = animateUserTurnIndicator()
             }
         default:
         break
@@ -551,7 +552,7 @@ class ViewController: UIViewController, BeverbendeDelegate {
             
         case let .nextTurn(player,_,_):
             playerPlaceholder = player
-            duration = 0.6
+            duration = 0.3
             
         case let .knocked(player):
             playerPlaceholder = player
